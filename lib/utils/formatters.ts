@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"; // cn might be used by getCategoryColor/getStatusColor if they return classes
 
-// Helper function to get status color class
+// Helper function to get status color class 
 export const getStatusColor = (status: string): string => {
     switch (status) {
       case "completed": return "bg-green-500";
