@@ -1,0 +1,719 @@
+[
+  {
+    "id": "cmaa9s0g1000bvp887eu1oixs",
+    "title": "Deliver Bot ROI Metrics & CSV Reporting",
+    "description": "Provide clients a revised deflection rate, additional insights into escalation and conversion rates as well as new reporting for workflows & automations via API and CSV.",
+    "date": "2025-03-31T00:00:00.000Z",
+    "category": "Product",
+    "status": "completed",
+    "milestoneId": "cmaa9erip0000vp88hw495wdk",
+    "pirateMetrics": [
+      "Retention"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Deflections",
+      "Increase in Conversions"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-04T23:15:18.721Z",
+    "updatedAt": "2025-05-05T17:03:41.018Z",
+    "milestone": {
+      "title": "Q1 2025",
+      "date": "2025-04-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmaa9xv12000cvp88fhbb9gpz",
+    "title": "Launch Capacity Voice IVA Offering",
+    "description": "Ability to onboard clients to a Voice IVA solution native in Capacity and providing the foundation to migrate existing IVA clients.",
+    "date": "2025-06-27T00:00:00.000Z",
+    "category": "Product",
+    "status": "in-progress",
+    "milestoneId": "cmaa9f1v70001vp884nqxorbn",
+    "pirateMetrics": [
+      "Revenue",
+      "Retention",
+      "Acquisition"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Deflections"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-04T23:19:51.621Z",
+    "updatedAt": "2025-05-05T23:23:13.725Z",
+    "milestone": {
+      "title": "Q2 2025",
+      "date": "2025-07-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [
+      {
+        "id": "cmaaa7nb9000evp88cnlahvxz",
+        "title": "AI Agent Capabilities within Conversations"
+      },
+      {
+        "id": "cmab9bt100004vpygpye1hd9i",
+        "title": "Complete Migration of SmartAction IVA Clients"
+      }
+    ],
+    "relatedTo": []
+  },
+  {
+    "id": "cmab8wz3q0000vpyga2rnvg8j",
+    "title": "Answer Engine Document Search Native in Capacity",
+    "description": "Integrate Answer Engine into Capacity to power native searching for Autopilot, AI Agent Card, GCs, and visibility within the KB.",
+    "date": "2025-06-30T00:00:00.000Z",
+    "category": "Product",
+    "status": "in-progress",
+    "milestoneId": "cmaa9f1v70001vp884nqxorbn",
+    "pirateMetrics": [
+      "Retention",
+      "Revenue"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Processes",
+      "Increase Automated Deflections",
+      "Reduce Average Handle Time"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-05T15:38:56.812Z",
+    "updatedAt": "2025-05-05T15:41:13.812Z",
+    "milestone": {
+      "title": "Q2 2025",
+      "date": "2025-07-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmaaa44xa000dvp884mzraanv",
+    "title": "Deliver Omnichannel Inbox Experience",
+    "description": "Enhance Capacity with a fully omnichannel inbox that centralizes access to interactions across ticketing, SMS, and voice.",
+    "date": "2025-06-30T00:00:00.000Z",
+    "category": "Product",
+    "status": "in-progress",
+    "milestoneId": "cmaa9f1v70001vp884nqxorbn",
+    "pirateMetrics": [
+      "Acquisition",
+      "Revenue"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Deflections",
+      "Reduce Average Handle Time"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-04T23:24:44.397Z",
+    "updatedAt": "2025-05-04T23:24:44.397Z",
+    "milestone": {
+      "title": "Q2 2025",
+      "date": "2025-07-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmaaa7nb9000evp88cnlahvxz",
+    "title": "AI Agent Capabilities within Conversations",
+    "description": "Provide full agentic capabilities within our conversations flows for any channel.",
+    "date": "2025-06-30T00:00:00.000Z",
+    "category": "AI",
+    "status": "in-progress",
+    "milestoneId": "cmaa9f1v70001vp884nqxorbn",
+    "pirateMetrics": [
+      "Revenue",
+      "Retention",
+      "Activation"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Deflections",
+      "Increase Automated Processes",
+      "Increase in Conversions"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-04T23:27:28.180Z",
+    "updatedAt": "2025-05-04T23:27:46.229Z",
+    "milestone": {
+      "title": "Q2 2025",
+      "date": "2025-07-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": [
+      {
+        "id": "cmaa9xv12000cvp88fhbb9gpz",
+        "title": "Launch Capacity Voice IVA Offering"
+      }
+    ]
+  },
+  {
+    "id": "cmab8zjs50001vpyg6ngced0o",
+    "title": "AI Model Fallback Handling",
+    "description": "Provide a seamless and reliable AI service to our customers by automatically switching to alternative or backup models when the selected service is unavailable or experiencing degraded performance.",
+    "date": "2025-09-30T00:00:00.000Z",
+    "category": "AI",
+    "status": "planned",
+    "milestoneId": "cmaa9ij7a0002vp88lgub2x0o",
+    "pirateMetrics": [
+      "Retention"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Processes",
+      "Increase Automated Deflections"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-05T15:40:56.932Z",
+    "updatedAt": "2025-05-05T15:40:56.932Z",
+    "milestone": {
+      "title": "Q3 2025",
+      "date": "2025-10-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmaaad5wm000fvp88qm9xhax3",
+    "title": "Become a Preferred IVA Partner for RingCX",
+    "description": "Integrate with RingCentral's RingCX CCaaS platform as their preferred SMB/midmarket for omnichannel IVA.",
+    "date": "2025-05-04T00:00:00.000Z",
+    "category": "Integrations",
+    "status": "planned",
+    "milestoneId": "cmaa9ij7a0002vp88lgub2x0o",
+    "pirateMetrics": [
+      "Revenue",
+      "Acquisition"
+    ],
+    "northStarMetrics": [
+      "Reduce Average Handle Time",
+      "Increase Automated Deflections"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-04T23:31:45.573Z",
+    "updatedAt": "2025-05-04T23:31:45.573Z",
+    "milestone": {
+      "title": "Q3 2025",
+      "date": "2025-10-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmaaaf99j000gvp88ti1oxnu8",
+    "title": "Capacity One Centralized Authentication",
+    "description": "Deliver our infrastructure that will enable centralized management of authentication, users, accounts, etc. for our acquired technical platforms.",
+    "date": "2025-09-30T00:00:00.000Z",
+    "category": "Product",
+    "status": "planned",
+    "milestoneId": "cmaa9ij7a0002vp88lgub2x0o",
+    "pirateMetrics": [
+      "Activation"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Processes"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-04T23:33:23.224Z",
+    "updatedAt": "2025-05-04T23:33:23.224Z",
+    "milestone": {
+      "title": "Q3 2025",
+      "date": "2025-10-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmaaan4lx000hvp88x3quddu0",
+    "title": "Centralized AI Services",
+    "description": "Create an architecture that allows flexibility to use our various NLU providers across voice and text, giving us more control, configuration, and cost savings.",
+    "date": "2025-09-30T00:00:00.000Z",
+    "category": "AI",
+    "status": "planned",
+    "milestoneId": "cmaa9ij7a0002vp88lgub2x0o",
+    "pirateMetrics": [
+      "Revenue",
+      "Retention"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Processes",
+      "Increase Automated Deflections"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-04T23:39:30.441Z",
+    "updatedAt": "2025-05-04T23:39:43.819Z",
+    "milestone": {
+      "title": "Q3 2025",
+      "date": "2025-10-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmab94o340002vpygy4hey3z6",
+    "title": "Deliver a Sites 2.0 / Answers Experience",
+    "description": "Create a new version of our sites/portal feature (existing Capacity Sites will remain) that combines the power of the Answer Engine search and search results, with a GPT-assisted chat experience that can search all documents and articles. Targeted persona here is Emily the Employee and our internal sites/portal clients in mortgage as well.",
+    "date": "2025-09-30T00:00:00.000Z",
+    "category": "Product",
+    "status": "planned",
+    "milestoneId": "cmaa9ij7a0002vp88lgub2x0o",
+    "pirateMetrics": [
+      "Retention",
+      "Revenue"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Deflections"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-05T15:44:55.779Z",
+    "updatedAt": "2025-05-05T15:44:55.779Z",
+    "milestone": {
+      "title": "Q3 2025",
+      "date": "2025-10-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmab97bqu0003vpygq1olell4",
+    "title": "Whatsapp & RCS Integration",
+    "description": "Continue to enhance our mobile messaging capabilities by integrating with these two new methods for message delivery on mobile devices. Implement in such a way that the technology can be used across Capacity SMS and YCBM (and others).",
+    "date": "2025-09-30T00:00:00.000Z",
+    "category": "Integrations",
+    "status": "planned",
+    "milestoneId": "cmaa9ij7a0002vp88lgub2x0o",
+    "pirateMetrics": [
+      "Acquisition",
+      "Revenue"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Deflections",
+      "Increase in Conversions"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-05T15:46:59.766Z",
+    "updatedAt": "2025-05-05T15:47:17.284Z",
+    "milestone": {
+      "title": "Q3 2025",
+      "date": "2025-10-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmab9pb5m0005vpygy5nuzan6",
+    "title": "Migrate Retail CX Chat Clients to Capacity",
+    "description": "Complete the migration of clients on the Retail CX platform who are using webchat over to Capacity.",
+    "date": "2025-09-30T00:00:00.000Z",
+    "category": "Migrations",
+    "status": "planned",
+    "milestoneId": "cmaa9ij7a0002vp88lgub2x0o",
+    "pirateMetrics": [
+      "Retention",
+      "Activation"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Deflections",
+      "Increase in Conversions"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-05T16:00:58.795Z",
+    "updatedAt": "2025-05-05T16:04:31.685Z",
+    "milestone": {
+      "title": "Q3 2025",
+      "date": "2025-10-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmaae93ko0000vphs2oi993mr",
+    "title": "Using AI to Interact with Analytics",
+    "description": "Provide clients with ways to gain insights and talk to their data using natural language and AI.",
+    "date": "2025-09-30T00:00:00.000Z",
+    "category": "AI",
+    "status": "planned",
+    "milestoneId": "cmaa9iux40003vp88mkfpx5p0",
+    "pirateMetrics": [
+      "Retention"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Deflections",
+      "Increase in Conversions"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-05T01:20:34.381Z",
+    "updatedAt": "2025-05-05T01:21:10.207Z",
+    "milestone": {
+      "title": "Q4 2025",
+      "date": "2026-01-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmabprx9z0000vp80eueq09dm",
+    "title": "Expand into Social Channel",
+    "description": "Deliver IVA, inbox, and outbound campaign features that extend into social media post management and support.",
+    "date": "2025-12-31T00:00:00.000Z",
+    "category": "Product",
+    "status": "planned",
+    "milestoneId": "cmaa9iux40003vp88mkfpx5p0",
+    "pirateMetrics": [
+      "Acquisition",
+      "Revenue"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Deflections",
+      "Increase in Conversions"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-05T23:30:54.624Z",
+    "updatedAt": "2025-05-05T23:30:54.624Z",
+    "milestone": {
+      "title": "Q4 2025",
+      "date": "2026-01-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [
+      {
+        "id": "cmab5y4f10005vphsb7g860x4",
+        "title": "AI Assisted Knowledge Management"
+      }
+    ],
+    "relatedTo": []
+  },
+  {
+    "id": "cmab9bt100004vpygpye1hd9i",
+    "title": "Complete Migration of SmartAction IVA Clients",
+    "description": "Throughout Q3 2025 - Q1 2026, move the IVA clients from the legacy SmartAction platform (NOVA) to Capacity IVA.",
+    "date": "2026-03-30T00:00:00.000Z",
+    "category": "Migrations",
+    "status": "planned",
+    "milestoneId": "cmaa9jba60004vp88kfarnlvc",
+    "pirateMetrics": [
+      "Retention"
+    ],
+    "northStarMetrics": [],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-05T15:50:28.779Z",
+    "updatedAt": "2025-05-05T19:05:07.171Z",
+    "milestone": {
+      "title": "Q1 2026",
+      "date": "2026-04-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": [
+      {
+        "id": "cmaa9xv12000cvp88fhbb9gpz",
+        "title": "Launch Capacity Voice IVA Offering"
+      }
+    ]
+  },
+  {
+    "id": "cmab5rz5c0003vphsqjwrysg5",
+    "title": "Enable AI Generated Workflows, GCs, and Concierges",
+    "description": "Surface the capabilities to clients to allow them to create well developed workflows, GCs, and Concierges using AI prompts.",
+    "date": "2026-06-30T00:00:00.000Z",
+    "category": "AI",
+    "status": "planned",
+    "milestoneId": "cmaa9jba60004vp88kfarnlvc",
+    "pirateMetrics": [
+      "Revenue",
+      "Activation",
+      "Retention"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Processes",
+      "Increase Automated Deflections"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-05T14:11:04.752Z",
+    "updatedAt": "2025-05-05T14:12:15.763Z",
+    "milestone": {
+      "title": "Q1 2026",
+      "date": "2026-04-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmab5pawp0001vphsixa5fshk",
+    "title": "Internal AI Agents for Small Features",
+    "description": "Create an internal use only, AI Agent builder that would allow us to quickly deploy small features for clients using Capacity console's platform API endpoints. It would use MCP protocol endpoints and our own component library.",
+    "date": "2026-03-31T00:00:00.000Z",
+    "category": "AI",
+    "status": "planned",
+    "milestoneId": "cmaa9jba60004vp88kfarnlvc",
+    "pirateMetrics": [
+      "Revenue",
+      "Activation"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Processes"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-05T14:09:00.014Z",
+    "updatedAt": "2025-05-05T14:09:00.014Z",
+    "milestone": {
+      "title": "Q1 2026",
+      "date": "2026-04-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmab9x0yh0006vpyg341rtrv0",
+    "title": "Campaign for Consolidated Voice Offerings in Capacity",
+    "description": "Deploy go-to-market materials and campaigns covering our combined voice offerings within the Capacity console including Call QA, Coaching, IVA, Sentiment, etc.",
+    "date": "2025-05-05T00:00:00.000Z",
+    "category": "Branding",
+    "status": "planned",
+    "milestoneId": "cmaa9jba60004vp88kfarnlvc",
+    "pirateMetrics": [
+      "Acquisition"
+    ],
+    "northStarMetrics": [],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-05T16:06:58.827Z",
+    "updatedAt": "2025-05-05T16:06:58.827Z",
+    "milestone": {
+      "title": "Q1 2026",
+      "date": "2026-04-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  },
+  {
+    "id": "cmab5y4f10005vphsb7g860x4",
+    "title": "AI Assisted Knowledge Management",
+    "description": "Develop features that surface areas of attention for clients' knowledge, e.g. stale documents, duplicates, low feedback, etc. with recommended actions to take.",
+    "date": "2026-06-30T00:00:00.000Z",
+    "category": "AI",
+    "status": "planned",
+    "milestoneId": "cmab5u4uc0004vphsnauq8i11",
+    "pirateMetrics": [
+      "Retention"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Processes"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-05T14:15:51.506Z",
+    "updatedAt": "2025-05-05T14:15:51.506Z",
+    "milestone": {
+      "title": "Q2 2026",
+      "date": "2026-07-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": [
+      {
+        "id": "cmabprx9z0000vp80eueq09dm",
+        "title": "Expand into Social Channel"
+      }
+    ]
+  },
+  {
+    "id": "cmab617ao0007vphsluro1yth",
+    "title": "AI Assisted Analysis of Automated Processes",
+    "description": "Native analysis using AI of clients' workflows and guided conversations for improvements and actionable insights.",
+    "date": "2026-09-30T00:00:00.000Z",
+    "category": "AI",
+    "status": "planned",
+    "milestoneId": "cmab5z1j10006vphswiqzjr74",
+    "pirateMetrics": [
+      "Retention",
+      "Activation"
+    ],
+    "northStarMetrics": [
+      "Increase Automated Processes",
+      "Increase Automated Deflections",
+      "Increase in Conversions"
+    ],
+    "createdById": "cmaa9rd740008vp88427bfm7z",
+    "updatedById": "cmaa9rd740008vp88427bfm7z",
+    "createdAt": "2025-05-05T14:18:15.214Z",
+    "updatedAt": "2025-05-05T14:18:15.214Z",
+    "milestone": {
+      "title": "Q3 2026",
+      "date": "2026-10-01T00:00:00.000Z"
+    },
+    "createdBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "updatedBy": {
+      "name": "Julia Dalton",
+      "email": "julia.dalton@capacity.com"
+    },
+    "relatedItems": [],
+    "relatedTo": []
+  }
+]
