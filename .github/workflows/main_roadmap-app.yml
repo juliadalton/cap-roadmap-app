@@ -75,5 +75,5 @@ jobs:
         with:
           app-name: 'roadmap-app'
           slot-name: 'Production'
-          package: ./build/standalone
+          package: .
           
