@@ -7,6 +7,7 @@
     "dev": "next dev",
     "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
     "start": "next start",
+    "startAzure": "./node_modules/next/dist/bin/next start",
     "lint": "next lint"
   },
   "dependencies": {
