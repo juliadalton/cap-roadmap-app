@@ -1,8 +1,0 @@
-name: your-app-name
-location: eastus
-sku: P1v2
-runtime:
-  nodeVersion: '18-lts'
-  operatingSystem: linux
-  webServer: nginx
-  startupCommand: 'npm start' 
