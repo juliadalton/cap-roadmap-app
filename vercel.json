@@ -1,0 +1,12 @@
+{
+  "buildCommand": "prisma generate && prisma db push && next build",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  }
+}
+

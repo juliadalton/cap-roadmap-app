@@ -16,6 +16,8 @@ export interface RoadmapItem {
   relatedItemIds?: string[] | null
   relatedItems?: RoadmapItem[] | null
   relatedTo?: RoadmapItem[] | null
+  relevantLinks?: string[] | null
+  productDRI?: string | null
 }
 
 export interface Milestone {

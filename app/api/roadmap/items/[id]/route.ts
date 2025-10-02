@@ -38,9 +38,13 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
   const id = params.id;
   try {
-    const body = await request.json() as Partial<RoadmapItem & { relatedItemIds?: string[] }>;    
+    const body = await request.json();
+    const { title, description, date, category, status, milestoneId, pirateMetrics, northStarMetrics, relatedItemIds, relevantLinks, productDRI } = body;
+    const userId = session.user.id; // Get user ID from session
 
-    const { title, description, date, status, category, milestoneId, pirateMetrics, northStarMetrics, relatedItemIds } = body;
+    if (!params.id) {
+      return NextResponse.json({ error: 'Roadmap item ID is missing' }, { status: 400 });
+    }
 
     const currentItem = await prisma.roadmapItem.findUnique({ where: { id }});
     if (!currentItem) {
@@ -50,7 +54,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     const dataToUpdate: Prisma.RoadmapItemUpdateInput = {};
 
     const allowedUpdates: Prisma.RoadmapItemUpdateInput = {};
-    const allowedScalarKeys = ['title', 'description', 'date', 'category', 'status']; 
+    const allowedScalarKeys = ['title', 'description', 'date', 'category', 'status', 'productDRI']; 
 
     for (const key of allowedScalarKeys) {
       if (body.hasOwnProperty(key)) {
@@ -58,7 +62,9 @@ export async function PATCH(request: Request, { params }: { params: { id: string
           allowedUpdates.date = new Date(body[key]!);
         } else if (key === 'description') {
           allowedUpdates.description = body.description;
-        } else if (key !== 'date' && key !== 'description') {
+        } else if (key === 'productDRI') {
+          allowedUpdates.productDRI = body.productDRI || "";
+        } else if (key !== 'date' && key !== 'description' && key !== 'productDRI') {
           (allowedUpdates as any)[key] = body[key as keyof typeof body];
         }
       }
@@ -74,6 +80,9 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     }
     if (body.hasOwnProperty('northStarMetrics')) {
       allowedUpdates.northStarMetrics = { set: body.northStarMetrics || [] };
+    }
+    if (relevantLinks) {
+      allowedUpdates.relevantLinks = { set: relevantLinks };
     }
     
     if (body.hasOwnProperty('relatedItemIds')) {

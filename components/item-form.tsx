@@ -19,7 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, SubmitHandler, Control } from "react-hook-form"
 import * as z from "zod"
 import { format } from "date-fns"
-import { CalendarIcon, Loader2, Check, ChevronsUpDown } from "lucide-react"
+import { CalendarIcon, Loader2, Check, ChevronsUpDown, PlusCircle, XCircle } from "lucide-react"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Calendar } from "@/components/ui/calendar"
 
@@ -31,6 +31,7 @@ const formSchema = z.object({
   category: z.enum(["Product", "AI", "Integrations", "Branding", "Migrations"], { required_error: "Category is required." }),
   status: z.enum(["planned", "in-progress", "completed"], { required_error: "Status is required." }),
   milestoneId: z.string().min(1, "Milestone is required"),
+  productDRI: z.string().optional(),
 })
 
 // Explicit type for form values based on schema
@@ -48,6 +49,8 @@ type SaveItemData = Omit<z.infer<typeof formSchema>, 'date'> & {
     pirateMetrics: string[];
     northStarMetrics: string[];
     relatedItemIds: string[];
+    relevantLinks: string[];
+    productDRI?: string;
 };
 
 interface ItemFormProps {
@@ -75,6 +78,7 @@ export default function ItemForm({
   const [selectedPirateMetrics, setSelectedPirateMetrics] = useState<string[]>([])
   const [selectedNorthStarMetrics, setSelectedNorthStarMetrics] = useState<string[]>([])
   const [selectedRelatedItemIds, setSelectedRelatedItemIds] = useState<string[]>([])
+  const [relevantLinks, setRelevantLinks] = useState<string[]>([]);
 
   // Check if incoming item category/status is valid, otherwise use undefined/default
   const initialCategory = categories.includes(initialData?.category || '') ? initialData?.category as FormValues['category'] : undefined;
@@ -89,6 +93,7 @@ export default function ItemForm({
       category: initialCategory,
       status: initialStatus,
       milestoneId: initialData?.milestoneId || milestoneId || undefined,
+      productDRI: initialData?.productDRI || "",
     },
   })
 
@@ -105,10 +110,12 @@ export default function ItemForm({
         category: defaultCategory,
         status: defaultStatus,
         milestoneId: initialData?.milestoneId || milestoneId || undefined,
+        productDRI: initialData?.productDRI || "",
       });
       
       setSelectedPirateMetrics(initialData?.pirateMetrics || []);
       setSelectedNorthStarMetrics(initialData?.northStarMetrics || []);
+      setRelevantLinks(initialData?.relevantLinks || []);
       
       // --- Initialize related items state --- 
       // Prefer item.relatedItemIds if available (e.g., from previous form state)
@@ -168,6 +175,21 @@ export default function ItemForm({
     );
   }, []);
 
+  const handleLinkChange = (index: number, value: string) => {
+    const newLinks = [...relevantLinks];
+    newLinks[index] = value;
+    setRelevantLinks(newLinks);
+  };
+
+  const addLink = () => {
+    setRelevantLinks([...relevantLinks, '']);
+  };
+
+  const removeLink = (index: number) => {
+    const newLinks = relevantLinks.filter((_, i) => i !== index);
+    setRelevantLinks(newLinks);
+  };
+
   // Submit Handler - Let type be inferred from handleSubmit
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
@@ -178,6 +200,8 @@ export default function ItemForm({
         pirateMetrics: selectedPirateMetrics,
         northStarMetrics: selectedNorthStarMetrics,
         relatedItemIds: selectedRelatedItemIds,
+        relevantLinks: relevantLinks.filter(link => link.trim() !== ''),
+        productDRI: values.productDRI,
       };
       await onSave(saveData);
     } catch (error) {
@@ -334,6 +358,27 @@ export default function ItemForm({
                 </FormItem>
             )}
         />
+            {/* Product DRI Field */}
+            <FormField
+                control={form.control}
+                name="productDRI"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Product DRI</FormLabel>
+                    <FormControl>
+                    <Input 
+                        placeholder="Enter Product DRI name" 
+                        {...field} 
+                        value={field.value ?? ''} 
+                    />
+                    </FormControl>
+                    <FormDescription>
+                        Directly Responsible Individual for this product item
+                    </FormDescription>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
             {/* --- Multi-select fields --- */}
             {/* Pirate Metrics */}
             <FormItem>
@@ -450,6 +495,34 @@ export default function ItemForm({
                     Link this item to other existing roadmap items.
                 </FormDescription>
             </FormItem>
+
+            {/* --- Relevant Links --- */}
+            <FormItem>
+              <FormLabel>Relevant Links</FormLabel>
+              <div className="space-y-2">
+                {relevantLinks.map((link, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Input
+                      type="url"
+                      placeholder="https://example.com"
+                      value={link}
+                      onChange={(e) => handleLinkChange(index, e.target.value)}
+                    />
+                    <Button type="button" variant="ghost" size="icon" onClick={() => removeLink(index)} className="shrink-0">
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" size="sm" onClick={addLink}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Link
+                </Button>
+              </div>
+              <FormDescription>
+                Add external links for reference.
+              </FormDescription>
+            </FormItem>
+
             {/* Display error prop */}
             {error && (
                 <p className="text-sm font-medium text-destructive">{error}</p>

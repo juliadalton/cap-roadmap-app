@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     // Explicitly type body for clarity
-    const { title, description, date, category, status, milestoneId, pirateMetrics, northStarMetrics, relatedItemIds } = body as {
+    const { title, description, date, category, status, milestoneId, pirateMetrics, northStarMetrics, relatedItemIds, relevantLinks, productDRI } = body as {
         title: string;
         description?: string | null;
         date: string;
@@ -30,6 +30,8 @@ export async function POST(request: Request) {
         pirateMetrics?: string[] | null;
         northStarMetrics?: string[] | null;
         relatedItemIds?: string[] | null; // Added type for relatedItemIds
+        relevantLinks?: string[] | null;
+        productDRI?: string | null;
     };
 
     if (!title || !category || !status || !milestoneId || !date) {
@@ -48,6 +50,8 @@ export async function POST(request: Request) {
         updatedBy: { connect: { id: userId } },
         pirateMetrics: { set: pirateMetrics || [] },
         northStarMetrics: { set: northStarMetrics || [] },
+        relevantLinks: { set: relevantLinks || [] },
+        productDRI: productDRI || "",
         // Omit relatedItems here
     };
     

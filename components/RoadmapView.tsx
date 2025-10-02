@@ -173,6 +173,7 @@ export default function RoadmapView({
                            <ul className="space-y-2 pl-4"> 
                              {categoryMilestoneItems.map((item) => {
                                const hasMetrics = (item.pirateMetrics && item.pirateMetrics.length > 0) || (item.northStarMetrics && item.northStarMetrics.length > 0);
+                               const hasDetails = hasMetrics || (item.relevantLinks && item.relevantLinks.length > 0) || (item.productDRI && item.productDRI.trim() !== "");
                                const isExpanded = expandedItems[item.id];
                                return (
                                  <li key={item.id} className="flex items-start gap-2 group">
@@ -197,7 +198,7 @@ export default function RoadmapView({
                                        <p className="text-sm text-muted-foreground mb-1">{item.description}</p>
                                      )}
                                      {/* Expand/Collapse Toggle */}
-                                     {hasMetrics && (
+                                     {hasDetails && (
                                        <Button 
                                          variant="link" 
                                          size="sm" 
@@ -205,12 +206,19 @@ export default function RoadmapView({
                                          className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
                                        >
                                          {isExpanded ? <ChevronDown className="h-3 w-3 mr-1" /> : <ChevronRight className="h-3 w-3 mr-1" />}
-                                         {isExpanded ? "Hide" : "Show"} Metrics
+                                         {isExpanded ? "Hide" : "Show"} Details
                                        </Button>
                                      )}
-                                     {/* Conditionally Render Metrics */}
+                                     {/* Conditionally Render Details */}
                                      {isExpanded && (
                                        <div className="mt-1 space-y-1"> 
+                                          {/* Product DRI */}
+                                          {item.productDRI && item.productDRI.trim() !== "" && (
+                                            <div className="mt-2">
+                                              <div className="text-xs font-medium text-muted-foreground mb-1">Product DRI:</div>
+                                              <div className="text-xs text-foreground">{item.productDRI}</div>
+                                            </div>
+                                          )}
                                           {/* Render Pirate Metrics */}
                                           {(item.pirateMetrics && item.pirateMetrics.length > 0) && (
                                            <div className="mt-1">

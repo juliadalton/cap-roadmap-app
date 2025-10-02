@@ -581,7 +581,7 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
         )}
 
         {/* --- Page Content --- */}
-        <div className="min-w-0">
+        <div className="grid grid-cols-1">
             {children}
         </div>
       </div>

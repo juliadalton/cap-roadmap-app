@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { Edit, Trash2, Lock, Check, X, ChevronsUpDownIcon } from "lucide-react"
+import { Edit, Trash2, Lock, Check, X, ChevronsUpDownIcon, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -39,6 +39,9 @@ export function EditorViewTable({
   isEditor,
   sortDirection,
 }: EditorViewTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30;
+
   // Only show this view for editors
   if (!isEditor) {
     return (
@@ -73,6 +76,21 @@ export function EditorViewTable({
     return a.category.localeCompare(b.category)
   })
 
+  // Pagination logic
+  const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
+  const paginatedItems = sortedItems.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
   return (
     <div className="border rounded-lg overflow-hidden">
       <div className="grid grid-cols-[1fr,100px,100px,1fr,1fr,2fr,minmax(80px,auto)] gap-2 p-3 font-medium bg-[rgb(240_244_249)] dark:bg-muted/50 text-xs sticky top-0 z-10">
@@ -85,7 +103,7 @@ export function EditorViewTable({
         <div className="text-right pr-2">Actions</div>
       </div>
       <div className="divide-y">
-        {sortedItems.map((item) => {
+        {paginatedItems.map((item) => {
           const milestone = milestones.find((m) => m.id === item.milestoneId)
 
           return (
@@ -142,6 +160,31 @@ export function EditorViewTable({
             </div>
           )
         })}
+      </div>
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-end p-2 border-t bg-gray-50 dark:bg-muted/50">
+        <span className="text-sm text-muted-foreground mr-4">
+          Page {currentPage} of {totalPages}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1}
+        >
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          className="ml-2"
+        >
+          Next
+          <ChevronRight className="h-4 w-4 ml-1" />
+        </Button>
       </div>
     </div>
   )

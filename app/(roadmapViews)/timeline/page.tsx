@@ -1,13 +1,13 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRoadmap } from "../layout"; // Use the context hook
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Edit, Trash2, ChevronDown, Plus, Lock, History, Link } from "lucide-react";
+import { Edit, Trash2, ChevronDown, Plus, Lock, History, Link, Link2, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { RoadmapItem } from "@/types/roadmap"; // <-- Import RoadmapItem
 import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"; // <-- Import helpers
@@ -26,6 +26,12 @@ export default function TimelinePage() {
     openItemModal,
     deleteItem,
   } = useRoadmap();
+
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+
+  const toggleItemExpansion = (itemId: string) => {
+    setExpandedItems(prev => ({ ...prev, [itemId]: !prev[itemId] }));
+  };
 
   // Actual handlers using context functions
   const handleAddItemClick = (milestoneId: string) => {
@@ -128,7 +134,11 @@ export default function TimelinePage() {
                           </div>
                           <CardContent className="p-3 pt-0">
                             <ul className="space-y-2">
-                              {categoryItems.map((item) => (
+                              {categoryItems.map((item) => {
+                                const hasMetrics = (item.pirateMetrics?.length || 0) > 0 || (item.northStarMetrics?.length || 0) > 0;
+                                const hasDetails = hasMetrics || (item.relevantLinks && item.relevantLinks.length > 0) || (item.productDRI && item.productDRI.trim() !== "");
+                                const isExpanded = expandedItems[item.id];
+                                return (
                                 <li key={item.id} className="flex items-start gap-2 group">
                                   <div className={cn("mt-1.5 h-2 w-2 rounded-full shrink-0", getStatusColor(item.status))} />
                                   <div className="flex-1 min-w-0">
@@ -159,25 +169,70 @@ export default function TimelinePage() {
                                     </div>
                                     <div className="text-sm text-muted-foreground mb-1">{item.description}</div>
                                     
-                                    {/* Metrics Rendering (assuming types include these) */}
-                                    {(item.pirateMetrics && item.pirateMetrics.length > 0) && (
-                                      <div className="mt-2">
-                                        <div className="text-xs font-medium text-muted-foreground mb-1">Pirate Metrics:</div>
-                                        <div className="flex flex-wrap gap-1">
-                                          {item.pirateMetrics.map(metric => (
-                                            <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0">{metric}</Badge>
-                                          ))}
-                                        </div>
-                                      </div>
+                                    {/* Expand/Collapse for Details */}
+                                    {hasDetails && (
+                                      <Button 
+                                        variant="link" size="sm" onClick={() => toggleItemExpansion(item.id)}
+                                        className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+                                      >
+                                        {isExpanded ? <ChevronDown className="h-3 w-3 mr-1" /> : <ChevronRight className="h-3 w-3 mr-1" />}
+                                        {isExpanded ? "Hide" : "Show"} Details
+                                      </Button>
                                     )}
-                                    {(item.northStarMetrics && item.northStarMetrics.length > 0) && (
-                                       <div className="mt-2">
-                                        <div className="text-xs font-medium text-muted-foreground mb-1">North Star Metrics:</div>
-                                        <div className="flex flex-wrap gap-1">
-                                          {item.northStarMetrics.map(metric => (
-                                            <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0">{metric}</Badge>
-                                          ))}
-                                        </div>
+
+                                    {/* Conditionally Render Details */}
+                                    {isExpanded && (
+                                      <div className="mt-1 space-y-1">
+                                        {/* Product DRI */}
+                                        {item.productDRI && item.productDRI.trim() !== "" && (
+                                          <div className="mt-2">
+                                            <div className="text-xs font-medium text-muted-foreground mb-1">Product DRI:</div>
+                                            <div className="text-xs text-foreground">{item.productDRI}</div>
+                                          </div>
+                                        )}
+                                        {/* Relevant Links */}
+                                        {item.relevantLinks && item.relevantLinks.length > 0 && (
+                                          <div className="mt-2">
+                                            <div className="text-xs font-medium text-muted-foreground mb-1">Relevant Links:</div>
+                                            <div className="space-y-1">
+                                              {item.relevantLinks.map((link, index) => (
+                                                <a 
+                                                  key={index}
+                                                  href={link} 
+                                                  target="_blank" 
+                                                  rel="noopener noreferrer" 
+                                                  className="text-xs text-blue-500 hover:underline flex items-center gap-1"
+                                                  onClick={(e) => e.stopPropagation()}
+                                                >
+                                                  <Link2 className="h-3.5 w-3.5" />
+                                                  {link.length > 40 ? `${link.substring(0, 40)}...` : link}
+                                                </a>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        {/* Metrics Rendering (assuming types include these) */}
+                                        {(item.pirateMetrics && item.pirateMetrics.length > 0) && (
+                                          <div className="mt-2">
+                                            <div className="text-xs font-medium text-muted-foreground mb-1">Pirate Metrics:</div>
+                                            <div className="flex flex-wrap gap-1">
+                                              {item.pirateMetrics.map(metric => (
+                                                <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0">{metric}</Badge>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+                                        {(item.northStarMetrics && item.northStarMetrics.length > 0) && (
+                                           <div className="mt-2">
+                                            <div className="text-xs font-medium text-muted-foreground mb-1">North Star Metrics:</div>
+                                            <div className="flex flex-wrap gap-1">
+                                              {item.northStarMetrics.map(metric => (
+                                                <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0">{metric}</Badge>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
                                       </div>
                                     )}
                                   </div>
@@ -208,7 +263,7 @@ export default function TimelinePage() {
                                     </div>
                                   ) : null}
                                 </li>
-                              ))}
+                              )})}
                             </ul>
                           </CardContent>
                         </Card>
