@@ -2,15 +2,16 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import type { RoadmapItem } from '@/types/roadmap';
 
 // GET /api/roadmap/items/[id]
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
   // Optional: Add auth check if needed for reading single items
   // const session = await getServerSession(authOptions);
   // if (!session) { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); }
   
+  const params = await context.params;
   const id = params.id;
   try {
     const item = await prisma.roadmapItem.findUnique({
@@ -30,19 +31,20 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 // PATCH /api/roadmap/items/[id]
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session || session.user?.role !== "editor") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const params = await context.params;
   const id = params.id;
   try {
     const body = await request.json();
     const { title, description, date, category, status, milestoneId, pirateMetrics, northStarMetrics, relatedItemIds, relevantLinks, productDRI } = body;
     const userId = session.user.id; // Get user ID from session
 
-    if (!params.id) {
+    if (!id) {
       return NextResponse.json({ error: 'Roadmap item ID is missing' }, { status: 400 });
     }
 
@@ -136,12 +138,13 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 }
 
 // DELETE /api/roadmap/items/[id]
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user || session.user.role !== 'editor') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
   // We have the user ID, but it's not directly needed for delete
+  const params = await context.params;
   const id = params.id;
   
   try {

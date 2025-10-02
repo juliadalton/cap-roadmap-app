@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
 // GET /api/roadmap/milestones/[id] (Optional: If needed)
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
+  const params = await context.params;
   const id = params.id;
   try {
     const milestone = await prisma.milestone.findUnique({ where: { id } });
@@ -20,11 +21,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 // PATCH /api/roadmap/milestones/[id]
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user || session.user.role !== 'editor') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
+  const params = await context.params;
   const id = params.id;
   try {
     const body = await request.json();
@@ -61,11 +63,12 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 }
 
 // DELETE /api/roadmap/milestones/[id]
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user || session.user.role !== 'editor') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
+  const params = await context.params;
   const id = params.id;
   try {
     // Check if any RoadmapItems are associated with this milestone

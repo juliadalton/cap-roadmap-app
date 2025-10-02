@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import type { RoadmapItem } from '@/types/roadmap'; // Assuming your type definition path
 import { Prisma } from '@prisma/client'; // Import Prisma types for error checking
 import { getServerSession } from "next-auth/next";
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'; // Import authOptions
+import { authOptions } from '@/lib/auth'; // Import from new location
 import { PrismaClient } from '@prisma/client';
 
 const prismaClient = new PrismaClient();
