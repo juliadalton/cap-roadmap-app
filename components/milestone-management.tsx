@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import MilestoneForm from "@/components/milestone-form"
+import MilestoneForm, { SaveMilestoneData } from "@/components/milestone-form"
 import type { Milestone, RoadmapItem } from "@/types/roadmap"
 
 interface MilestoneManagementProps {
@@ -86,21 +86,19 @@ export default function MilestoneManagement({
     }
   }
 
-  const handleSave = async (milestoneData: Omit<Milestone, 'id'> | Milestone) => {
+  const handleSave = async (milestoneData: SaveMilestoneData) => {
     setApiError(null)
     setIsSubmitting(true)
 
-    const isEditing = 'id' in milestoneData
-    const url = isEditing ? `/api/roadmap/milestones/${milestoneData.id}` : '/api/roadmap/milestones'
+    const isEditing = !!editingMilestone
+    const url = isEditing ? `/api/roadmap/milestones/${editingMilestone!.id}` : '/api/roadmap/milestones'
     const method = isEditing ? 'PATCH' : 'POST'
-
-    const payload = isEditing ? { title: milestoneData.title, date: milestoneData.date } : milestoneData
 
     try {
       const response = await fetch(url, {
         method: method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(milestoneData),
       })
 
       if (!response.ok) {
@@ -241,11 +239,10 @@ export default function MilestoneManagement({
 
           <TabsContent value="edit" className="mt-4">
             <MilestoneForm
-              milestone={editingMilestone}
-              existingMilestones={internalMilestones}
+              initialData={editingMilestone}
               onSave={handleSave}
               onCancel={handleCancel}
-              isSubmitting={isSubmitting}
+              mode="edit"
             />
           </TabsContent>
         </Tabs>
