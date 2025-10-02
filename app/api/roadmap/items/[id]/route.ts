@@ -90,7 +90,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     if (body.hasOwnProperty('relatedItemIds')) {
       const relatedIds = body.relatedItemIds || [];
       allowedUpdates.relatedItems = {
-          set: relatedIds.map(relatedId => ({ id: relatedId }))
+          set: relatedIds.map((relatedId: string) => ({ id: relatedId }))
       };
     }
 
