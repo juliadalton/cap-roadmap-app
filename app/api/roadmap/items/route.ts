@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import type { RoadmapItem } from '@/types/roadmap'; // Assuming your type definition path
+import type { RoadmapItem, RelevantLink } from '@/types/roadmap'; // Assuming your type definition path
 import { Prisma } from '@prisma/client'; // Import Prisma types for error checking
 import { getServerSession } from "next-auth/next";
 import { authOptions } from '@/lib/auth'; // Import from new location
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
         pirateMetrics?: string[] | null;
         northStarMetrics?: string[] | null;
         relatedItemIds?: string[] | null; // Added type for relatedItemIds
-        relevantLinks?: string[] | null;
+        relevantLinks?: RelevantLink[] | null;
         productDRI?: string | null;
     };
 

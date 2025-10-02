@@ -1,3 +1,9 @@
+// Type for relevant links with optional text
+export interface RelevantLink {
+  url: string
+  text?: string // Optional display text
+}
+
 export interface RoadmapItem {
   id: string
   title: string
@@ -16,7 +22,7 @@ export interface RoadmapItem {
   relatedItemIds?: string[] | null
   relatedItems?: RoadmapItem[] | null
   relatedTo?: RoadmapItem[] | null
-  relevantLinks?: string[] | null
+  relevantLinks?: RelevantLink[] | null
   productDRI?: string | null
 }
 

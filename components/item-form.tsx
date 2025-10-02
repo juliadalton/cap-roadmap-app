@@ -14,7 +14,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Badge } from "@/components/ui/badge"
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { RoadmapItem, Milestone } from "@/types/roadmap"
+import type { RoadmapItem, Milestone, RelevantLink } from "@/types/roadmap"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, SubmitHandler, Control } from "react-hook-form"
 import * as z from "zod"
@@ -49,7 +49,7 @@ type SaveItemData = Omit<z.infer<typeof formSchema>, 'date'> & {
     pirateMetrics: string[];
     northStarMetrics: string[];
     relatedItemIds: string[];
-    relevantLinks: string[];
+    relevantLinks: RelevantLink[];
     productDRI?: string;
 };
 
@@ -78,7 +78,7 @@ export default function ItemForm({
   const [selectedPirateMetrics, setSelectedPirateMetrics] = useState<string[]>([])
   const [selectedNorthStarMetrics, setSelectedNorthStarMetrics] = useState<string[]>([])
   const [selectedRelatedItemIds, setSelectedRelatedItemIds] = useState<string[]>([])
-  const [relevantLinks, setRelevantLinks] = useState<string[]>([]);
+  const [relevantLinks, setRelevantLinks] = useState<RelevantLink[]>([]);
 
   // Check if incoming item category/status is valid, otherwise use undefined/default
   const initialCategory = categories.includes(initialData?.category || '') ? initialData?.category as FormValues['category'] : undefined;
@@ -115,7 +115,18 @@ export default function ItemForm({
       
       setSelectedPirateMetrics(initialData?.pirateMetrics || []);
       setSelectedNorthStarMetrics(initialData?.northStarMetrics || []);
-      setRelevantLinks(initialData?.relevantLinks || []);
+      
+      // Handle migration from old string[] format to new RelevantLink[] format
+      const initialLinks = initialData?.relevantLinks || [];
+      const formattedLinks: RelevantLink[] = initialLinks.map(link => {
+        // If it's already a RelevantLink object, use it as is
+        if (typeof link === 'object' && link !== null && 'url' in link) {
+          return link as RelevantLink;
+        }
+        // If it's a string (old format), convert to RelevantLink
+        return { url: link as string };
+      });
+      setRelevantLinks(formattedLinks);
       
       // --- Initialize related items state --- 
       // Prefer item.relatedItemIds if available (e.g., from previous form state)
@@ -175,14 +186,20 @@ export default function ItemForm({
     );
   }, []);
 
-  const handleLinkChange = (index: number, value: string) => {
+  const handleLinkUrlChange = (index: number, url: string) => {
     const newLinks = [...relevantLinks];
-    newLinks[index] = value;
+    newLinks[index] = { ...newLinks[index], url };
+    setRelevantLinks(newLinks);
+  };
+
+  const handleLinkTextChange = (index: number, text: string) => {
+    const newLinks = [...relevantLinks];
+    newLinks[index] = { ...newLinks[index], text: text || undefined };
     setRelevantLinks(newLinks);
   };
 
   const addLink = () => {
-    setRelevantLinks([...relevantLinks, '']);
+    setRelevantLinks([...relevantLinks, { url: '' }]);
   };
 
   const removeLink = (index: number) => {
@@ -200,7 +217,7 @@ export default function ItemForm({
         pirateMetrics: selectedPirateMetrics,
         northStarMetrics: selectedNorthStarMetrics,
         relatedItemIds: selectedRelatedItemIds,
-        relevantLinks: relevantLinks.filter(link => link.trim() !== ''),
+        relevantLinks: relevantLinks.filter(link => link.url.trim() !== ''),
         productDRI: values.productDRI,
       };
       await onSave(saveData);
@@ -504,9 +521,17 @@ export default function ItemForm({
                   <div key={index} className="flex items-center gap-2">
                     <Input
                       type="url"
-                      placeholder="https://example.com"
-                      value={link}
-                      onChange={(e) => handleLinkChange(index, e.target.value)}
+                      placeholder="Link URL"
+                      value={link.url}
+                      onChange={(e) => handleLinkUrlChange(index, e.target.value)}
+                      className="flex-1"
+                    />
+                    <Input
+                      type="text"
+                      placeholder="Link Text"
+                      value={link.text || ''}
+                      onChange={(e) => handleLinkTextChange(index, e.target.value)}
+                      className="flex-1"
                     />
                     <Button type="button" variant="ghost" size="icon" onClick={() => removeLink(index)} className="shrink-0">
                       <XCircle className="h-4 w-4" />

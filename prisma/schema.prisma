@@ -46,8 +46,8 @@ model RoadmapItem {
   // New multi-select fields
   pirateMetrics    String[] @default([]) // Store selected Pirate Metrics
   northStarMetrics String[] @default([]) // Store selected North Star Metrics
-  relevantLinks    String[] @default([]) // Store relevant links
-  productDRI       String?   @default("") // Product DRI (Directly Responsible Individual)
+  relevantLinks    Json[]   @default([]) // Store relevant links with optional text
+  productDRI       String?  @default("") // Product DRI (Directly Responsible Individual)
 
   createdById String?
   createdBy   User?   @relation("CreatedItems", fields: [createdById], references: [id])

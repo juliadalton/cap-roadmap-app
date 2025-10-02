@@ -161,14 +161,18 @@ export default function RoadmapPage() {
                                                   {item.relevantLinks.map((link, index) => (
                                                     <a 
                                                       key={index}
-                                                      href={link} 
+                                                      href={typeof link === 'object' ? link.url : link} 
                                                       target="_blank" 
                                                       rel="noopener noreferrer" 
                                                       className="text-xs text-blue-500 hover:underline flex items-center gap-1"
                                                       onClick={(e) => e.stopPropagation()} // Prevent card click-through
                                                     >
                                                       <Link2 className="h-3.5 w-3.5" />
-                                                      {link.length > 40 ? `${link.substring(0, 40)}...` : link}
+                                                      {typeof link === 'object' && link.text 
+                                                        ? link.text 
+                                                        : (typeof link === 'object' 
+                                                          ? (link.url.length > 40 ? `${link.url.substring(0, 40)}...` : link.url)
+                                                          : (link.length > 40 ? `${link.substring(0, 40)}...` : link))}
                                                     </a>
                                                   ))}
                                                 </div>

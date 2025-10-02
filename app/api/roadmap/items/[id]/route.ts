@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from '@/lib/auth';
-import type { RoadmapItem } from '@/types/roadmap';
+import type { RoadmapItem, RelevantLink } from '@/types/roadmap';
 
 // GET /api/roadmap/items/[id]
 export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
