@@ -9,7 +9,7 @@ import prisma from "@/lib/prisma";
 const editorEmails = process.env.EDITOR_EMAILS?.split(",") || []
 
 // Define Auth Options (Original v4 structure)
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
   // Use the v5 adapter for now, cast as v4 Adapter type. If issues arise, we might need @next-auth/prisma-adapter
   adapter: PrismaAdapter(prisma) as Adapter,
   providers: [

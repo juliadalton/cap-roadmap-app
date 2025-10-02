@@ -10,10 +10,8 @@ const nextConfig = {
   images: {
     unoptimized: true, // Keep this if you're not using next/image optimization
   },
-  // Enable experimental features for better performance
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client'],
-  },
+  // Updated external packages configuration for Next.js 15+
+  serverExternalPackages: ['@prisma/client'],
 }
 
 export default nextConfig
