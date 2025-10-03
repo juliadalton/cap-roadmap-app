@@ -505,16 +505,6 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
                 Add Roadmap Item
               </Button>
             )}
-            {isEditor && pathname === '/milestone-editor' && (
-              <Button onClick={() => {
-                if (typeof window !== 'undefined') {
-                  window.dispatchEvent(new Event('createMilestone'));
-                }
-              }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Milestone
-              </Button>
-            )}
             {/* Other global header controls could go here if needed */}
           </div> 
         </div>

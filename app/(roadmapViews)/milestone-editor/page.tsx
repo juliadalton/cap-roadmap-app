@@ -55,18 +55,6 @@ export default function MilestoneEditorPage() {
     }
   }, [fetchMilestones, session?.user]);
 
-  // Listen for create milestone events from layout button
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const handleCreateMilestone = () => {
-      openCreateModal();
-    };
-
-    window.addEventListener('createMilestone', handleCreateMilestone);
-    return () => window.removeEventListener('createMilestone', handleCreateMilestone);
-  }, []);
-
   // Handle create milestone
   const handleCreateMilestone = async (milestoneData: { title: string; date: string }) => {
     setModalError(null);
@@ -213,7 +201,20 @@ export default function MilestoneEditorPage() {
             <TableRow>
               <TableHead>Milestone Name</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right">
+                <div className="flex items-center justify-between">
+                  <span>Actions</span>
+                  <Button 
+                    onClick={openCreateModal} 
+                    variant="outline" 
+                    size="sm"
+                    className="ml-4"
+                  >
+                    <Plus className="mr-1 h-3 w-3" />
+                    Create Milestone
+                  </Button>
+                </div>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
