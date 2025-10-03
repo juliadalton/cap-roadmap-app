@@ -6,15 +6,15 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from '@/lib/auth'; // Import from new location
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  const userId = session?.user?.id;
-
-  // Added detailed check for editor role
-  if (!session?.user || !userId || session.user.role !== 'editor') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
   try {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+
+    // Added detailed check for editor role
+    if (!session?.user || !userId || session.user.role !== 'editor') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const body = await request.json();
     // Explicitly type body for clarity
     const { title, description, date, category, status, milestoneId, pirateMetrics, northStarMetrics, relatedItemIds, relevantLinks, productDRI } = body as {

@@ -20,13 +20,13 @@ export async function GET(request: Request) {
 
 // POST /api/roadmap/milestones
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user || session.user.role !== 'editor') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-  // userId not directly stored on Milestone, but check ensures only editors create
-
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user || session.user.role !== 'editor') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    // userId not directly stored on Milestone, but check ensures only editors create
+
     const body = await request.json();
     if (!body.title || !body.date) {
       return NextResponse.json({ error: 'Missing required fields (title, date)' }, { status: 400 });
