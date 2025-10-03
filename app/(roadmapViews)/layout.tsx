@@ -506,7 +506,11 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
               </Button>
             )}
             {isEditor && pathname === '/milestone-editor' && (
-              <Button onClick={() => window.dispatchEvent(new Event('createMilestone'))}>
+              <Button onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new Event('createMilestone'));
+                }
+              }}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create Milestone
               </Button>
