@@ -57,6 +57,8 @@ export default function MilestoneEditorPage() {
 
   // Listen for create milestone events from layout button
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleCreateMilestone = () => {
       openCreateModal();
     };
