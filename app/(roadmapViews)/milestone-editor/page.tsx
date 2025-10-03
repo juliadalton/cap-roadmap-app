@@ -195,9 +195,10 @@ export default function MilestoneEditorPage() {
 
   return (
     <div className="container mx-auto p-6">
+      {/* Header with Create Button positioned like in Item Editor */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Milestone Editor</h1>
-        <Button onClick={openCreateModal} className="bg-blue-600 hover:bg-blue-700">
+        <div></div> {/* Empty div for spacing */}
+        <Button onClick={openCreateModal}>
           <Plus className="mr-2 h-4 w-4" />
           Create Milestone
         </Button>
