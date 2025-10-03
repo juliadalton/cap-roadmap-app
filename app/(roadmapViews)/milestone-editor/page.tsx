@@ -55,6 +55,16 @@ export default function MilestoneEditorPage() {
     }
   }, [fetchMilestones, session?.user]);
 
+  // Listen for create milestone events from layout button
+  useEffect(() => {
+    const handleCreateMilestone = () => {
+      openCreateModal();
+    };
+
+    window.addEventListener('createMilestone', handleCreateMilestone);
+    return () => window.removeEventListener('createMilestone', handleCreateMilestone);
+  }, []);
+
   // Handle create milestone
   const handleCreateMilestone = async (milestoneData: { title: string; date: string }) => {
     setModalError(null);
@@ -195,15 +205,6 @@ export default function MilestoneEditorPage() {
 
   return (
     <div className="container mx-auto p-6">
-      {/* Header with Create Button positioned like in Item Editor */}
-      <div className="flex justify-between items-center mb-6">
-        <div></div> {/* Empty div for spacing */}
-        <Button onClick={openCreateModal}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Milestone
-        </Button>
-      </div>
-
       <div className="rounded-md border">
         <Table>
           <TableHeader>
