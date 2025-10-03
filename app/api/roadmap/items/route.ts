@@ -4,9 +4,6 @@ import type { RoadmapItem, RelevantLink } from '@/types/roadmap'; // Assuming yo
 import { Prisma } from '@prisma/client'; // Import Prisma types for error checking
 import { getServerSession } from "next-auth/next";
 import { authOptions } from '@/lib/auth'; // Import from new location
-import { PrismaClient } from '@prisma/client';
-
-const prismaClient = new PrismaClient();
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
@@ -50,7 +47,7 @@ export async function POST(request: Request) {
         updatedBy: { connect: { id: userId } },
         pirateMetrics: { set: pirateMetrics || [] },
         northStarMetrics: { set: northStarMetrics || [] },
-        relevantLinks: { set: relevantLinks || [] },
+        relevantLinks: { set: (relevantLinks || []) as any },
         productDRI: productDRI || "",
         // Omit relatedItems here
     };
