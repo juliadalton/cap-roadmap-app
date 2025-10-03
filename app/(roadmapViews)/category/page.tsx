@@ -181,11 +181,12 @@ export default function CategoryPage() {
                                               <Link2 className="h-3.5 w-3.5" />
                                               {(() => {
                                                 if (typeof link === 'object' && link !== null && 'url' in link) {
-                                                  return link.text || (link.url.length > 40 ? `${link.url.substring(0, 40)}...` : link.url);
-                                                } else if (typeof link === 'string') {
-                                                  return link.length > 40 ? `${link.substring(0, 40)}...` : link;
+                                                  const objLink = link as { url: string; text?: string };
+                                                  return objLink.text || (objLink.url.length > 40 ? `${objLink.url.substring(0, 40)}...` : objLink.url);
+                                                } else {
+                                                  const strLink = link as string;
+                                                  return strLink.length > 40 ? `${strLink.substring(0, 40)}...` : strLink;
                                                 }
-                                                return '';
                                               })()}
                                             </a>
                                           ))}
