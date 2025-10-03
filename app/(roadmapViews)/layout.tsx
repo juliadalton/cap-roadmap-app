@@ -130,19 +130,17 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
     setIsLoadingRoadmapData(true);
     setApiError(null);
     try {
-      const [milestonesResponse, itemsResponse] = await Promise.all([
-        fetch('/api/roadmap/milestones'),
-        fetch('/api/roadmap/items')
-      ]);
-
+      // Make sequential calls instead of concurrent to avoid auth conflicts
+      const milestonesResponse = await fetch('/api/roadmap/milestones');
       if (!milestonesResponse.ok) {
         throw new Error(`Failed to fetch milestones: ${milestonesResponse.statusText}`);
       }
+      const milestonesData: Milestone[] = await milestonesResponse.json();
+
+      const itemsResponse = await fetch('/api/roadmap/items');
       if (!itemsResponse.ok) {
         throw new Error(`Failed to fetch roadmap items: ${itemsResponse.statusText}`);
       }
-
-      const milestonesData: Milestone[] = await milestonesResponse.json();
       const itemsData: RoadmapItem[] = await itemsResponse.json();
 
       setAllMilestones(milestonesData);
