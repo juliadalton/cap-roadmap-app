@@ -440,8 +440,11 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
     { href: '/roadmap', label: 'Roadmap View' },
     { href: '/category', label: 'Category View' },
     { href: '/timeline', label: 'Timeline View' },
-    // Conditionally add editor link
-    ...(isEditor ? [{ href: '/editor', label: 'Editor View' }] : []),
+    // Conditionally add editor links
+    ...(isEditor ? [
+      { href: '/editor', label: 'Item Editor' },
+      { href: '/milestone-editor', label: 'Milestone Editor' }
+    ] : []),
   ];
 
   // Context Value
@@ -497,16 +500,10 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
           {/* Right side: Add New Item Button (conditionally for editor page) */}
           <div className="flex items-center gap-2">
             {isEditor && pathname === '/editor' && (
-              <>
-                <Button onClick={() => openMilestoneModal('create')} variant="outline">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Manage Milestones
-                </Button>
-                <Button onClick={() => openItemModal('create')}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Roadmap Item
-                </Button>
-              </>
+              <Button onClick={() => openItemModal('create')}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Roadmap Item
+              </Button>
             )}
             {/* Other global header controls could go here if needed */}
           </div> 
