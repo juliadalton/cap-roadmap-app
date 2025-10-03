@@ -48,10 +48,12 @@ export default function MilestoneEditorPage() {
     }
   }, []);
 
-  // Load milestones on component mount
+  // Load milestones only after authentication is confirmed
   useEffect(() => {
-    fetchMilestones();
-  }, [fetchMilestones]);
+    if (session?.user) {
+      fetchMilestones();
+    }
+  }, [fetchMilestones, session?.user]);
 
   // Handle create milestone
   const handleCreateMilestone = async (milestoneData: { title: string; date: string }) => {
@@ -146,8 +148,8 @@ export default function MilestoneEditorPage() {
     setIsDeleteDialogOpen(true);
   };
 
-  // Show loading state
-  if (isLoading) {
+  // Show loading state (including auth loading)
+  if (isLoading || !session) {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center min-h-[400px]">
