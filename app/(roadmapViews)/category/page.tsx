@@ -179,11 +179,14 @@ export default function CategoryPage() {
                                               onClick={(e) => e.stopPropagation()}
                                             >
                                               <Link2 className="h-3.5 w-3.5" />
-                                              {typeof link === 'object' && link.text 
-                                                ? link.text 
-                                                : (typeof link === 'object' 
-                                                  ? (link.url.length > 40 ? `${link.url.substring(0, 40)}...` : link.url)
-                                                  : (link.length > 40 ? `${link.substring(0, 40)}...` : link))}
+                                              {(() => {
+                                                if (typeof link === 'object' && link !== null && 'url' in link) {
+                                                  return link.text || (link.url.length > 40 ? `${link.url.substring(0, 40)}...` : link.url);
+                                                } else if (typeof link === 'string') {
+                                                  return link.length > 40 ? `${link.substring(0, 40)}...` : link;
+                                                }
+                                                return '';
+                                              })()}
                                             </a>
                                           ))}
                                         </div>
