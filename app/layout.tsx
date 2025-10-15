@@ -30,7 +30,7 @@ export default function RootLayout({
         <ClientProviders>
           <div className="min-h-screen flex flex-col">
             <header className="border-b bg-[rgb(0_43_103)] dark:bg-background">
-              <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+              <div className="container mx-auto px-4 py-3 flex justify-between items-center max-w-full">
                 <Logo />
                 <div className="flex items-center gap-2">
                   <ThemeToggle />
