@@ -53,6 +53,10 @@ interface RoadmapContextProps {
   setSelectedCategoryFilter: React.Dispatch<React.SetStateAction<string>>;
   categories: string[]; // <-- Add categories to context props
 
+  // Add milestone filter state
+  selectedMilestoneFilter: string;
+  setSelectedMilestoneFilter: React.Dispatch<React.SetStateAction<string>>;
+
   // Modal State & Handlers for ItemForm
   isItemModalOpen: boolean;
   itemModalMode: 'create' | 'edit' | null;
@@ -111,6 +115,7 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
   const [showHistorical, setShowHistorical] = useState(false);
   const [focusedItemId, setFocusedItemId] = useState<string | null>(null);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("All");
+  const [selectedMilestoneFilter, setSelectedMilestoneFilter] = useState<string>("All");
 
   // New state for ItemForm modal
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
@@ -331,7 +336,7 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
     }
   }, [fetchData]);
 
-  // Derived Data Calculation (based on focus, sort, history)
+  // Derived Data Calculation (based on focus, sort, history, milestone filter)
   const { displayedItems, displayedMilestones, historicalMilestoneCount } = useMemo(() => {
     
     // 1. Filter Milestones by History
@@ -353,14 +358,19 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
     
     const count = sortedMilestones.length - filteredMilestonesByHistory.length;
 
+    // 1.5. Filter Milestones by Milestone Filter (if active)
+    const filteredMilestonesByMilestoneFilter = selectedMilestoneFilter !== "All"
+        ? filteredMilestonesByHistory.filter(m => m.id === selectedMilestoneFilter)
+        : filteredMilestonesByHistory;
+
     // 2. Filter Items and Milestones by Focus
     if (!focusedItemId) {
-        // No focus: Use history-filtered milestones and all items relevant to them
-        const relevantMilestoneIds = new Set(filteredMilestonesByHistory.map(m => m.id));
+        // No focus: Use milestone-filtered milestones and all items relevant to them
+        const relevantMilestoneIds = new Set(filteredMilestonesByMilestoneFilter.map(m => m.id));
         const itemsForHistoryMilestones = allItems.filter(item => relevantMilestoneIds.has(item.milestoneId));
         return { 
             displayedItems: itemsForHistoryMilestones, 
-            displayedMilestones: filteredMilestonesByHistory,
+            displayedMilestones: filteredMilestonesByMilestoneFilter,
             historicalMilestoneCount: count
          };
     } else {
@@ -405,7 +415,7 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
         };
     }
 
-  }, [focusedItemId, allItems, allMilestones, showHistorical, sortDirection]);
+  }, [focusedItemId, allItems, allMilestones, showHistorical, sortDirection, selectedMilestoneFilter]);
 
   // Loading State Handling
   if (isAuthLoading || (isAuthenticated && isLoadingRoadmapData)) {
@@ -467,6 +477,8 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
     selectedCategoryFilter,
     setSelectedCategoryFilter,
     categories, // <-- Pass categories to context value
+    selectedMilestoneFilter,
+    setSelectedMilestoneFilter,
     // Item Modal related
     isItemModalOpen,
     itemModalMode,
@@ -548,6 +560,28 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
                             ))} 
                         </SelectContent> 
                     </Select> 
+                )}
+                {/* Conditional Milestone Filter for Timeline View */}
+                {pathname === '/timeline' && !focusedItemId && (
+                    <Select value={selectedMilestoneFilter} onValueChange={setSelectedMilestoneFilter}>
+                        <SelectTrigger id="milestone-filter-layout" className="w-[180px]">
+                            <SelectValue placeholder="Filter milestone..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="All">All Quarters</SelectItem>
+                            {allMilestones
+                                .sort((a, b) => {
+                                    const dateA = new Date(a.date).getTime();
+                                    const dateB = new Date(b.date).getTime();
+                                    return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+                                })
+                                .map(milestone => (
+                                    <SelectItem key={milestone.id} value={milestone.id}>
+                                        {milestone.title}
+                                    </SelectItem>
+                                ))}
+                        </SelectContent>
+                    </Select>
                 )}
                 {/* Sort Button */}
                 <Button variant="outline" size="sm" onClick={toggleSortDirection}>
