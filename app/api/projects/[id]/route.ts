@@ -4,11 +4,12 @@ import prisma from '@/lib/prisma';
 // GET /api/projects/[id] - Get single project
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const project = await prisma.project.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         acquisitions: true,
         startMilestone: true,
@@ -30,7 +31,7 @@ export async function GET(
 // PATCH /api/projects/[id] - Update project
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { getServerSession } = await import("next-auth/next");
@@ -41,6 +42,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    const { id } = await params;
     const body = await request.json();
     
     // Build the update data object
@@ -65,7 +67,7 @@ export async function PATCH(
     }
 
     const updatedProject = await prisma.project.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: {
         acquisitions: true,
@@ -84,7 +86,7 @@ export async function PATCH(
 // DELETE /api/projects/[id] - Delete project
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { getServerSession } = await import("next-auth/next");
@@ -95,8 +97,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    const { id } = await params;
     await prisma.project.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Project deleted successfully' });
@@ -105,4 +108,3 @@ export async function DELETE(
     return NextResponse.json({ error: 'Failed to delete project' }, { status: 500 });
   }
 }
-

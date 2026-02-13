@@ -4,11 +4,12 @@ import prisma from '@/lib/prisma';
 // GET /api/acquisitions/[id] - Get single acquisition with projects
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const acquisition = await prisma.acquisition.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         projects: {
           include: {
@@ -33,7 +34,7 @@ export async function GET(
 // PATCH /api/acquisitions/[id] - Update acquisition
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { getServerSession } = await import("next-auth/next");
@@ -44,10 +45,11 @@ export async function PATCH(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    const { id } = await params;
     const body = await request.json();
     
     const updatedAcquisition = await prisma.acquisition.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(body.name !== undefined && { name: body.name }),
         ...(body.description !== undefined && { description: body.description }),
@@ -73,7 +75,7 @@ export async function PATCH(
 // DELETE /api/acquisitions/[id] - Delete acquisition
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { getServerSession } = await import("next-auth/next");
@@ -84,8 +86,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    const { id } = await params;
     await prisma.acquisition.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Acquisition deleted successfully' });
@@ -94,4 +97,3 @@ export async function DELETE(
     return NextResponse.json({ error: 'Failed to delete acquisition' }, { status: 500 });
   }
 }
-
