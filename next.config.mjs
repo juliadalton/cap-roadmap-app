@@ -8,10 +8,11 @@ const nextConfig = {
     ignoreBuildErrors: process.env.NODE_ENV === 'development',
   },
   images: {
-    unoptimized: true, // Keep this if you're not using next/image optimization
+    unoptimized: true,
   },
   // Updated external packages configuration for Next.js 15+
   serverExternalPackages: ['@prisma/client'],
+  output: 'standalone',
 }
 
 export default nextConfig

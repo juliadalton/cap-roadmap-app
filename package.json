@@ -2,10 +2,12 @@
   "name": "my-v0-project",
   "version": "0.1.0",
   "private": true,
+  "start": "node_modules/next/dist/bin/next start",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
     "start": "next start",
+    "startAzure": "./node_modules/next/dist/bin/next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate deploy",
