@@ -9,18 +9,18 @@ import React, {
     useCallback,
     ReactNode 
 } from "react";
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Loader2, ChevronDown, ChevronUp, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { RoadmapItem, Milestone } from "@/types/roadmap";
-import { useAuth } from "@/context/auth-context"; // Assuming auth context is needed for editor status
-import { cn } from "@/lib/utils"; // Import cn for conditional styling
+import { useAuth } from "@/context/auth-context";
+import { cn } from "@/lib/utils";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"; // Import Dialog components
-import ItemForm from "@/components/item-form"; // Corrected: Import ItemForm as default
-import { MilestoneManagementModal } from "@/components/milestone-management-modal"; // <-- Import the new modal
-import { type SaveMilestoneData } from "@/components/milestone-form"; // <-- Re-add this type import
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import ItemForm from "@/components/item-form";
+import { MilestoneManagementModal } from "@/components/milestone-management-modal";
+import { type SaveMilestoneData } from "@/components/milestone-form";
+import SidebarNav from "@/components/sidebar-nav";
 
 // --- Context Definition ---
 
@@ -77,6 +77,10 @@ interface RoadmapContextProps {
   saveMilestone: (milestoneData: SaveMilestoneData) => Promise<void>;
   milestoneModalError: string | null;
   deleteMilestone: (milestoneId: string) => Promise<void>; // <-- Add deleteMilestone
+
+  // Page-specific header actions (registered by pages)
+  headerActions: React.ReactNode;
+  setHeaderActions: React.Dispatch<React.SetStateAction<React.ReactNode>>;
 }
 
 const RoadmapContext = createContext<RoadmapContextProps | undefined>(undefined);
@@ -129,6 +133,23 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
   const [milestoneModalMode, setMilestoneModalMode] = useState<'create' | 'edit' | null>(null);
   const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
   const [milestoneModalError, setMilestoneModalError] = useState<string | null>(null);
+
+  // State for sidebar expansion (shared with SidebarNav)
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+
+  // State for page-specific header actions
+  const [headerActions, setHeaderActions] = useState<React.ReactNode>(null);
+
+  // Page title mapping based on current route
+  const pageTitles: Record<string, string> = {
+    '/roadmap': 'Company Roadmap',
+    '/category': 'Roadmap by Category',
+    '/timeline': 'Vertical Timeline',
+    '/acquisitions': 'Acquisition Tracker',
+    '/editor': 'Item Editor',
+    '/milestone-editor': 'Milestone Editor',
+  };
+  const pageTitle = pageTitles[pathname] || 'Company Roadmap';
 
   // Data Fetching Logic (moved from page.tsx)
   const fetchData = useCallback(async () => {
@@ -445,18 +466,6 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
     );
   }
 
-  // Define navigation links
-  const navLinks = [
-    { href: '/roadmap', label: 'Roadmap View' },
-    { href: '/category', label: 'Category View' },
-    { href: '/timeline', label: 'Timeline View' },
-    // Conditionally add editor links
-    ...(isEditor ? [
-      { href: '/editor', label: 'Item Editor' },
-      { href: '/milestone-editor', label: 'Milestone Editor' }
-    ] : []),
-  ];
-
   // Context Value
   const contextValue: RoadmapContextProps = {
     allItems,
@@ -498,120 +507,108 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
     saveMilestone,
     milestoneModalError,
     deleteMilestone, // <-- Provide deleteMilestone in context
+    headerActions,
+    setHeaderActions,
   };
 
   return (
     <RoadmapContext.Provider value={contextValue}>
-      <div className="p-4 md:p-8 space-y-4">
-        {/* --- Header Area --- */}
-        <div className="flex flex-wrap gap-4 justify-between items-center">
-          {/* Left side: Title */} 
-          <div> 
-            <h1 className="text-3xl font-bold">Company Roadmap</h1>
-          </div>
-          {/* Right side: Add New Item Button (conditionally for editor page) */}
-          <div className="flex items-center gap-2">
-            {isEditor && pathname === '/editor' && (
-              <Button onClick={() => openItemModal('create')}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Roadmap Item
-              </Button>
-            )}
-            {/* Other global header controls could go here if needed */}
-          </div> 
-        </div>
+      <div className="flex h-full">
+        {/* Sidebar Navigation */}
+        <SidebarNav 
+          isEditor={isEditor} 
+          onNavigate={() => setFocusedItemId(null)}
+          isExpanded={isSidebarExpanded}
+          onToggle={() => setIsSidebarExpanded(prev => !prev)}
+        />
 
-        {/* --- Navigation & Shared Controls Area --- */}
-        <div className="flex flex-wrap gap-4 items-center justify-between">
-            {/* Navigation Links (Left Aligned) */}
-             <nav className="bg-muted p-1 rounded-md inline-flex gap-1"> 
-              {navLinks.map(link => {
-                const isActive = pathname === link.href;
-                return (
-                  <Link 
-                    key={link.href} 
-                    href={link.href} 
-                    className={cn(
-                      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                      isActive 
-                        ? "bg-background text-foreground shadow-sm" 
-                        : "hover:bg-muted-foreground/10 hover:text-muted-foreground"
-                    )}
-                    onClick={() => setFocusedItemId(null)} // Clear focus on navigation
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </nav>
-            
-            {/* Sort Button (Right Aligned in this row) */}
-            <div className="flex items-center gap-2">
-                {/* Conditional Category Filter (Rendered by Layout now) */}
-                 {pathname === '/category' && !focusedItemId && (
-                    <Select value={selectedCategoryFilter} onValueChange={setSelectedCategoryFilter}> 
-                        <SelectTrigger id="category-filter-layout" className="w-[180px]"> 
-                            <SelectValue placeholder="Filter category..." /> 
-                        </SelectTrigger> 
-                        <SelectContent> 
-                            <SelectItem value="All">All Categories</SelectItem> 
-                            {categories.map(cat => ( 
-                                <SelectItem key={cat} value={cat}>{cat}</SelectItem> 
-                            ))} 
-                        </SelectContent> 
-                    </Select> 
+        {/* Main Content Area - margin accounts for fixed sidebar */}
+        <div className={cn("flex-1 min-w-0 transition-all duration-300", isSidebarExpanded ? "ml-64" : "ml-16")}>
+          <div className="p-4 md:p-6 lg:p-8 space-y-4">
+            {/* --- Header Area --- */}
+            <div className="flex flex-wrap gap-4 justify-between items-center">
+              {/* Left side: Title */}
+              <div>
+                <h1 className="text-3xl font-bold">{pageTitle}</h1>
+              </div>
+              {/* Right side: Page-specific action buttons */}
+              <div className="flex items-center gap-2">
+                {isEditor && pathname === '/editor' && (
+                  <Button onClick={() => openItemModal('create')}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Roadmap Item
+                  </Button>
                 )}
-                {/* Conditional Milestone Filter for Timeline View */}
-                {pathname === '/timeline' && !focusedItemId && (
-                    <Select value={selectedMilestoneFilter} onValueChange={setSelectedMilestoneFilter}>
-                        <SelectTrigger id="milestone-filter-layout" className="w-[180px]">
-                            <SelectValue placeholder="Filter milestone..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="All">All Quarters</SelectItem>
-                            {allMilestones
-                                .sort((a, b) => {
-                                    const dateA = new Date(a.date).getTime();
-                                    const dateB = new Date(b.date).getTime();
-                                    return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
-                                })
-                                .map(milestone => (
-                                    <SelectItem key={milestone.id} value={milestone.id}>
-                                        {milestone.title}
-                                    </SelectItem>
-                                ))}
-                        </SelectContent>
-                    </Select>
-                )}
-                {/* Sort Button */}
-                <Button variant="outline" size="sm" onClick={toggleSortDirection}>
-                    {sortDirection === "asc" ? <ChevronUp className="mr-2 h-4 w-4" /> : <ChevronDown className="mr-2 h-4 w-4" />}
-                    {sortDirection === "asc" ? "Earliest first" : "Latest first"}
-                </Button>
+                {/* Page-registered header actions */}
+                {headerActions}
+              </div>
             </div>
-        </div>
 
-        {/* --- Row for Focus Indicator (Below Nav/Sort, Full Width) --- */}
-        {focusedItemId && (
-          <div className="flex items-center justify-start mb-2">
-             {/* Group for Focus Indicators */} 
-             <div className="flex items-center gap-2"> 
-                {/* Clear Focus Button */} 
-                <Button variant="outline" size="sm" onClick={() => setFocusedItemId(null)}> 
-                  <X className="mr-2 h-4 w-4" /> 
-                  Clear Focus (Show All)
-                </Button>
-                {/* Focus Message */} 
-                <p className="text-sm text-muted-foreground">
-                  (Showing items related to: {allItems.find(i => i.id === focusedItemId)?.title || 'selected item'})
-                </p>
-             </div>
+            {/* --- Controls Area (hidden on acquisitions page which has its own controls) --- */}
+            {pathname !== '/acquisitions' && <div className="flex flex-wrap gap-4 items-center justify-end">
+              {/* Conditional Category Filter */}
+              {pathname === '/category' && !focusedItemId && (
+                <Select value={selectedCategoryFilter} onValueChange={setSelectedCategoryFilter}>
+                  <SelectTrigger id="category-filter-layout" className="w-[180px]">
+                    <SelectValue placeholder="Filter category..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Categories</SelectItem>
+                    {categories.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              {/* Conditional Milestone Filter for Timeline View */}
+              {pathname === '/timeline' && !focusedItemId && (
+                <Select value={selectedMilestoneFilter} onValueChange={setSelectedMilestoneFilter}>
+                  <SelectTrigger id="milestone-filter-layout" className="w-[180px]">
+                    <SelectValue placeholder="Filter milestone..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Quarters</SelectItem>
+                    {allMilestones
+                      .sort((a, b) => {
+                        const dateA = new Date(a.date).getTime();
+                        const dateB = new Date(b.date).getTime();
+                        return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+                      })
+                      .map(milestone => (
+                        <SelectItem key={milestone.id} value={milestone.id}>
+                          {milestone.title}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              )}
+              {/* Sort Button */}
+              <Button variant="outline" size="sm" onClick={toggleSortDirection}>
+                {sortDirection === "asc" ? <ChevronUp className="mr-2 h-4 w-4" /> : <ChevronDown className="mr-2 h-4 w-4" />}
+                {sortDirection === "asc" ? "Earliest first" : "Latest first"}
+              </Button>
+            </div>}
+
+            {/* --- Focus Indicator --- */}
+            {focusedItemId && (
+              <div className="flex items-center justify-start">
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setFocusedItemId(null)}>
+                    <X className="mr-2 h-4 w-4" />
+                    Clear Focus (Show All)
+                  </Button>
+                  <p className="text-sm text-muted-foreground">
+                    (Showing items related to: {allItems.find(i => i.id === focusedItemId)?.title || 'selected item'})
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* --- Page Content --- */}
+            <div className="grid grid-cols-1">
+              {children}
+            </div>
           </div>
-        )}
-
-        {/* --- Page Content --- */}
-        <div className="grid grid-cols-1">
-            {children}
         </div>
       </div>
 
@@ -629,7 +626,7 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
                 </DialogDescription>
               )}
             </DialogHeader>
-            <ItemForm 
+            <ItemForm
               initialData={itemModalMode === 'edit' ? editingItem : undefined}
               milestoneId={itemModalMode === 'create' ? targetMilestoneId : undefined}
               milestones={allMilestones}
@@ -639,13 +636,12 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
               mode={itemModalMode || 'create'}
               error={itemModalError}
             />
-            {/* DialogFooter could be part of ItemForm or managed here if needed */}
           </DialogContent>
         </Dialog>
       )}
 
       {/* --- Milestone Management Modal --- */}
-      <MilestoneManagementModal /> 
+      <MilestoneManagementModal />
 
     </RoadmapContext.Provider>
   );

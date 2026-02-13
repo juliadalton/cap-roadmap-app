@@ -365,7 +365,7 @@ export default function ItemForm({
                     </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                        {milestones.length === 0 && <SelectItem value="" disabled>No milestones available</SelectItem>}
+                        {milestones.length === 0 && <SelectItem value="none" disabled>No milestones available</SelectItem>}
                         {milestones.map(m => (
                             <SelectItem key={m.id} value={m.id}>{m.title} ({format(new Date(m.date), "MMM d, yyyy")})</SelectItem>
                         ))}

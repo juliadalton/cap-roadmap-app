@@ -37,3 +37,34 @@ export interface User {
   name: string
   role: "viewer" | "editor"
 }
+
+// Acquisition Types
+export interface Acquisition {
+  id: string
+  name: string
+  description?: string | null
+  integrationOverview?: string | null
+  projects?: Project[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Project {
+  id: string
+  title: string
+  description?: string | null
+  relevantLinks?: RelevantLink[] | null
+  
+  // Acquisition relations
+  acquisitions?: Acquisition[]
+  acquisitionIds?: string[]
+  
+  // Milestone relations
+  startMilestoneId?: string | null
+  startMilestone?: Milestone | null
+  endMilestoneId?: string | null
+  endMilestone?: Milestone | null
+  
+  createdAt: string
+  updatedAt: string
+}

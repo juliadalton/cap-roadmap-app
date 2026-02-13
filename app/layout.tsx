@@ -29,8 +29,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <ClientProviders>
           <div className="min-h-screen flex flex-col">
-            <header className="border-b bg-[rgb(0_43_103)] dark:bg-background">
-              <div className="container mx-auto px-4 py-3 flex justify-between items-center max-w-full">
+            <header className="border-b bg-[rgb(0_43_103)] dark:bg-background fixed top-0 left-0 right-0 z-50 h-[57px]">
+              <div className="px-4 py-3 flex justify-between items-center w-full h-full">
                 <Logo />
                 <div className="flex items-center gap-2">
                   <ThemeToggle />
@@ -38,7 +38,9 @@ export default function RootLayout({
                 </div>
               </div>
             </header>
-            <main className="flex-1 min-w-0 overflow-x-hidden">{children}</main>
+            {/* Spacer for fixed header */}
+            <div className="h-[57px] shrink-0" />
+            <main className="flex-1 min-w-0">{children}</main>
           </div>
         </ClientProviders>
       </body>

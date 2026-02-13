@@ -28,8 +28,50 @@ model Milestone {
   date  DateTime
   items RoadmapItem[] // Relation to RoadmapItem
 
+  // Relations for Projects (start and end milestones)
+  projectsStarting Project[] @relation("ProjectStartMilestone")
+  projectsEnding   Project[] @relation("ProjectEndMilestone")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Acquisition Models
+model Acquisition {
+  id                  String    @id @default(cuid())
+  name                String
+  description         String?   @db.Text
+  integrationOverview String?   @db.Text
+  
+  projects            Project[] // One-to-many relation with Projects
+  
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  
+  // Many-to-many relation with Acquisitions
+  acquisitions Acquisition[]
+  
+  // Start and End Milestone relations
+  startMilestoneId String?
+  startMilestone   Milestone? @relation("ProjectStartMilestone", fields: [startMilestoneId], references: [id], onDelete: SetNull)
+  
+  endMilestoneId   String?
+  endMilestone     Milestone? @relation("ProjectEndMilestone", fields: [endMilestoneId], references: [id], onDelete: SetNull)
+  
+  // Relevant links (same pattern as RoadmapItem)
+  relevantLinks    Json[]   @default([])
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@index([startMilestoneId])
+  @@index([endMilestoneId])
 }
 
 model RoadmapItem {

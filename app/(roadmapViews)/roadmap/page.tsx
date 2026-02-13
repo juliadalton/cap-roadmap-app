@@ -56,8 +56,8 @@ export default function RoadmapPage() {
         </div>
       ) : null}
 
-      {/* --- This is the new, single scrolling container for all wide content --- */}
-      <div className="overflow-x-auto">
+      {/* --- Wide content container --- */}
+      <div>
         {/* --- Horizontal Timeline Row --- */}
         {displayedMilestones.length > 0 && (
           /* w-max ensures this container is as wide as its children (the milestones) */
