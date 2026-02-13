@@ -104,7 +104,7 @@ export default function SidebarNav({ isEditor, onNavigate, isExpanded, onToggle 
       {isMobile && isExpanded && (
         <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={() => setIsExpanded(false)}
+          onClick={() => onToggle()}
         />
       )}
 
