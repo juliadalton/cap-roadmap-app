@@ -54,6 +54,7 @@ export async function PATCH(
         ...(body.name !== undefined && { name: body.name }),
         ...(body.description !== undefined && { description: body.description }),
         ...(body.integrationOverview !== undefined && { integrationOverview: body.integrationOverview }),
+        ...(body.color !== undefined && { color: body.color }),
       },
       include: {
         projects: {

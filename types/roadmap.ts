@@ -39,12 +39,61 @@ export interface User {
 }
 
 // Acquisition Types
+export type Disposition = 'Standalone' | 'Wrapped' | 'Deprecating'
+
 export interface Acquisition {
   id: string
   name: string
   description?: string | null
   integrationOverview?: string | null
+  color?: string | null
   projects?: Project[]
+  progress?: AcquisitionProgress | null
+  epics?: FunctionalityEpic[]
+  clientCounts?: AcquisitionClientCount[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AcquisitionProgress {
+  id: string
+  acquisitionId: string
+  acquisition?: Acquisition
+  disposition?: Disposition | null
+  devPlatform: boolean
+  functionalityEpicsToDo: number
+  functionalityEpicsInProgress: number
+  functionalityEpicsComplete: number
+  clientCountTotal: number
+  clientAccessCount: number
+  clientActiveCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface FunctionalityEpic {
+  id: string
+  acquisitionId: string
+  acquisition?: Acquisition
+  projectId?: string | null
+  project?: Project | null
+  epicId: string
+  epicName: string
+  epicStatus?: string | null
+  epicAcquiredCompany?: string | null
+  epicLink?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AcquisitionClientCount {
+  id: string
+  acquisitionId: string
+  acquisition?: Acquisition
+  clientVitallyId: string
+  orgId?: string | null
+  clientName: string
+  activeInConsole: boolean
   createdAt: string
   updatedAt: string
 }
@@ -58,6 +107,9 @@ export interface Project {
   // Acquisition relations
   acquisitions?: Acquisition[]
   acquisitionIds?: string[]
+  
+  // Functionality epics relation
+  epics?: FunctionalityEpic[]
   
   // Milestone relations
   startMilestoneId?: string | null

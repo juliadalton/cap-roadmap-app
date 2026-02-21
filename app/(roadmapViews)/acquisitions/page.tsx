@@ -3,67 +3,32 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRoadmap } from "../layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Plus, Edit, Trash2, ChevronDown, Link2, Building2, FolderKanban, Loader2, ChevronRight, ChevronUp } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import type { Acquisition, Project, Milestone, RelevantLink } from "@/types/roadmap";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Plus, Edit, Trash2, ChevronDown, Building2, Loader2, MoreVertical, FolderKanban, Link2 } from "lucide-react";
+import type { Acquisition, Project } from "@/types/roadmap";
 import AcquisitionForm from "@/components/acquisition-form";
-import ProjectForm, { type SaveProjectData } from "@/components/project-form";
+import Link from "next/link";
 
-// Color palette for acquisitions (distinct colors for visual separation)
-const ACQUISITION_COLORS = [
-  "bg-blue-500",
-  "bg-emerald-500",
-  "bg-violet-500",
-  "bg-amber-500",
-  "bg-rose-500",
-  "bg-cyan-500",
-  "bg-indigo-500",
-  "bg-teal-500",
-];
-
-const ACQUISITION_COLORS_LIGHT = [
-  "bg-blue-100 dark:bg-blue-900/30",
-  "bg-emerald-100 dark:bg-emerald-900/30",
-  "bg-violet-100 dark:bg-violet-900/30",
-  "bg-amber-100 dark:bg-amber-900/30",
-  "bg-rose-100 dark:bg-rose-900/30",
-  "bg-cyan-100 dark:bg-cyan-900/30",
-  "bg-indigo-100 dark:bg-indigo-900/30",
-  "bg-teal-100 dark:bg-teal-900/30",
-];
-
-export default function AcquisitionsPage() {
-  const { allMilestones, isEditor, sortDirection, toggleSortDirection, setHeaderActions } = useRoadmap();
+export default function AcquisitionListPage() {
+  const { isEditor, setHeaderActions } = useRoadmap();
   
-  // Data state
   const [acquisitions, setAcquisitions] = useState<Acquisition[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Modal state
   const [isAcquisitionModalOpen, setIsAcquisitionModalOpen] = useState(false);
   const [acquisitionModalMode, setAcquisitionModalMode] = useState<'create' | 'edit'>('create');
   const [editingAcquisition, setEditingAcquisition] = useState<Acquisition | null>(null);
   const [acquisitionModalError, setAcquisitionModalError] = useState<string | null>(null);
   
-  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [projectModalMode, setProjectModalMode] = useState<'create' | 'edit'>('create');
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [projectModalError, setProjectModalError] = useState<string | null>(null);
-  const [preselectedAcquisitionId, setPreselectedAcquisitionId] = useState<string | null>(null);
-  
-  // Expansion state for acquisitions
-  const [expandedAcquisitions, setExpandedAcquisitions] = useState<Record<string, boolean>>({});
+  const [isProjectsModalOpen, setIsProjectsModalOpen] = useState(false);
+  const [selectedAcquisitionForProjects, setSelectedAcquisitionForProjects] = useState<{ acquisition: Acquisition; projects: Project[] } | null>(null);
 
-  // Fetch data
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -92,56 +57,18 @@ export default function AcquisitionsPage() {
     fetchData();
   }, [fetchData]);
 
-  // Sort milestones for the timeline header
-  const sortedMilestones = useMemo(() => {
-    return [...allMilestones].sort((a, b) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
-    });
-  }, [allMilestones, sortDirection]);
-
-  // Create a map of milestone ID to index for positioning
-  const milestoneIndexMap = useMemo(() => {
-    const map: Record<string, number> = {};
-    sortedMilestones.forEach((m, index) => {
-      map[m.id] = index;
-    });
-    return map;
-  }, [sortedMilestones]);
-
-  // Get projects for an acquisition with their computed span
   const getAcquisitionProjects = useCallback((acquisitionId: string) => {
     return projects.filter(p => 
       p.acquisitions?.some(a => a.id === acquisitionId)
     );
   }, [projects]);
 
-  // Calculate acquisition timeline span based on its projects
-  const getAcquisitionTimelineSpan = useCallback((acquisitionId: string): { startIndex: number; endIndex: number } | null => {
-    const acqProjects = getAcquisitionProjects(acquisitionId);
-    if (acqProjects.length === 0) return null;
+  const sortedAcquisitions = useMemo(() => {
+    return [...acquisitions].sort((a, b) => 
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+    );
+  }, [acquisitions]);
 
-    let minIndex = Infinity;
-    let maxIndex = -1;
-
-    acqProjects.forEach(project => {
-      if (project.startMilestoneId && milestoneIndexMap[project.startMilestoneId] !== undefined) {
-        minIndex = Math.min(minIndex, milestoneIndexMap[project.startMilestoneId]);
-      }
-      if (project.endMilestoneId && milestoneIndexMap[project.endMilestoneId] !== undefined) {
-        maxIndex = Math.max(maxIndex, milestoneIndexMap[project.endMilestoneId]);
-      }
-    });
-
-    if (minIndex === Infinity && maxIndex === -1) return null;
-    if (minIndex === Infinity) minIndex = maxIndex;
-    if (maxIndex === -1) maxIndex = minIndex;
-
-    return { startIndex: minIndex, endIndex: maxIndex };
-  }, [getAcquisitionProjects, milestoneIndexMap]);
-
-  // Modal handlers
   const openAcquisitionModal = (mode: 'create' | 'edit', acquisition?: Acquisition) => {
     setAcquisitionModalMode(mode);
     setEditingAcquisition(acquisition || null);
@@ -155,7 +82,17 @@ export default function AcquisitionsPage() {
     setAcquisitionModalError(null);
   };
 
-  const saveAcquisition = async (data: { name: string; description?: string; integrationOverview?: string }) => {
+  const openProjectsModal = (acquisition: Acquisition, acqProjects: Project[]) => {
+    setSelectedAcquisitionForProjects({ acquisition, projects: acqProjects });
+    setIsProjectsModalOpen(true);
+  };
+
+  const closeProjectsModal = () => {
+    setIsProjectsModalOpen(false);
+    setSelectedAcquisitionForProjects(null);
+  };
+
+  const saveAcquisition = async (data: { name: string; description?: string; integrationOverview?: string; color?: string }) => {
     setAcquisitionModalError(null);
     const isEdit = acquisitionModalMode === 'edit' && editingAcquisition;
     const url = isEdit ? `/api/acquisitions/${editingAcquisition.id}` : '/api/acquisitions';
@@ -194,88 +131,18 @@ export default function AcquisitionsPage() {
     }
   };
 
-  const openProjectModal = (mode: 'create' | 'edit', project?: Project, acquisitionId?: string) => {
-    setProjectModalMode(mode);
-    setEditingProject(project || null);
-    setPreselectedAcquisitionId(acquisitionId || null);
-    setProjectModalError(null);
-    setIsProjectModalOpen(true);
-  };
-
-  const closeProjectModal = () => {
-    setIsProjectModalOpen(false);
-    setEditingProject(null);
-    setPreselectedAcquisitionId(null);
-    setProjectModalError(null);
-  };
-
-  const saveProject = async (data: SaveProjectData) => {
-    setProjectModalError(null);
-    const isEdit = projectModalMode === 'edit' && editingProject;
-    const url = isEdit ? `/api/projects/${editingProject.id}` : '/api/projects';
-    const method = isEdit ? 'PATCH' : 'POST';
-
-    try {
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to save project');
-      }
-
-      await fetchData();
-      closeProjectModal();
-    } catch (err: any) {
-      setProjectModalError(err.message);
-    }
-  };
-
-  const deleteProject = async (projectId: string) => {
-    if (!window.confirm('Are you sure you want to delete this project?')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/projects/${projectId}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete project');
-      await fetchData();
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
-
-  const toggleAcquisitionExpansion = (acquisitionId: string) => {
-    setExpandedAcquisitions(prev => ({
-      ...prev,
-      [acquisitionId]: !prev[acquisitionId]
-    }));
-  };
-
-  // Register header action buttons
   useEffect(() => {
     if (isEditor) {
       setHeaderActions(
-        <>
-          <Button variant="outline" onClick={() => openProjectModal('create')}>
-            <FolderKanban className="mr-2 h-4 w-4" />
-            Add Project
-          </Button>
-          <Button onClick={() => openAcquisitionModal('create')}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Acquisition
-          </Button>
-        </>
+        <Button onClick={() => openAcquisitionModal('create')}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Acquisition
+        </Button>
       );
     }
-    // Cleanup on unmount
     return () => setHeaderActions(null);
   }, [isEditor, setHeaderActions]);
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -285,7 +152,6 @@ export default function AcquisitionsPage() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="text-center py-12">
@@ -295,20 +161,8 @@ export default function AcquisitionsPage() {
     );
   }
 
-  const COLUMN_WIDTH = 160;
-  const ROW_LABEL_WIDTH = 280;
-
   return (
     <div className="space-y-6">
-      {/* Sort control - near the table */}
-      <div className="flex justify-end">
-        <Button variant="outline" size="sm" onClick={toggleSortDirection}>
-          {sortDirection === "asc" ? <ChevronUp className="mr-2 h-4 w-4" /> : <ChevronDown className="mr-2 h-4 w-4" />}
-          {sortDirection === "asc" ? "Earliest first" : "Latest first"}
-        </Button>
-      </div>
-
-      {/* Empty state */}
       {acquisitions.length === 0 ? (
         <Card className="py-12">
           <CardContent className="text-center">
@@ -326,287 +180,76 @@ export default function AcquisitionsPage() {
           </CardContent>
         </Card>
       ) : (
-        /* Gantt-style Chart */
-        <Card className="overflow-hidden">
-          <ScrollArea className="w-full">
-            <div className="min-w-max">
-              {/* Header Row - Milestones */}
-              <div className="flex border-b bg-muted/50 sticky top-0 z-10">
-                <div 
-                  className="shrink-0 p-4 font-semibold border-r bg-muted/50 sticky left-0 z-20"
-                  style={{ width: ROW_LABEL_WIDTH }}
-                >
-                  Acquisition / Project
-                </div>
-                {sortedMilestones.map((milestone) => (
-                  <div 
-                    key={milestone.id}
-                    className="shrink-0 p-4 text-center border-r"
-                    style={{ width: COLUMN_WIDTH }}
-                  >
-                    <div className="font-semibold text-sm">{milestone.title}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {format(new Date(milestone.date), "MMM yyyy")}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {sortedAcquisitions.map((acquisition) => {
+            const acqProjects = getAcquisitionProjects(acquisition.id);
+            
+            return (
+              <Card key={acquisition.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Building2 
+                        className="h-5 w-5" 
+                        style={{ color: acquisition.color || undefined }}
+                      />
+                      <h3 className="font-semibold text-lg">{acquisition.name}</h3>
                     </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Acquisition Rows */}
-              {acquisitions.map((acquisition, acqIndex) => {
-                const acqProjects = getAcquisitionProjects(acquisition.id);
-                const timelineSpan = getAcquisitionTimelineSpan(acquisition.id);
-                const colorIndex = acqIndex % ACQUISITION_COLORS.length;
-                const isExpanded = expandedAcquisitions[acquisition.id] ?? true;
-
-                return (
-                  <div key={acquisition.id} className="border-b last:border-b-0">
-                    {/* Acquisition Header Row */}
-                    <div className="flex hover:bg-muted/30 group">
-                      <div 
-                        className="shrink-0 p-3 border-r bg-background sticky left-0 z-10 flex items-center gap-2"
-                        style={{ width: ROW_LABEL_WIDTH }}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 shrink-0"
-                          onClick={() => toggleAcquisitionExpansion(acquisition.id)}
-                        >
-                          {isExpanded ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <div className={cn("w-3 h-3 rounded-full shrink-0", ACQUISITION_COLORS[colorIndex])} />
-                        <div className="flex-1 min-w-0">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="font-semibold truncate cursor-help">
-                                  {acquisition.name}
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="right" className="max-w-sm">
-                                <div className="space-y-2">
-                                  <p className="font-semibold">{acquisition.name}</p>
-                                  {acquisition.description && (
-                                    <p className="text-sm">{acquisition.description}</p>
-                                  )}
-                                  {acquisition.integrationOverview && (
-                                    <div>
-                                      <p className="text-xs font-medium text-muted-foreground">Integration Overview:</p>
-                                      <p className="text-sm">{acquisition.integrationOverview}</p>
-                                    </div>
-                                  )}
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                          <div className="text-xs text-muted-foreground">
-                            {acqProjects.length} project{acqProjects.length !== 1 ? 's' : ''}
-                          </div>
-                        </div>
-                        {isEditor && (
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex shrink-0">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7"
-                              onClick={() => openProjectModal('create', undefined, acquisition.id)}
-                              title="Add project to this acquisition"
-                            >
-                              <Plus className="h-4 w-4" />
-                            </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7">
-                                  <ChevronDown className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => openAcquisitionModal('edit', acquisition)}>
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  className="text-destructive"
-                                  onClick={() => deleteAcquisition(acquisition.id)}
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Acquisition Timeline Bar */}
-                      <div className="flex relative" style={{ width: sortedMilestones.length * COLUMN_WIDTH }}>
-                        {sortedMilestones.map((_, idx) => (
-                          <div 
-                            key={idx}
-                            className="shrink-0 border-r h-full"
-                            style={{ width: COLUMN_WIDTH }}
-                          />
-                        ))}
-                        {timelineSpan && (
-                          <div
-                            className={cn(
-                              "absolute top-1/2 -translate-y-1/2 h-6 rounded-full opacity-60",
-                              ACQUISITION_COLORS[colorIndex]
-                            )}
-                            style={{
-                              left: timelineSpan.startIndex * COLUMN_WIDTH + 8,
-                              width: (timelineSpan.endIndex - timelineSpan.startIndex + 1) * COLUMN_WIDTH - 16,
-                            }}
-                          />
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Project Rows (when expanded) */}
-                    {isExpanded && acqProjects.map((project) => {
-                      const startIndex = project.startMilestoneId ? milestoneIndexMap[project.startMilestoneId] : undefined;
-                      const endIndex = project.endMilestoneId ? milestoneIndexMap[project.endMilestoneId] : undefined;
-                      
-                      return (
-                        <div key={project.id} className="flex hover:bg-muted/20 group border-t border-dashed">
-                          <div 
-                            className="shrink-0 p-2 pl-10 border-r bg-background sticky left-0 z-10 flex items-center gap-2"
-                            style={{ width: ROW_LABEL_WIDTH }}
+                    {isEditor && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => openAcquisitionModal('edit', acquisition)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="text-destructive"
+                            onClick={() => deleteAcquisition(acquisition.id)}
                           >
-                            <FolderKanban className="h-4 w-4 text-muted-foreground shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="text-sm truncate cursor-help">
-                                      {project.title}
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="right" className="max-w-sm">
-                                    <div className="space-y-2">
-                                      <p className="font-semibold">{project.title}</p>
-                                      {project.description && (
-                                        <p className="text-sm">{project.description}</p>
-                                      )}
-                                      {project.relevantLinks && project.relevantLinks.length > 0 && (
-                                        <div>
-                                          <p className="text-xs font-medium text-muted-foreground mb-1">Links:</p>
-                                          <div className="space-y-1">
-                                            {project.relevantLinks.map((link, i) => (
-                                              <a
-                                                key={i}
-                                                href={typeof link === 'object' ? link.url : link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-xs text-blue-500 hover:underline flex items-center gap-1"
-                                              >
-                                                <Link2 className="h-3 w-3" />
-                                                {typeof link === 'object' && link.text ? link.text : 'Link'}
-                                              </a>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                            {isEditor && (
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-6 w-6">
-                                      <ChevronDown className="h-3 w-3" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => openProjectModal('edit', project)}>
-                                      <Edit className="mr-2 h-4 w-4" />
-                                      Edit
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                      className="text-destructive"
-                                      onClick={() => deleteProject(project.id)}
-                                    >
-                                      <Trash2 className="mr-2 h-4 w-4" />
-                                      Delete
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Project Timeline Bar */}
-                          <div className="flex relative" style={{ width: sortedMilestones.length * COLUMN_WIDTH }}>
-                            {sortedMilestones.map((_, idx) => (
-                              <div 
-                                key={idx}
-                                className="shrink-0 border-r h-full"
-                                style={{ width: COLUMN_WIDTH }}
-                              />
-                            ))}
-                            {startIndex !== undefined && endIndex !== undefined && (
-                              <div
-                                className={cn(
-                                  "absolute top-1/2 -translate-y-1/2 h-4 rounded",
-                                  ACQUISITION_COLORS_LIGHT[colorIndex],
-                                  "border-2",
-                                  `border-${ACQUISITION_COLORS[colorIndex].replace('bg-', '')}`
-                                )}
-                                style={{
-                                  left: startIndex * COLUMN_WIDTH + 12,
-                                  width: Math.max((endIndex - startIndex + 1) * COLUMN_WIDTH - 24, 24),
-                                  borderColor: 'currentColor',
-                                }}
-                              >
-                                <div 
-                                  className={cn("absolute inset-0 rounded-sm", ACQUISITION_COLORS[colorIndex], "opacity-30")}
-                                />
-                              </div>
-                            )}
-                            {startIndex !== undefined && endIndex === undefined && (
-                              <div
-                                className={cn(
-                                  "absolute top-1/2 -translate-y-1/2 h-4 w-4 rounded-full",
-                                  ACQUISITION_COLORS[colorIndex]
-                                )}
-                                style={{
-                                  left: startIndex * COLUMN_WIDTH + COLUMN_WIDTH / 2 - 8,
-                                }}
-                              />
-                            )}
-                            {startIndex === undefined && endIndex !== undefined && (
-                              <div
-                                className={cn(
-                                  "absolute top-1/2 -translate-y-1/2 h-4 w-4 rounded-full",
-                                  ACQUISITION_COLORS[colorIndex]
-                                )}
-                                style={{
-                                  left: endIndex * COLUMN_WIDTH + COLUMN_WIDTH / 2 - 8,
-                                }}
-                              />
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
-                );
-              })}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </Card>
+                  
+                  {acquisition.description && (
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {acquisition.description}
+                    </p>
+                  )}
+                  
+                  <button 
+                    onClick={() => openProjectsModal(acquisition, acqProjects)}
+                    className="flex items-center gap-2 text-sm text-muted-foreground mb-4 hover:text-foreground transition-colors"
+                    disabled={acqProjects.length === 0}
+                  >
+                    <FolderKanban className="h-4 w-4" />
+                    <span className={acqProjects.length > 0 ? "underline underline-offset-2" : ""}>
+                      {acqProjects.length} project{acqProjects.length !== 1 ? 's' : ''}
+                    </span>
+                  </button>
+                  
+                  <div className="flex gap-2">
+                    <Link href={`/acquisition-tracker#${acquisition.id}`} className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full">
+                        View in Tracker
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       )}
 
-      {/* Acquisition Modal */}
       <Dialog open={isAcquisitionModalOpen} onOpenChange={(open) => !open && closeAcquisitionModal()}>
         <DialogContent className="sm:max-w-[525px]">
           <DialogHeader>
@@ -629,32 +272,108 @@ export default function AcquisitionsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Project Modal */}
-      <Dialog open={isProjectModalOpen} onOpenChange={(open) => !open && closeProjectModal()}>
-        <DialogContent className="sm:max-w-[625px] max-h-[90vh] overflow-y-auto">
+      <Dialog open={isProjectsModalOpen} onOpenChange={(open) => !open && closeProjectsModal()}>
+        <DialogContent className="sm:max-w-[525px] max-h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>
-              {projectModalMode === 'create' ? 'Create New Project' : 'Edit Project'}
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 
+                className="h-5 w-5" 
+                style={{ color: selectedAcquisitionForProjects?.acquisition.color || undefined }}
+              />
+              Projects for {selectedAcquisitionForProjects?.acquisition.name}
             </DialogTitle>
             <DialogDescription>
-              {projectModalMode === 'create' 
-                ? 'Add a new project to track as part of an acquisition integration.'
-                : 'Update project details.'}
+              {selectedAcquisitionForProjects?.projects.length || 0} project{(selectedAcquisitionForProjects?.projects.length || 0) !== 1 ? 's' : ''} linked to this acquisition
             </DialogDescription>
           </DialogHeader>
-          <ProjectForm
-            initialData={editingProject}
-            acquisitions={acquisitions}
-            milestones={allMilestones}
-            onSave={saveProject}
-            onCancel={closeProjectModal}
-            mode={projectModalMode}
-            error={projectModalError}
-            preselectedAcquisitionId={preselectedAcquisitionId}
-          />
+          <ScrollArea className="flex-1 pr-4">
+            {selectedAcquisitionForProjects?.projects.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No projects linked to this acquisition yet.
+              </div>
+            ) : (
+              <div>
+                {selectedAcquisitionForProjects?.projects.map((project, index) => (
+                  <div key={project.id}>
+                    {index > 0 && <hr className="my-6 border-border" />}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <FolderKanban className="h-5 w-5 text-muted-foreground" />
+                        <h3 className="font-semibold text-base">{project.title}</h3>
+                      </div>
+                      
+                      {project.description && (
+                        <div>
+                          <h4 className="text-sm font-medium mb-1">Description</h4>
+                          <p className="text-sm text-muted-foreground">{project.description}</p>
+                        </div>
+                      )}
+                      
+                      {project.startMilestone && (
+                        <div>
+                          <h4 className="text-sm font-medium mb-1">Start Milestone</h4>
+                          <p className="text-sm text-muted-foreground">{project.startMilestone.title || project.startMilestone.name}</p>
+                        </div>
+                      )}
+                      
+                      {project.endMilestone && (
+                        <div>
+                          <h4 className="text-sm font-medium mb-1">End Milestone</h4>
+                          <p className="text-sm text-muted-foreground">{project.endMilestone.title || project.endMilestone.name}</p>
+                        </div>
+                      )}
+                      
+                      {project.relevantLinks && project.relevantLinks.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Relevant Links</h4>
+                          <div className="space-y-2">
+                            {project.relevantLinks.map((link, i) => (
+                              <a
+                                key={i}
+                                href={typeof link === 'object' ? link.url : link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-500 hover:underline flex items-center gap-2"
+                              >
+                                <Link2 className="h-4 w-4" />
+                                {typeof link === 'object' && link.text ? link.text : 'Link'}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {project.epics && project.epics.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Associated Epics</h4>
+                          <div className="space-y-2">
+                            {project.epics.map((epic) => (
+                              <div key={epic.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                                <span className="text-sm">{epic.epicName}</span>
+                                {epic.epicLink && (
+                                  <a
+                                    href={epic.epicLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-blue-500 hover:underline flex items-center gap-1"
+                                  >
+                                    <Link2 className="h-3 w-3" />
+                                    View
+                                  </a>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>
   );
 }
-

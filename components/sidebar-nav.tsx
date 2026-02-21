@@ -68,7 +68,9 @@ export default function SidebarNav({ isEditor, onNavigate, isExpanded, onToggle 
       title: "Company Integrations",
       icon: <Building2 className="h-4 w-4" />,
       links: [
-        { href: "/acquisitions", label: "Acquisition Tracker" },
+        { href: "/acquisitions", label: "Acquisition List" },
+        { href: "/acquisition-tracker", label: "Acquisition Tracker" },
+        { href: "/technical-integration", label: "Technical Integration" },
       ],
     },
     // Admin section only for editors

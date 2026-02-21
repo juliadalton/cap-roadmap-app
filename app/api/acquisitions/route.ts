@@ -12,6 +12,9 @@ export async function GET(request: Request) {
             endMilestone: true,
           },
         },
+        progress: true,
+        epics: true,
+        clientCounts: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -43,6 +46,7 @@ export async function POST(request: Request) {
         name: body.name,
         description: body.description || null,
         integrationOverview: body.integrationOverview || null,
+        color: body.color || null,
       },
       include: {
         projects: {

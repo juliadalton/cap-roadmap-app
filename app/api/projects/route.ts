@@ -9,6 +9,7 @@ export async function GET(request: Request) {
         acquisitions: true,
         startMilestone: true,
         endMilestone: true,
+        epics: true,
       },
       orderBy: { createdAt: 'desc' },
     });

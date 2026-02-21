@@ -37,16 +37,86 @@ model Milestone {
 }
 
 // Acquisition Models
+enum Disposition {
+  Standalone
+  Wrapped
+  Deprecating
+}
+
 model Acquisition {
   id                  String    @id @default(cuid())
   name                String
   description         String?   @db.Text
   integrationOverview String?   @db.Text
+  color               String?   // Hex color code for display (e.g., "#3b82f6")
   
   projects            Project[] // One-to-many relation with Projects
+  progress            AcquisitionProgress? // One-to-one relation
+  epics               FunctionalityEpic[] // One-to-many relation
+  clientCounts        AcquisitionClientCount[] // One-to-many relation
   
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
+}
+
+model AcquisitionProgress {
+  id                          String      @id @default(cuid())
+  
+  acquisitionId               String      @unique
+  acquisition                 Acquisition @relation(fields: [acquisitionId], references: [id], onDelete: Cascade)
+  
+  disposition                 Disposition?
+  devPlatform                 Boolean     @default(false)
+  functionalityEpicsToDo      Int         @default(0)
+  functionalityEpicsInProgress Int        @default(0)
+  functionalityEpicsComplete  Int         @default(0)
+  clientCountTotal            Int         @default(0)
+  clientAccessCount           Int         @default(0)
+  clientActiveCount           Int         @default(0)
+  
+  createdAt                   DateTime    @default(now())
+  updatedAt                   DateTime    @updatedAt
+  
+  @@index([acquisitionId])
+}
+
+model FunctionalityEpic {
+  id                  String      @id @default(cuid())
+  
+  acquisitionId       String
+  acquisition         Acquisition @relation(fields: [acquisitionId], references: [id], onDelete: Cascade)
+  
+  projectId           String?
+  project             Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  
+  epicId              String
+  epicName            String
+  epicStatus          String?
+  epicAcquiredCompany String?
+  epicLink            String?
+  
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  
+  @@index([acquisitionId])
+  @@index([projectId])
+}
+
+model AcquisitionClientCount {
+  id                  String      @id @default(cuid())
+  
+  acquisitionId       String
+  acquisition         Acquisition @relation(fields: [acquisitionId], references: [id], onDelete: Cascade)
+  
+  clientVitallyId     String
+  orgId               String?
+  clientName          String
+  activeInConsole     Boolean     @default(false)
+  
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  
+  @@index([acquisitionId])
 }
 
 model Project {
@@ -56,6 +126,9 @@ model Project {
   
   // Many-to-many relation with Acquisitions
   acquisitions Acquisition[]
+  
+  // One-to-many relation with FunctionalityEpics
+  epics        FunctionalityEpic[]
   
   // Start and End Milestone relations
   startMilestoneId String?
