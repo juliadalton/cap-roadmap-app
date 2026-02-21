@@ -312,14 +312,14 @@ export default function AcquisitionListPage() {
                       {project.startMilestone && (
                         <div>
                           <h4 className="text-sm font-medium mb-1">Start Milestone</h4>
-                          <p className="text-sm text-muted-foreground">{project.startMilestone.title || project.startMilestone.name}</p>
+                          <p className="text-sm text-muted-foreground">{project.startMilestone.title}</p>
                         </div>
                       )}
                       
                       {project.endMilestone && (
                         <div>
                           <h4 className="text-sm font-medium mb-1">End Milestone</h4>
-                          <p className="text-sm text-muted-foreground">{project.endMilestone.title || project.endMilestone.name}</p>
+                          <p className="text-sm text-muted-foreground">{project.endMilestone.title}</p>
                         </div>
                       )}
                       
