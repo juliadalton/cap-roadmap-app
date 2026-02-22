@@ -73,7 +73,9 @@ export default function TechnicalIntegrationPage() {
   const [preselectedAcquisitionId, setPreselectedAcquisitionId] = useState<string | null>(null);
   
   const [expandedAcquisitions, setExpandedAcquisitions] = useState<Record<string, boolean>>({});
+  const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
   const [viewingProject, setViewingProject] = useState<Project | null>(null);
+  const [viewMode, setViewMode] = useState<'acquisition' | 'project'>('acquisition');
   
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -289,9 +291,53 @@ export default function TechnicalIntegrationPage() {
   const toggleAcquisitionExpansion = (acquisitionId: string) => {
     setExpandedAcquisitions(prev => ({
       ...prev,
-      [acquisitionId]: !prev[acquisitionId]
+      [acquisitionId]: prev[acquisitionId] === undefined ? false : !prev[acquisitionId]
     }));
   };
+
+  const toggleProjectExpansion = (projectId: string) => {
+    setExpandedProjects(prev => ({
+      ...prev,
+      [projectId]: prev[projectId] === undefined ? false : !prev[projectId]
+    }));
+  };
+
+  const sortedProjects = useMemo(() => {
+    return [...projects].sort((a, b) => 
+      a.title.toLowerCase().localeCompare(b.title.toLowerCase())
+    );
+  }, [projects]);
+
+  const getProjectAcquisitions = useCallback((projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (!project?.acquisitions) return [];
+    return acquisitions.filter(a => 
+      project.acquisitions?.some(pa => pa.id === a.id)
+    );
+  }, [projects, acquisitions]);
+
+  const getProjectTimelineSpan = useCallback((projectId: string): { startIndex: number; endIndex: number } | null => {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return null;
+
+    const startIndex = project.startMilestoneId ? milestoneIndexMap[project.startMilestoneId] : undefined;
+    const endIndex = project.endMilestoneId ? milestoneIndexMap[project.endMilestoneId] : undefined;
+
+    if (startIndex === undefined && endIndex === undefined) return null;
+    
+    return { 
+      startIndex: startIndex ?? endIndex!, 
+      endIndex: endIndex ?? startIndex! 
+    };
+  }, [projects, milestoneIndexMap]);
+
+  const getProjectColor = useCallback((projectId: string, index: number): string => {
+    const projectAcquisitions = getProjectAcquisitions(projectId);
+    if (projectAcquisitions.length > 0 && projectAcquisitions[0].color) {
+      return projectAcquisitions[0].color;
+    }
+    return DEFAULT_COLORS[index % DEFAULT_COLORS.length];
+  }, [getProjectAcquisitions]);
 
   useEffect(() => {
     if (isEditor) {
@@ -351,7 +397,36 @@ export default function TechnicalIntegrationPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card className="overflow-hidden">
+        <>
+          {!isExportMode && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Group by:</span>
+                <div className="flex rounded-lg border bg-muted p-1">
+                  <Button
+                    variant={viewMode === 'acquisition' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="h-7 px-3"
+                    onClick={() => setViewMode('acquisition')}
+                  >
+                    <Building2 className="h-4 w-4 mr-1" />
+                    Acquisition
+                  </Button>
+                  <Button
+                    variant={viewMode === 'project' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="h-7 px-3"
+                    onClick={() => setViewMode('project')}
+                  >
+                    <FolderKanban className="h-4 w-4 mr-1" />
+                    Project
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <Card className="overflow-hidden">
           <ScrollArea className="w-full">
             <div className="min-w-max">
               <div className="flex border-b bg-muted/50 sticky top-0 z-10">
@@ -359,7 +434,7 @@ export default function TechnicalIntegrationPage() {
                   className="shrink-0 p-4 font-semibold border-r bg-muted/50 sticky left-0 z-20"
                   style={{ width: ROW_LABEL_WIDTH }}
                 >
-                  Acquisition / Project
+                  {viewMode === 'acquisition' ? 'Acquisition / Project' : 'Project / Acquisition'}
                 </div>
                 {sortedMilestones.map((milestone) => (
                   <div 
@@ -375,7 +450,7 @@ export default function TechnicalIntegrationPage() {
                 ))}
               </div>
 
-              {sortedAcquisitions.map((acquisition, acqIndex) => {
+              {viewMode === 'acquisition' && sortedAcquisitions.map((acquisition, acqIndex) => {
                 const acqProjects = getAcquisitionProjects(acquisition.id);
                 const timelineSpan = getAcquisitionTimelineSpan(acquisition.id);
                 const acqColor = getAcquisitionColor(acquisition, acqIndex);
@@ -562,10 +637,154 @@ export default function TechnicalIntegrationPage() {
                   </div>
                 );
               })}
+
+              {viewMode === 'project' && sortedProjects.map((project, projIndex) => {
+                const projectAcquisitions = getProjectAcquisitions(project.id);
+                const timelineSpan = getProjectTimelineSpan(project.id);
+                const projColor = getProjectColor(project.id, projIndex);
+                const isExpanded = expandedProjects[project.id] ?? true;
+                const startIndex = project.startMilestoneId ? milestoneIndexMap[project.startMilestoneId] : undefined;
+                const endIndex = project.endMilestoneId ? milestoneIndexMap[project.endMilestoneId] : undefined;
+
+                return (
+                  <div key={project.id} className="border-b last:border-b-0">
+                    <div className="flex hover:bg-muted/30 group">
+                      <div 
+                        className="shrink-0 p-3 border-r bg-background sticky left-0 z-10 flex items-center gap-2"
+                        style={{ width: ROW_LABEL_WIDTH }}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 shrink-0"
+                          onClick={() => toggleProjectExpansion(project.id)}
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <FolderKanban className="h-4 w-4 shrink-0" style={{ color: projColor }} />
+                        <div className="flex-1 min-w-0">
+                          <button
+                            onClick={() => setViewingProject(project)}
+                            className={`font-semibold ${isExportMode ? '' : 'truncate'} cursor-pointer hover:text-[rgb(2_33_77)] dark:hover:text-primary hover:underline text-left w-full`}
+                          >
+                            {project.title}
+                          </button>
+                          <div className="text-xs text-muted-foreground">
+                            {projectAcquisitions.length} acquisition{projectAcquisitions.length !== 1 ? 's' : ''}
+                          </div>
+                        </div>
+                        {isEditor && (
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex shrink-0">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7">
+                                  <ChevronDown className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => openProjectModal('edit', project)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit Project
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-destructive"
+                                  onClick={() => deleteProject(project.id)}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex relative" style={{ width: sortedMilestones.length * COLUMN_WIDTH }}>
+                        {sortedMilestones.map((_, idx) => (
+                          <div 
+                            key={idx}
+                            className="shrink-0 border-r h-full"
+                            style={{ width: COLUMN_WIDTH }}
+                          />
+                        ))}
+                        {timelineSpan && (
+                          <div
+                            className="absolute top-1/2 -translate-y-1/2 h-6 rounded-full opacity-60"
+                            style={{
+                              left: timelineSpan.startIndex * COLUMN_WIDTH + 8,
+                              width: (timelineSpan.endIndex - timelineSpan.startIndex + 1) * COLUMN_WIDTH - 16,
+                              backgroundColor: projColor,
+                            }}
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    {isExpanded && projectAcquisitions.map((acquisition) => {
+                      const acqColor = acquisition.color || projColor;
+                      
+                      return (
+                        <div key={acquisition.id} className="flex hover:bg-muted/20 group border-t border-dashed">
+                          <div 
+                            className="shrink-0 p-2 pl-10 border-r bg-background sticky left-0 z-10 flex items-center gap-2"
+                            style={{ width: ROW_LABEL_WIDTH }}
+                          >
+                            <Building2 className="h-4 w-4 text-muted-foreground shrink-0" style={{ color: acqColor }} />
+                            <div className="flex-1 min-w-0">
+                              <div className={`text-sm ${isExportMode ? '' : 'truncate'}`}>
+                                {acquisition.name}
+                              </div>
+                            </div>
+                            {isEditor && (
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex shrink-0">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                                      <ChevronDown className="h-3 w-3" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => openAcquisitionModal('edit', acquisition)}>
+                                      <Edit className="mr-2 h-4 w-4" />
+                                      Edit Acquisition
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex relative" style={{ width: sortedMilestones.length * COLUMN_WIDTH }}>
+                            {sortedMilestones.map((_, idx) => (
+                              <div 
+                                key={idx}
+                                className="shrink-0 border-r h-full"
+                                style={{ width: COLUMN_WIDTH }}
+                              />
+                            ))}
+                            <div
+                              className="absolute top-1/2 -translate-y-1/2 h-3 w-3 rounded-full"
+                              style={{
+                                left: (timelineSpan?.startIndex ?? 0) * COLUMN_WIDTH + COLUMN_WIDTH / 2 - 6,
+                                backgroundColor: acqColor,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </Card>
+        </>
       )}
 
       <Dialog open={isAcquisitionModalOpen} onOpenChange={(open) => !open && closeAcquisitionModal()}>
