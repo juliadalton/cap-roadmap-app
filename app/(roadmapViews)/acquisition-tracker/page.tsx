@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useRoadmap } from "../layout";
+import { useExportContent } from "@/context/export-content-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -154,9 +156,10 @@ function ProgressTrack({ title, icon, steps }: ProgressTrackProps) {
 
 interface AcquisitionCardProps {
   acquisition: Acquisition;
+  isExportMode?: boolean;
 }
 
-function AcquisitionCard({ acquisition }: AcquisitionCardProps) {
+function AcquisitionCard({ acquisition, isExportMode = false }: AcquisitionCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const progress = acquisition.progress;
   
@@ -243,12 +246,18 @@ function AcquisitionCard({ acquisition }: AcquisitionCardProps) {
   const clientProgress = clientSteps.reduce((acc, step) => acc + (step.percentage || 0), 0) / clientSteps.length;
   const overallProgress = Math.round((technicalProgress + clientProgress) / 2);
 
+  const shouldExpand = isExportMode || isExpanded;
+
   return (
-    <Card id={acquisition.id} className="mb-6 overflow-hidden scroll-mt-24">
+    <Card 
+      id={acquisition.id} 
+      data-export-section={`tracker-${acquisition.id}`}
+      className="mb-6 overflow-hidden scroll-mt-24"
+    >
       <CardContent className="p-0">
         <div 
           className="p-6 cursor-pointer hover:bg-muted/30 transition-colors"
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => !isExportMode && setIsExpanded(!isExpanded)}
         >
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
@@ -272,9 +281,11 @@ function AcquisitionCard({ acquisition }: AcquisitionCardProps) {
                   {progress.disposition}
                 </Badge>
               )}
-              <Button variant="ghost" size="icon" className="shrink-0">
-                {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-              </Button>
+              {!isExportMode && (
+                <Button variant="ghost" size="icon" className="shrink-0">
+                  {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                </Button>
+              )}
             </div>
           </div>
           {acquisition.description && (
@@ -298,7 +309,7 @@ function AcquisitionCard({ acquisition }: AcquisitionCardProps) {
           </div>
         </div>
         
-        {isExpanded && (
+        {shouldExpand && (
           <div className="px-6 pb-6">
             <div className="flex flex-col lg:flex-row gap-4">
               <ProgressTrack 
@@ -328,12 +339,49 @@ function AcquisitionCard({ acquisition }: AcquisitionCardProps) {
 
 export default function AcquisitionTrackerPage() {
   const { isEditor, setHeaderActions } = useRoadmap();
+  const { registerPage, registerSection } = useExportContent();
+  const searchParams = useSearchParams();
+  const isExportMode = searchParams.get('export') === 'true';
   
   const [acquisitions, setAcquisitions] = useState<Acquisition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [mounted, setMounted] = useState(false);
+  
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
+    registerPage({
+      id: 'acquisition-tracker',
+      name: 'Acquisition Tracker',
+      path: '/acquisition-tracker',
+    });
+  }, [mounted, registerPage]);
+
+  useEffect(() => {
+    if (!mounted || acquisitions.length === 0) return;
+    
+    const acquisitionsWithProgress = acquisitions.filter(a => a.progress);
+    acquisitionsWithProgress.forEach((acquisition, index) => {
+      registerSection({
+        id: `tracker-${acquisition.id}`,
+        pageId: 'acquisition-tracker',
+        pageName: 'Acquisition Tracker',
+        sectionName: `${acquisition.name} Progress`,
+        description: `Integration progress for ${acquisition.name}`,
+        order: index + 1,
+        elementRef: null,
+      });
+    });
+  }, [mounted, acquisitions, registerSection]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -441,7 +489,7 @@ export default function AcquisitionTrackerPage() {
   const acquisitionsWithoutProgress = filteredAndSortedAcquisitions.filter(a => !a.progress);
 
   return (
-    <div className="space-y-6">
+    <div ref={contentRef} data-export-section="tracker-view" className="space-y-6">
       {acquisitions.length === 0 ? (
         <Card className="py-12">
           <CardContent className="text-center">
@@ -467,7 +515,7 @@ export default function AcquisitionTrackerPage() {
           {acquisitionsWithProgress.length > 0 && (
             <div>
               {acquisitionsWithProgress.map((acquisition) => (
-                <AcquisitionCard key={acquisition.id} acquisition={acquisition} />
+                <AcquisitionCard key={acquisition.id} acquisition={acquisition} isExportMode={isExportMode} />
               ))}
             </div>
           )}

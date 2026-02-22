@@ -145,11 +145,13 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
     '/roadmap': 'Company Roadmap',
     '/category': 'Roadmap by Category',
     '/timeline': 'Vertical Timeline',
+    '/roadmap-process': 'Roadmap Process',
     '/acquisitions': 'Acquisition List',
     '/acquisition-tracker': 'Acquisition Tracker',
     '/technical-integration': 'Technical Integration Review',
     '/editor': 'Item Editor',
     '/milestone-editor': 'Milestone Editor',
+    '/presentation-builder': 'Presentation Builder',
   };
   const pageTitle = pageTitles[pathname] || 'Company Roadmap';
 
@@ -547,7 +549,7 @@ export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
             </div>
 
             {/* --- Controls Area (hidden on pages that have their own controls) --- */}
-            {pathname !== '/acquisitions' && pathname !== '/acquisition-tracker' && pathname !== '/technical-integration' && <div className="flex flex-wrap gap-4 items-center justify-end">
+            {pathname !== '/acquisitions' && pathname !== '/acquisition-tracker' && pathname !== '/technical-integration' && pathname !== '/roadmap-process' && pathname !== '/presentation-builder' && <div className="flex flex-wrap gap-4 items-center justify-end">
               {/* Conditional Category Filter */}
               {pathname === '/category' && !focusedItemId && (
                 <Select value={selectedCategoryFilter} onValueChange={setSelectedCategoryFilter}>

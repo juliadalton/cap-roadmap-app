@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useRoadmap } from "../layout";
+import { useExportContent } from "@/context/export-content-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,11 +17,15 @@ import Link from "next/link";
 
 export default function AcquisitionListPage() {
   const { isEditor, setHeaderActions } = useRoadmap();
+  const { registerPage, registerSection } = useExportContent();
+  const searchParams = useSearchParams();
+  const isExportMode = searchParams.get('export') === 'true';
   
   const [acquisitions, setAcquisitions] = useState<Acquisition[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   
   const [isAcquisitionModalOpen, setIsAcquisitionModalOpen] = useState(false);
   const [acquisitionModalMode, setAcquisitionModalMode] = useState<'create' | 'edit'>('create');
@@ -28,6 +34,32 @@ export default function AcquisitionListPage() {
   
   const [isProjectsModalOpen, setIsProjectsModalOpen] = useState(false);
   const [selectedAcquisitionForProjects, setSelectedAcquisitionForProjects] = useState<{ acquisition: Acquisition; projects: Project[] } | null>(null);
+  
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
+    registerPage({
+      id: 'acquisitions',
+      name: 'Acquisition List',
+      path: '/acquisitions',
+    });
+
+    registerSection({
+      id: 'acquisition-grid',
+      pageId: 'acquisitions',
+      pageName: 'Acquisition List',
+      sectionName: 'All Acquisitions',
+      description: 'Grid view of all tracked acquisitions',
+      order: 1,
+      elementRef: contentRef.current,
+    });
+  }, [mounted, registerPage, registerSection]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -162,7 +194,7 @@ export default function AcquisitionListPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div ref={contentRef} data-export-section="acquisition-grid" className="space-y-6">
       {acquisitions.length === 0 ? (
         <Card className="py-12">
           <CardContent className="text-center">
@@ -220,7 +252,7 @@ export default function AcquisitionListPage() {
                   </div>
                   
                   {acquisition.description && (
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                    <p className={`text-sm text-muted-foreground mb-4 ${isExportMode ? '' : 'line-clamp-2'}`}>
                       {acquisition.description}
                     </p>
                   )}

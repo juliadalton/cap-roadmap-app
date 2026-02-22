@@ -71,6 +71,7 @@ model AcquisitionProgress {
   clientCountTotal            Int         @default(0)
   clientAccessCount           Int         @default(0)
   clientActiveCount           Int         @default(0)
+  manualSync                  Boolean     @default(false)
   
   createdAt                   DateTime    @default(now())
   updatedAt                   DateTime    @updatedAt

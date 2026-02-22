@@ -62,6 +62,7 @@ export default function SidebarNav({ isEditor, onNavigate, isExpanded, onToggle 
         { href: "/roadmap", label: "Standard View" },
         { href: "/category", label: "By Category" },
         { href: "/timeline", label: "Vertical Timeline" },
+        { href: "/roadmap-process", label: "Roadmap Process" },
       ],
     },
     {
@@ -82,6 +83,7 @@ export default function SidebarNav({ isEditor, onNavigate, isExpanded, onToggle 
             links: [
               { href: "/editor", label: "Item Editor" },
               { href: "/milestone-editor", label: "Milestone Editor" },
+              { href: "/presentation-builder", label: "Presentation Builder" },
             ],
           },
         ]

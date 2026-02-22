@@ -67,6 +67,7 @@ export interface AcquisitionProgress {
   clientCountTotal: number
   clientAccessCount: number
   clientActiveCount: number
+  manualSync: boolean
   createdAt: string
   updatedAt: string
 }

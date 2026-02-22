@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useRoadmap } from "../layout";
+import { useExportContent } from "@/context/export-content-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -49,11 +51,15 @@ function getLightColor(hex: string): string {
 
 export default function TechnicalIntegrationPage() {
   const { allMilestones, isEditor, sortDirection, toggleSortDirection, setHeaderActions } = useRoadmap();
+  const { registerPage, registerSection } = useExportContent();
+  const searchParams = useSearchParams();
+  const isExportMode = searchParams.get('export') === 'true';
   
   const [acquisitions, setAcquisitions] = useState<Acquisition[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   
   const [isAcquisitionModalOpen, setIsAcquisitionModalOpen] = useState(false);
   const [acquisitionModalMode, setAcquisitionModalMode] = useState<'create' | 'edit'>('create');
@@ -68,6 +74,32 @@ export default function TechnicalIntegrationPage() {
   
   const [expandedAcquisitions, setExpandedAcquisitions] = useState<Record<string, boolean>>({});
   const [viewingProject, setViewingProject] = useState<Project | null>(null);
+  
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
+    registerPage({
+      id: 'technical-integration',
+      name: 'Technical Integration Review',
+      path: '/technical-integration',
+    });
+
+    registerSection({
+      id: 'integration-timeline',
+      pageId: 'technical-integration',
+      pageName: 'Technical Integration Review',
+      sectionName: 'Integration Timeline',
+      description: 'Gantt-style view of acquisition projects',
+      order: 1,
+      elementRef: contentRef.current,
+    });
+  }, [mounted, registerPage, registerSection]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -297,11 +329,11 @@ export default function TechnicalIntegrationPage() {
     );
   }
 
-  const COLUMN_WIDTH = 160;
-  const ROW_LABEL_WIDTH = 280;
+  const COLUMN_WIDTH = isExportMode ? 180 : 160;
+  const ROW_LABEL_WIDTH = isExportMode ? 400 : 280;
 
   return (
-    <div className="space-y-6">
+    <div ref={contentRef} data-export-section="integration-timeline" className="space-y-6">
       {acquisitions.length === 0 ? (
         <Card className="py-12">
           <CardContent className="text-center">
@@ -373,7 +405,7 @@ export default function TechnicalIntegrationPage() {
                           style={{ backgroundColor: acqColor }}
                         />
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold truncate">
+                          <div className={`font-semibold ${isExportMode ? '' : 'truncate'}`}>
                             {acquisition.name}
                           </div>
                           <div className="text-xs text-muted-foreground">
@@ -450,7 +482,7 @@ export default function TechnicalIntegrationPage() {
                             <div className="flex-1 min-w-0">
                               <button
                                 onClick={() => setViewingProject(project)}
-                                className="text-sm truncate cursor-pointer hover:text-[rgb(2_33_77)] dark:hover:text-primary hover:underline text-left w-full"
+                                className={`text-sm ${isExportMode ? '' : 'truncate'} cursor-pointer hover:text-[rgb(2_33_77)] dark:hover:text-primary hover:underline text-left w-full`}
                               >
                                 {project.title}
                               </button>
