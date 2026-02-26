@@ -20,10 +20,15 @@ import {
   ChevronUp,
   Search,
   ArrowDownAZ,
-  ArrowUpZA
+  ArrowUpZA,
+  Pencil,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Acquisition, AcquisitionProgress } from "@/types/roadmap";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ProgressStep {
   id: string;
@@ -157,9 +162,11 @@ function ProgressTrack({ title, icon, steps }: ProgressTrackProps) {
 interface AcquisitionCardProps {
   acquisition: Acquisition;
   isExportMode?: boolean;
+  isEditor?: boolean;
+  onEditProgress?: (acquisition: Acquisition) => void;
 }
 
-function AcquisitionCard({ acquisition, isExportMode = false }: AcquisitionCardProps) {
+function AcquisitionCard({ acquisition, isExportMode = false, isEditor = false, onEditProgress }: AcquisitionCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const progress = acquisition.progress;
   
@@ -281,6 +288,17 @@ function AcquisitionCard({ acquisition, isExportMode = false }: AcquisitionCardP
                   {progress.disposition}
                 </Badge>
               )}
+              {!isExportMode && isEditor && progress.manualSync && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={(e) => { e.stopPropagation(); onEditProgress?.(acquisition); }}
+                  title="Edit progress data"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              )}
               {!isExportMode && (
                 <Button variant="ghost" size="icon" className="shrink-0">
                   {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -349,6 +367,10 @@ export default function AcquisitionTrackerPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [mounted, setMounted] = useState(false);
+  const [editingAcquisition, setEditingAcquisition] = useState<Acquisition | null>(null);
+  const [editForm, setEditForm] = useState<Partial<AcquisitionProgress>>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -467,6 +489,38 @@ export default function AcquisitionTrackerPage() {
     return () => setHeaderActions(null);
   }, [setHeaderActions, searchTerm, sortDirection]);
 
+  const openEditModal = (acquisition: Acquisition) => {
+    setEditingAcquisition(acquisition);
+    setEditForm({ ...acquisition.progress });
+    setSaveError(null);
+  };
+
+  const closeEditModal = () => {
+    setEditingAcquisition(null);
+    setEditForm({});
+    setSaveError(null);
+  };
+
+  const saveProgressEdit = async () => {
+    if (!editingAcquisition?.progress?.id) return;
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      const res = await fetch(`/api/acquisition-progress/${editingAcquisition.progress.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      });
+      if (!res.ok) throw new Error('Failed to save changes');
+      await fetchData();
+      closeEditModal();
+    } catch (err: any) {
+      setSaveError(err.message || 'Failed to save');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -515,7 +569,13 @@ export default function AcquisitionTrackerPage() {
           {acquisitionsWithProgress.length > 0 && (
             <div>
               {acquisitionsWithProgress.map((acquisition) => (
-                <AcquisitionCard key={acquisition.id} acquisition={acquisition} isExportMode={isExportMode} />
+                <AcquisitionCard
+                  key={acquisition.id}
+                  acquisition={acquisition}
+                  isExportMode={isExportMode}
+                  isEditor={isEditor}
+                  onEditProgress={openEditModal}
+                />
               ))}
             </div>
           )}
@@ -542,6 +602,102 @@ export default function AcquisitionTrackerPage() {
           )}
         </>
       )}
+
+      {/* Edit Progress Modal — manualSync acquisitions only */}
+      <Dialog open={!!editingAcquisition} onOpenChange={(open) => !open && closeEditModal()}>
+        <DialogContent className="sm:max-w-[480px] max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Edit Progress — {editingAcquisition?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto space-y-5 py-2 pr-1">
+
+            {/* Disposition */}
+            <div className="space-y-1.5">
+              <Label>Disposition</Label>
+              <Select
+                value={editForm.disposition ?? 'none'}
+                onValueChange={(v) => setEditForm(f => ({ ...f, disposition: v === 'none' ? undefined : v as AcquisitionProgress['disposition'] }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select disposition" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="Standalone">Standalone</SelectItem>
+                  <SelectItem value="Wrapped">Wrapped</SelectItem>
+                  <SelectItem value="Deprecating">Deprecating</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Dev Platform */}
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="devPlatform"
+                checked={!!editForm.devPlatform}
+                onCheckedChange={(v) => setEditForm(f => ({ ...f, devPlatform: !!v }))}
+              />
+              <Label htmlFor="devPlatform" className="cursor-pointer">Dev Platform Connected</Label>
+            </div>
+
+            {/* Functionality Epics */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Functionality Epics</Label>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { key: 'functionalityEpicsToDo', label: 'To Do' },
+                  { key: 'functionalityEpicsInProgress', label: 'In Progress' },
+                  { key: 'functionalityEpicsComplete', label: 'Complete' },
+                ].map(({ key, label }) => (
+                  <div key={key} className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">{label}</Label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={(editForm as any)[key] ?? 0}
+                      onChange={(e) => setEditForm(f => ({ ...f, [key]: parseInt(e.target.value) || 0 }))}
+                      className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Client Counts */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Client Counts</Label>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { key: 'clientCountTotal', label: 'Total' },
+                  { key: 'clientAccessCount', label: 'With Access' },
+                  { key: 'clientActiveCount', label: 'Active' },
+                ].map(({ key, label }) => (
+                  <div key={key} className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">{label}</Label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={(editForm as any)[key] ?? 0}
+                      onChange={(e) => setEditForm(f => ({ ...f, [key]: parseInt(e.target.value) || 0 }))}
+                      className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {saveError && <p className="text-sm text-destructive">{saveError}</p>}
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4 border-t">
+            <Button variant="outline" onClick={closeEditModal} disabled={isSaving}>Cancel</Button>
+            <Button onClick={saveProgressEdit} disabled={isSaving}>
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

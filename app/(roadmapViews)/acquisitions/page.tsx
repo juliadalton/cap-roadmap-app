@@ -283,7 +283,7 @@ export default function AcquisitionListPage() {
       )}
 
       <Dialog open={isAcquisitionModalOpen} onOpenChange={(open) => !open && closeAcquisitionModal()}>
-        <DialogContent className="sm:max-w-[525px]">
+        <DialogContent className="sm:max-w-[525px] max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>
               {acquisitionModalMode === 'create' ? 'Create New Acquisition' : 'Edit Acquisition'}
@@ -294,6 +294,7 @@ export default function AcquisitionListPage() {
                 : 'Update acquisition details.'}
             </DialogDescription>
           </DialogHeader>
+          <ScrollArea className="flex-1 overflow-y-auto">
           <AcquisitionForm
             initialData={editingAcquisition}
             onSave={saveAcquisition}
@@ -301,6 +302,7 @@ export default function AcquisitionListPage() {
             mode={acquisitionModalMode}
             error={acquisitionModalError}
           />
+          </ScrollArea>
         </DialogContent>
       </Dialog>
 

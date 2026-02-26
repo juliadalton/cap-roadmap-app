@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Checkbox } from "@/components/ui/checkbox"
 
 const PRESET_COLORS = [
   "#3b82f6", // blue-500
@@ -32,6 +33,7 @@ const formSchema = z.object({
   description: z.string().optional(),
   integrationOverview: z.string().optional(),
   color: z.string().optional(),
+  manualSync: z.boolean().default(false),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -65,6 +67,7 @@ export default function AcquisitionForm({
       description: initialData?.description || "",
       integrationOverview: initialData?.integrationOverview || "",
       color: getDefaultColor(),
+      manualSync: false,
     },
   })
 
@@ -74,6 +77,7 @@ export default function AcquisitionForm({
       description: initialData?.description || "",
       integrationOverview: initialData?.integrationOverview || "",
       color: initialData?.color || PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)],
+      manualSync: false,
     })
   }, [initialData, form])
 
@@ -204,6 +208,25 @@ export default function AcquisitionForm({
             </FormItem>
           )}
         />
+
+        {/* Manual Sync — create mode only */}
+        {mode === 'create' && (
+          <FormField
+            control={form.control}
+            name="manualSync"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center gap-2">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormLabel className="!mt-0 cursor-pointer">Manual Sync</FormLabel>
+              </FormItem>
+            )}
+          />
+        )}
 
         {/* Display error prop */}
         {error && (

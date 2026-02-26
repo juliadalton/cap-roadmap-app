@@ -47,6 +47,11 @@ export async function POST(request: Request) {
         description: body.description || null,
         integrationOverview: body.integrationOverview || null,
         color: body.color || null,
+        progress: {
+          create: {
+            manualSync: body.manualSync === true,
+          },
+        },
       },
       include: {
         projects: {
@@ -55,6 +60,7 @@ export async function POST(request: Request) {
             endMilestone: true,
           },
         },
+        progress: true,
       },
     });
     
