@@ -53,6 +53,7 @@ export async function PATCH(
     if (body.clientCountTotal !== undefined) updateData.clientCountTotal = body.clientCountTotal;
     if (body.clientAccessCount !== undefined) updateData.clientAccessCount = body.clientAccessCount;
     if (body.clientActiveCount !== undefined) updateData.clientActiveCount = body.clientActiveCount;
+    if (body.clientMetricsApplicable !== undefined) updateData.clientMetricsApplicable = body.clientMetricsApplicable;
 
     const updatedProgress = await prisma.acquisitionProgress.update({
       where: { id },

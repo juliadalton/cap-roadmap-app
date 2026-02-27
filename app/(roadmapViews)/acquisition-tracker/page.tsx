@@ -89,7 +89,8 @@ function ProgressTrack({ title, icon, steps }: ProgressTrackProps) {
                 className={cn(
                   "text-xs",
                   step.status === 'complete' && "bg-emerald-500 hover:bg-emerald-600",
-                  step.status === 'in-progress' && "bg-[rgb(2_33_77)] text-white dark:bg-primary"
+                  step.status === 'in-progress' && "bg-[rgb(2_33_77)] text-white dark:bg-primary",
+                  step.statusLabel === 'Not Applicable' && "bg-muted text-muted-foreground border border-border"
                 )}
               >
                 {step.statusLabel || (step.status === 'complete' ? 'Complete' : step.status === 'in-progress' ? 'In Progress' : 'Not Started')}
@@ -232,26 +233,35 @@ function AcquisitionCard({ acquisition, isExportMode = false, isEditor = false, 
     },
   ];
 
+  const clientMetricsApplicable = progress.clientMetricsApplicable !== false;
+
   const clientSteps: ProgressStep[] = [
     {
       id: 'clientAccess',
       label: 'Clients With Access to Console',
-      status: clientAccessPercentage === 100 ? 'complete' : clientAccessPercentage > 0 ? 'in-progress' : 'not-started',
-      percentage: clientAccessPercentage,
+      status: !clientMetricsApplicable ? 'not-started' : clientAccessPercentage === 100 ? 'complete' : clientAccessPercentage > 0 ? 'in-progress' : 'not-started',
+      percentage: clientMetricsApplicable ? clientAccessPercentage : undefined,
+      statusLabel: !clientMetricsApplicable ? 'Not Applicable' : undefined,
     },
     {
       id: 'clientActive',
       label: 'Clients Active in the Console',
-      status: clientActivePercentage === 100 ? 'complete' : clientActivePercentage > 0 ? 'in-progress' : 'not-started',
-      percentage: clientActivePercentage,
+      status: !clientMetricsApplicable ? 'not-started' : clientActivePercentage === 100 ? 'complete' : clientActivePercentage > 0 ? 'in-progress' : 'not-started',
+      percentage: clientMetricsApplicable ? clientActivePercentage : undefined,
+      statusLabel: !clientMetricsApplicable ? 'Not Applicable' : undefined,
     },
   ];
 
   const devPlatformProgress = progress.devPlatform ? 100 : 0;
   const functionalityProgress = epicsCompletePercentage;
   const technicalProgress = (devPlatformProgress + functionalityProgress) / 2;
-  const clientProgress = clientSteps.reduce((acc, step) => acc + (step.percentage || 0), 0) / clientSteps.length;
-  const overallProgress = Math.round((technicalProgress + clientProgress) / 2);
+  // When client metrics are not applicable, overall progress is based solely on technical progress
+  const clientProgress = clientMetricsApplicable
+    ? clientSteps.reduce((acc, step) => acc + (step.percentage || 0), 0) / clientSteps.length
+    : null;
+  const overallProgress = clientProgress !== null
+    ? Math.round((technicalProgress + clientProgress) / 2)
+    : Math.round(technicalProgress);
 
   const shouldExpand = isExportMode || isExpanded;
 
@@ -661,6 +671,16 @@ export default function AcquisitionTrackerPage() {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Client Metrics Applicable */}
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="clientMetricsApplicable"
+                checked={editForm.clientMetricsApplicable !== false}
+                onCheckedChange={(v) => setEditForm(f => ({ ...f, clientMetricsApplicable: !!v }))}
+              />
+              <Label htmlFor="clientMetricsApplicable" className="cursor-pointer">Client Migration Metrics Applicable</Label>
             </div>
 
             {/* Client Counts */}

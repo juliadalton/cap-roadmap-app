@@ -5,11 +5,28 @@ import { useRoadmap } from "../layout"; // Use context
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, ChevronDown, Plus, Lock, History, Link, Link2, ChevronRight } from "lucide-react"; // Add needed icons
+import { Edit, Trash2, ChevronDown, Plus, Lock, History, Link, Link2, ChevronRight, CheckCircle2, Clock, CircleDashed } from "lucide-react"; // Add needed icons
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"; // For item actions
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; // For link icon
 import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"; // <-- Import helpers
+
+function StatusIcon({ status }: { status: string }) {
+  const config: Record<string, { icon: React.ReactNode; label: string }> = {
+    completed:     { icon: <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-green-500" />, label: "Completed" },
+    "in-progress": { icon: <Clock className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />,       label: "In Progress" },
+    planned:       { icon: <CircleDashed className="mt-0.5 h-3 w-3 shrink-0 text-slate-400" />, label: "Planned" },
+  };
+  const { icon, label } = config[status] ?? { icon: <CircleDashed className="mt-0.5 h-3 w-3 shrink-0 text-slate-300" />, label: "Unknown" };
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="cursor-default">{icon}</span>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-xs">{label}</TooltipContent>
+    </Tooltip>
+  );
+}
 
 export default function CategoryPage() {
   const {
@@ -114,7 +131,9 @@ export default function CategoryPage() {
                               key={item.id}
                               className="flex items-start gap-2 group"
                             >
-                              <div className={cn("mt-1.5 h-2 w-2 rounded-full shrink-0", getStatusColor(item.status))} />
+                              <TooltipProvider delayDuration={300}>
+                                <StatusIcon status={item.status} />
+                              </TooltipProvider>
                               <div className="flex-1 min-w-0">
                                 <div className="font-medium flex items-center">
                                   <span>{item.title}</span>

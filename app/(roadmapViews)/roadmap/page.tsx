@@ -9,11 +9,28 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"; // For metrics popover if used
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"; // For metrics popover if used
 import { Checkbox } from "@/components/ui/checkbox"; // For metrics popover if used
-import { Edit, Trash2, ChevronDown, History, ChevronRight, Link, Link2 } from "lucide-react";
+import { Edit, Trash2, ChevronDown, History, ChevronRight, Link, Link2, CheckCircle2, Clock, CircleDashed } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"; // <-- Import helpers
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { RoadmapItem } from "@/types/roadmap"; // <-- Import RoadmapItem
+
+function StatusIcon({ status }: { status: string }) {
+  const config: Record<string, { icon: React.ReactNode; label: string }> = {
+    completed:   { icon: <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-green-500" />, label: "Completed" },
+    "in-progress": { icon: <Clock className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />,       label: "In Progress" },
+    planned:     { icon: <CircleDashed className="mt-0.5 h-3 w-3 shrink-0 text-slate-400" />,   label: "Planned" },
+  };
+  const { icon, label } = config[status] ?? { icon: <CircleDashed className="mt-0.5 h-3 w-3 shrink-0 text-slate-300" />, label: "Unknown" };
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="cursor-default">{icon}</span>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-xs">{label}</TooltipContent>
+    </Tooltip>
+  );
+}
 
 export default function RoadmapPage() {
   // Consume context
@@ -107,14 +124,16 @@ export default function RoadmapPage() {
                                 <h4 className="font-semibold">{category}</h4>
                                 <Badge variant="outline" className="ml-auto h-5 px-1.5 text-xs">{categoryMilestoneItems.length}</Badge>
                             </div>
-                            <ul className="space-y-2 pl-4"> 
+                            <ul className="space-y-2"> 
                               {categoryMilestoneItems.map((item) => {
                                 const hasMetrics = (item.pirateMetrics?.length || 0) > 0 || (item.northStarMetrics?.length || 0) > 0;
                                 const hasDetails = hasMetrics || (item.relevantLinks && item.relevantLinks.length > 0) || (item.productDRI && item.productDRI.trim() !== "");
                                 const isExpanded = expandedItems[item.id];
                                 return (
                                   <li key={item.id} className="flex items-start gap-2 group">
-                                    <div className={cn("mt-1 h-2 w-2 rounded-full shrink-0", getStatusColor(item.status))} />
+                                    <TooltipProvider delayDuration={300}>
+                                      <StatusIcon status={item.status} />
+                                    </TooltipProvider>
                                     <div className="flex-1 min-w-0">
                                       <div className="font-medium flex items-center">
                                           <span>{item.title}</span>

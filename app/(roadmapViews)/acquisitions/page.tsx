@@ -34,6 +34,9 @@ export default function AcquisitionListPage() {
   
   const [isProjectsModalOpen, setIsProjectsModalOpen] = useState(false);
   const [selectedAcquisitionForProjects, setSelectedAcquisitionForProjects] = useState<{ acquisition: Acquisition; projects: Project[] } | null>(null);
+
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedAcquisitionForDetails, setSelectedAcquisitionForDetails] = useState<Acquisition | null>(null);
   
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -122,6 +125,16 @@ export default function AcquisitionListPage() {
   const closeProjectsModal = () => {
     setIsProjectsModalOpen(false);
     setSelectedAcquisitionForProjects(null);
+  };
+
+  const openDetailsModal = (acquisition: Acquisition) => {
+    setSelectedAcquisitionForDetails(acquisition);
+    setIsDetailsModalOpen(true);
+  };
+
+  const closeDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedAcquisitionForDetails(null);
   };
 
   const saveAcquisition = async (data: { name: string; description?: string; integrationOverview?: string; color?: string }) => {
@@ -269,6 +282,14 @@ export default function AcquisitionListPage() {
                   </button>
                   
                   <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => openDetailsModal(acquisition)}
+                    >
+                      View Details
+                    </Button>
                     <Link href={`/acquisition-tracker#${acquisition.id}`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full">
                         View in Tracker
@@ -302,6 +323,44 @@ export default function AcquisitionListPage() {
             mode={acquisitionModalMode}
             error={acquisitionModalError}
           />
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Acquisition Details Modal */}
+      <Dialog open={isDetailsModalOpen} onOpenChange={(open) => !open && closeDetailsModal()}>
+        <DialogContent className="sm:max-w-[525px] max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2
+                className="h-5 w-5 shrink-0"
+                style={{ color: selectedAcquisitionForDetails?.color || undefined }}
+              />
+              {selectedAcquisitionForDetails?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="flex-1 pr-1">
+            <div className="space-y-5 py-2">
+              {selectedAcquisitionForDetails?.description ? (
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-semibold">Description</h4>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {selectedAcquisitionForDetails.description}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">No description provided.</p>
+              )}
+
+              {selectedAcquisitionForDetails?.integrationOverview && (
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-semibold">Integration Overview</h4>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {selectedAcquisitionForDetails.integrationOverview}
+                  </p>
+                </div>
+              )}
+            </div>
           </ScrollArea>
         </DialogContent>
       </Dialog>
