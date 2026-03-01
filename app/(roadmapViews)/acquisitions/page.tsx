@@ -367,19 +367,21 @@ export default function AcquisitionListPage() {
                 const meta = DISPOSITION_META[selectedAcquisitionForDetails.progress.disposition];
                 return (
                   <div className="space-y-1.5">
-                    <h4 className="text-sm font-semibold">Acquisition End State</h4>
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "text-xs font-medium",
-                        selectedAcquisitionForDetails.progress.disposition === 'Affiliated' && "border-blue-500 text-blue-600 dark:text-blue-400",
-                        selectedAcquisitionForDetails.progress.disposition === 'Connected' && "border-emerald-500 text-emerald-600 dark:text-emerald-400",
-                        selectedAcquisitionForDetails.progress.disposition === 'Wrapped' && "border-violet-500 text-violet-600 dark:text-violet-400",
-                        selectedAcquisitionForDetails.progress.disposition === 'Migrated' && "border-amber-500 text-amber-600 dark:text-amber-400"
-                      )}
-                    >
-                      {meta.label}
-                    </Badge>
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold">Acquisition End State</h4>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-xs font-medium",
+                          selectedAcquisitionForDetails.progress.disposition === 'Affiliated' && "border-blue-500 text-blue-600 dark:text-blue-400",
+                          selectedAcquisitionForDetails.progress.disposition === 'Connected' && "border-emerald-500 text-emerald-600 dark:text-emerald-400",
+                          selectedAcquisitionForDetails.progress.disposition === 'Wrapped' && "border-violet-500 text-violet-600 dark:text-violet-400",
+                          selectedAcquisitionForDetails.progress.disposition === 'Migrated' && "border-amber-500 text-amber-600 dark:text-amber-400"
+                        )}
+                      >
+                        {meta.label}
+                      </Badge>
+                    </div>
                     <p className="text-sm text-muted-foreground">{meta.description}</p>
                   </div>
                 );
