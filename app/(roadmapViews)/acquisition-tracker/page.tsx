@@ -26,6 +26,8 @@ import {
 import { cn } from "@/lib/utils";
 import type { Acquisition, AcquisitionProgress } from "@/types/roadmap";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DISPOSITION_META } from "@/lib/constants/dispositions";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -286,18 +288,27 @@ function AcquisitionCard({ acquisition, isExportMode = false, isEditor = false, 
             </div>
             <div className="flex items-center gap-2">
               {progress.disposition && (
-                <Badge 
-                  variant="outline"
-                  className={cn(
-                    "text-xs font-medium",
-                    progress.disposition === 'Affiliated' && "border-blue-500 text-blue-600 dark:text-blue-400",
-                    progress.disposition === 'Connected' && "border-emerald-500 text-emerald-600 dark:text-emerald-400",
-                    progress.disposition === 'Wrapped' && "border-violet-500 text-violet-600 dark:text-violet-400",
-                    progress.disposition === 'Migrated' && "border-amber-500 text-amber-600 dark:text-amber-400"
-                  )}
-                >
-                  {progress.disposition}
-                </Badge>
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-xs font-medium cursor-default",
+                          progress.disposition === 'Affiliated' && "border-blue-500 text-blue-600 dark:text-blue-400",
+                          progress.disposition === 'Connected' && "border-emerald-500 text-emerald-600 dark:text-emerald-400",
+                          progress.disposition === 'Wrapped' && "border-violet-500 text-violet-600 dark:text-violet-400",
+                          progress.disposition === 'Migrated' && "border-amber-500 text-amber-600 dark:text-amber-400"
+                        )}
+                      >
+                        {progress.disposition}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[260px] text-xs text-center">
+                      {DISPOSITION_META[progress.disposition].description}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
               {!isExportMode && isEditor && progress.manualSync && (
                 <Button
