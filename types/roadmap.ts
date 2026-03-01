@@ -39,7 +39,7 @@ export interface User {
 }
 
 // Acquisition Types
-export type Disposition = 'Standalone' | 'Wrapped' | 'Deprecating'
+export type Disposition = 'Affiliated' | 'Connected' | 'Wrapped' | 'Migrated'
 
 export interface Acquisition {
   id: string

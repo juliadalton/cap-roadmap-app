@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const PRESET_COLORS = [
   "#3b82f6", // blue-500
@@ -28,11 +29,15 @@ const PRESET_COLORS = [
   "#a855f7", // purple-500
 ];
 
+const DISPOSITION_OPTIONS = ['Affiliated', 'Connected', 'Wrapped', 'Migrated'] as const
+type DispositionValue = typeof DISPOSITION_OPTIONS[number]
+
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
   integrationOverview: z.string().optional(),
   color: z.string().optional(),
+  disposition: z.enum(DISPOSITION_OPTIONS).nullable().optional(),
   manualSync: z.boolean().default(false),
 })
 
@@ -67,6 +72,7 @@ export default function AcquisitionForm({
       description: initialData?.description || "",
       integrationOverview: initialData?.integrationOverview || "",
       color: getDefaultColor(),
+      disposition: (initialData?.progress?.disposition as DispositionValue | null | undefined) ?? null,
       manualSync: false,
     },
   })
@@ -77,6 +83,7 @@ export default function AcquisitionForm({
       description: initialData?.description || "",
       integrationOverview: initialData?.integrationOverview || "",
       color: initialData?.color || PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)],
+      disposition: (initialData?.progress?.disposition as DispositionValue | null | undefined) ?? null,
       manualSync: false,
     })
   }, [initialData, form])
@@ -151,6 +158,34 @@ export default function AcquisitionForm({
               <FormDescription>
                 High-level overview of how this acquisition will be integrated
               </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Disposition Field */}
+        <FormField
+          control={form.control}
+          name="disposition"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Disposition</FormLabel>
+              <Select
+                onValueChange={(val) => field.onChange(val === '__none__' ? null : val)}
+                value={field.value ?? '__none__'}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a disposition" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="__none__">None</SelectItem>
+                  {DISPOSITION_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

@@ -55,6 +55,14 @@ export async function PATCH(
         ...(body.description !== undefined && { description: body.description }),
         ...(body.integrationOverview !== undefined && { integrationOverview: body.integrationOverview }),
         ...(body.color !== undefined && { color: body.color }),
+        ...(body.disposition !== undefined && {
+          progress: {
+            upsert: {
+              update: { disposition: body.disposition || null },
+              create: { disposition: body.disposition || null },
+            },
+          },
+        }),
       },
       include: {
         projects: {
@@ -63,6 +71,7 @@ export async function PATCH(
             endMilestone: true,
           },
         },
+        progress: true,
       },
     });
 

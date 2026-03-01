@@ -137,7 +137,7 @@ export default function AcquisitionListPage() {
     setSelectedAcquisitionForDetails(null);
   };
 
-  const saveAcquisition = async (data: { name: string; description?: string; integrationOverview?: string; color?: string }) => {
+  const saveAcquisition = async (data: { name: string; description?: string; integrationOverview?: string; color?: string; disposition?: string | null; manualSync?: boolean }) => {
     setAcquisitionModalError(null);
     const isEdit = acquisitionModalMode === 'edit' && editingAcquisition;
     const url = isEdit ? `/api/acquisitions/${editingAcquisition.id}` : '/api/acquisitions';

@@ -36,9 +36,10 @@ model Milestone {
 
 // Acquisition Models
 enum Disposition {
-  Standalone
+  Affiliated
+  Connected
   Wrapped
-  Deprecating
+  Migrated
 }
 
 model Acquisition {

@@ -8,6 +8,15 @@ import { getAllAccounts } from "@/lib/services/vitally";
  */
 const ARR_FIELD_RE = /^sfdc\.(.+?)_ARR/i;
 
+/**
+ * Maps Vitally field name variants (lowercase) to the canonical acquisition
+ * name used in the platform DB. Add entries here whenever a Vitally field
+ * name doesn't match the acquisition name exactly.
+ */
+const VITALLY_NAME_ALIASES: Record<string, string> = {
+  lucy: "Answer Engine",
+};
+
 export interface SyncResult {
   accountsProcessed: number;
   acquisitionsUpdated: string[];
@@ -83,7 +92,10 @@ export async function runVitallySync(): Promise<SyncResult> {
       if (!numValue || numValue <= 0) continue;
 
       const extractedName = match[1]; // e.g. "SmartAction"
-      const acquisition = acquisitionByName.get(extractedName.toLowerCase());
+      const lowerExtracted = extractedName.toLowerCase();
+      // Resolve alias first, then fall back to direct name match
+      const resolvedName = VITALLY_NAME_ALIASES[lowerExtracted] ?? extractedName;
+      const acquisition = acquisitionByName.get(resolvedName.toLowerCase());
       if (!acquisition) continue;
 
       if (!freshByAcquisition.has(acquisition.id)) {

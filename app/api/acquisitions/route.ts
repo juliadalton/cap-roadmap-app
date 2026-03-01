@@ -50,6 +50,7 @@ export async function POST(request: Request) {
         progress: {
           create: {
             manualSync: body.manualSync === true,
+            ...(body.disposition ? { disposition: body.disposition } : {}),
           },
         },
       },
