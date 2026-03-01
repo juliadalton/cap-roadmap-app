@@ -112,10 +112,12 @@ model AcquisitionClientCount {
   orgId               String?
   clientName          String
   activeInConsole     Boolean     @default(false)
+  churned             Boolean     @default(false)
   
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
   
+  @@unique([acquisitionId, clientVitallyId])
   @@index([acquisitionId])
 }
 
@@ -221,6 +223,8 @@ model User {
   emailVerified DateTime?
   image         String?
   role          Role         @default(VIEWER) // Default role is VIEWER
+  lastLoginAt   DateTime?
+  loginCount    Int          @default(0)
   accounts      Account[]
   sessions      Session[]
   createdItems  RoadmapItem[] @relation("CreatedItems")

@@ -6,7 +6,15 @@
   "functions": {
     "app/api/**/*.ts": {
       "maxDuration": 30
+    },
+    "app/api/sync/**/*.ts": {
+      "maxDuration": 300
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/sync/vitally",
+      "schedule": "0 18 * * *"
+    }
+  ]
 }
-
