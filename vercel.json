@@ -14,7 +14,7 @@
   "crons": [
     {
       "path": "/api/sync/vitally",
-      "schedule": "0 18 * * *"
+      "schedule": "0 6 * * *"
     }
   ]
 }
