@@ -290,9 +290,10 @@ function AcquisitionCard({ acquisition, isExportMode = false, isEditor = false, 
                   variant="outline"
                   className={cn(
                     "text-xs font-medium",
-                    progress.disposition === 'Standalone' && "border-blue-500 text-blue-600 dark:text-blue-400",
+                    progress.disposition === 'Affiliated' && "border-blue-500 text-blue-600 dark:text-blue-400",
+                    progress.disposition === 'Connected' && "border-emerald-500 text-emerald-600 dark:text-emerald-400",
                     progress.disposition === 'Wrapped' && "border-violet-500 text-violet-600 dark:text-violet-400",
-                    progress.disposition === 'Deprecating' && "border-amber-500 text-amber-600 dark:text-amber-400"
+                    progress.disposition === 'Migrated' && "border-amber-500 text-amber-600 dark:text-amber-400"
                   )}
                 >
                   {progress.disposition}
@@ -633,9 +634,10 @@ export default function AcquisitionTrackerPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="Standalone">Standalone</SelectItem>
+                  <SelectItem value="Affiliated">Affiliated</SelectItem>
+                  <SelectItem value="Connected">Connected</SelectItem>
                   <SelectItem value="Wrapped">Wrapped</SelectItem>
-                  <SelectItem value="Deprecating">Deprecating</SelectItem>
+                  <SelectItem value="Migrated">Migrated</SelectItem>
                 </SelectContent>
               </Select>
             </div>
