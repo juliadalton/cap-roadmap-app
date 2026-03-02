@@ -21,12 +21,15 @@ const IN_PROGRESS_STATUSES = new Set(["In Development"]);
 const COMPLETE_STATUSES = new Set(["Closed", "Done"]);
 
 export interface JiraSyncResult {
+  dryRun: boolean;
   epicsProcessed: number;
   epicsUpserted: number;
   epicsRemoved: number;
   acquisitionsUpdated: string[];
   progressRecordsUpdated: number;
   unmatchedCompanyNames: string[];
+  /** dry-run only: rows that would be upserted */
+  preview?: Array<{ epicId: string; epicName: string; acquisitionId: string; epicAcquiredCompany: string; epicStatus: string }>;
   errors: string[];
 }
 
@@ -39,14 +42,16 @@ export interface JiraSyncResult {
  *  - Removes stale rows for epics no longer returned by Jira
  *  - Updates AcquisitionProgress epic counts for non-manual acquisitions
  */
-export async function runJiraSync(): Promise<JiraSyncResult> {
+export async function runJiraSync(dryRun = false): Promise<JiraSyncResult> {
   const result: JiraSyncResult = {
+    dryRun,
     epicsProcessed: 0,
     epicsUpserted: 0,
     epicsRemoved: 0,
     acquisitionsUpdated: [],
     progressRecordsUpdated: 0,
     unmatchedCompanyNames: [],
+    ...(dryRun ? { preview: [] } : {}),
     errors: [],
   };
 
@@ -117,61 +122,70 @@ export async function runJiraSync(): Promise<JiraSyncResult> {
     }
   }
 
-  // ── 4. Upsert fresh epic records ─────────────────────────────────────────
-  for (const row of epicUpserts) {
-    try {
-      await prisma.functionalityEpic.upsert({
-        where: {
-          epicId_acquisitionId: {
+  // ── 4. Upsert fresh epic records (skipped in dry run) ────────────────────
+  if (dryRun) {
+    result.preview = epicUpserts.map(({ epicId, epicName, acquisitionId, epicAcquiredCompany, epicStatus }) => ({
+      epicId, epicName, acquisitionId, epicAcquiredCompany, epicStatus,
+    }));
+    result.epicsUpserted = epicUpserts.length;
+  } else {
+    for (const row of epicUpserts) {
+      try {
+        await prisma.functionalityEpic.upsert({
+          where: {
+            epicId_acquisitionId: {
+              epicId: row.epicId,
+              acquisitionId: row.acquisitionId,
+            },
+          },
+          update: {
+            epicName: row.epicName,
+            epicStatus: row.epicStatus,
+            epicAcquiredCompany: row.epicAcquiredCompany,
+            epicLink: row.epicLink,
+            // projectId intentionally omitted — preserved from prior manual set
+          },
+          create: {
             epicId: row.epicId,
             acquisitionId: row.acquisitionId,
+            epicName: row.epicName,
+            epicStatus: row.epicStatus,
+            epicAcquiredCompany: row.epicAcquiredCompany,
+            epicLink: row.epicLink,
           },
-        },
-        update: {
-          epicName: row.epicName,
-          epicStatus: row.epicStatus,
-          epicAcquiredCompany: row.epicAcquiredCompany,
-          epicLink: row.epicLink,
-          // projectId intentionally omitted — preserved from prior manual set
-        },
-        create: {
-          epicId: row.epicId,
-          acquisitionId: row.acquisitionId,
-          epicName: row.epicName,
-          epicStatus: row.epicStatus,
-          epicAcquiredCompany: row.epicAcquiredCompany,
-          epicLink: row.epicLink,
-        },
-      });
-      result.epicsUpserted++;
-    } catch (err) {
-      result.errors.push(
-        `Upsert ${row.epicId}/${row.acquisitionId}: ${err instanceof Error ? err.message : String(err)}`
-      );
+        });
+        result.epicsUpserted++;
+      } catch (err) {
+        result.errors.push(
+          `Upsert ${row.epicId}/${row.acquisitionId}: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
     }
-  }
 
-  // ── 5. Remove stale epic rows for each touched acquisition ───────────────
-  for (const [acquisitionId, currentEpicIds] of freshPairs) {
-    try {
-      const deleted = await prisma.functionalityEpic.deleteMany({
-        where: {
-          acquisitionId,
-          epicId: { notIn: [...currentEpicIds] },
-        },
-      });
-      result.epicsRemoved += deleted.count;
-      result.acquisitionsUpdated.push(acquisitionId);
-    } catch (err) {
-      result.errors.push(
-        `Cleanup ${acquisitionId}: ${err instanceof Error ? err.message : String(err)}`
-      );
+    // ── 5. Remove stale epic rows for each touched acquisition ─────────────
+    for (const [acquisitionId, currentEpicIds] of freshPairs) {
+      try {
+        const deleted = await prisma.functionalityEpic.deleteMany({
+          where: {
+            acquisitionId,
+            epicId: { notIn: [...currentEpicIds] },
+          },
+        });
+        result.epicsRemoved += deleted.count;
+        result.acquisitionsUpdated.push(acquisitionId);
+      } catch (err) {
+        result.errors.push(
+          `Cleanup ${acquisitionId}: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
     }
   }
 
   result.unmatchedCompanyNames = [...unmatchedNames].sort();
 
-  // ── 6. Update AcquisitionProgress epic counts for non-manual acqs ────────
+  // ── 6. Update AcquisitionProgress epic counts (skipped in dry run) ───────
+  if (dryRun) return result;
+
   for (const acquisition of acquisitions) {
     if (!acquisition.progress) continue;
     if (acquisition.progress.manualSync) continue;

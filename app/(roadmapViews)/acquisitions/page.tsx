@@ -183,18 +183,31 @@ export default function AcquisitionListPage() {
     }
   };
 
-  const runJiraSync = useCallback(async () => {
+  const runJiraSync = useCallback(async (dryRun = false) => {
     setIsJiraSyncing(true);
     setSyncMessage(null);
     try {
-      const res = await fetch('/api/sync/jira', { method: 'POST' });
+      const url = dryRun ? '/api/sync/jira?dryRun=true' : '/api/sync/jira';
+      const res = await fetch(url, { method: 'POST' });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || 'Jira sync failed');
-      setSyncMessage({
-        type: 'success',
-        text: `Jira sync complete — ${data.epicsUpserted} epics synced, ${data.epicsRemoved} removed, ${data.progressRecordsUpdated} acquisitions updated (${(data.durationMs / 1000).toFixed(1)}s)`,
-      });
-      await fetchData();
+
+      const unmatched = data.unmatchedCompanyNames?.length
+        ? ` | Unmatched: ${data.unmatchedCompanyNames.join(', ')}`
+        : '';
+
+      if (dryRun) {
+        setSyncMessage({
+          type: 'success',
+          text: `[DRY RUN] Would sync ${data.epicsUpserted} epics across ${data.preview?.length ?? 0} rows (${(data.durationMs / 1000).toFixed(1)}s)${unmatched}`,
+        });
+      } else {
+        setSyncMessage({
+          type: 'success',
+          text: `Jira sync complete — ${data.epicsUpserted} epics synced, ${data.epicsRemoved} removed, ${data.progressRecordsUpdated} acquisitions updated (${(data.durationMs / 1000).toFixed(1)}s)${unmatched}`,
+        });
+        await fetchData();
+      }
     } catch (err: any) {
       setSyncMessage({ type: 'error', text: err.message || 'Jira sync failed' });
     } finally {
@@ -225,7 +238,11 @@ export default function AcquisitionListPage() {
     if (isEditor) {
       setHeaderActions(
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={runJiraSync} disabled={isJiraSyncing}>
+          <Button variant="outline" onClick={() => runJiraSync(true)} disabled={isJiraSyncing}>
+            {isJiraSyncing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Test Jira Sync
+          </Button>
+          <Button variant="outline" onClick={() => runJiraSync(false)} disabled={isJiraSyncing}>
             <RefreshCw className={cn("mr-2 h-4 w-4", isJiraSyncing && "animate-spin")} />
             {isJiraSyncing ? "Syncing…" : "Sync Jira"}
           </Button>

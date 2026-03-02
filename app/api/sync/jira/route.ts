@@ -47,9 +47,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const dryRun = req.nextUrl.searchParams.get("dryRun") === "true";
   const started = Date.now();
   try {
-    const result = await runJiraSync();
+    const result = await runJiraSync(dryRun);
     return NextResponse.json({ ok: true, durationMs: Date.now() - started, ...result });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
