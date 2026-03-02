@@ -133,29 +133,34 @@ export async function runJiraSync(dryRun = false): Promise<JiraSyncResult> {
   } else {
     for (const row of epicUpserts) {
       try {
-        await prisma.functionalityEpic.upsert({
-          where: {
-            epicId_acquisitionId: {
+        const existing = await prisma.functionalityEpic.findFirst({
+          where: { epicId: row.epicId, acquisitionId: row.acquisitionId },
+          select: { id: true },
+        });
+
+        if (existing) {
+          await prisma.functionalityEpic.update({
+            where: { id: existing.id },
+            data: {
+              epicName: row.epicName,
+              epicStatus: row.epicStatus,
+              epicAcquiredCompany: row.epicAcquiredCompany,
+              epicLink: row.epicLink,
+              // projectId intentionally omitted — preserved from prior manual set
+            },
+          });
+        } else {
+          await prisma.functionalityEpic.create({
+            data: {
               epicId: row.epicId,
               acquisitionId: row.acquisitionId,
+              epicName: row.epicName,
+              epicStatus: row.epicStatus,
+              epicAcquiredCompany: row.epicAcquiredCompany,
+              epicLink: row.epicLink,
             },
-          },
-          update: {
-            epicName: row.epicName,
-            epicStatus: row.epicStatus,
-            epicAcquiredCompany: row.epicAcquiredCompany,
-            epicLink: row.epicLink,
-            // projectId intentionally omitted — preserved from prior manual set
-          },
-          create: {
-            epicId: row.epicId,
-            acquisitionId: row.acquisitionId,
-            epicName: row.epicName,
-            epicStatus: row.epicStatus,
-            epicAcquiredCompany: row.epicAcquiredCompany,
-            epicLink: row.epicLink,
-          },
-        });
+          });
+        }
         result.epicsUpserted++;
       } catch (err) {
         result.errors.push(
