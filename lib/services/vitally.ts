@@ -1,4 +1,6 @@
 function getVitallyHeaders(): HeadersInit {
+  if (!process.env.VITALLY_API_KEY) throw new Error("VITALLY_API_KEY is not set");
+  if (!process.env.VITALLY_BASE_URL) throw new Error("VITALLY_BASE_URL is not set");
   return {
     Authorization: `Basic ${process.env.VITALLY_API_KEY}`,
     "Content-Type": "application/json",
