@@ -1,6 +1,15 @@
 import prisma from "@/lib/prisma";
 import { getAcquisitionEpics, extractAcquiredCompanies } from "@/lib/services/jira";
 
+/**
+ * Maps Jira "Acquired Company" field values (lowercase) to the canonical
+ * acquisition name used in the platform DB. Add entries here whenever a
+ * Jira company name doesn't match the acquisition name exactly.
+ */
+const JIRA_COMPANY_ALIASES: Record<string, string> = {
+  ycbm: "YouCanBookMe",
+};
+
 // Status → AcquisitionProgress bucket mappings
 const TODO_STATUSES = new Set([
   "To Do",
@@ -17,6 +26,7 @@ export interface JiraSyncResult {
   epicsRemoved: number;
   acquisitionsUpdated: string[];
   progressRecordsUpdated: number;
+  unmatchedCompanyNames: string[];
   errors: string[];
 }
 
@@ -36,8 +46,11 @@ export async function runJiraSync(): Promise<JiraSyncResult> {
     epicsRemoved: 0,
     acquisitionsUpdated: [],
     progressRecordsUpdated: 0,
+    unmatchedCompanyNames: [],
     errors: [],
   };
+
+  const unmatchedNames = new Set<string>();
 
   // ── 1. Load all acquisitions ─────────────────────────────────────────────
   const acquisitions = await prisma.acquisition.findMany({
@@ -80,8 +93,13 @@ export async function runJiraSync(): Promise<JiraSyncResult> {
     const epicLink = `${process.env.JIRA_BASE_URL}/browse/${epic.key}`;
 
     for (const company of companies) {
-      const acquisition = acquisitionByName.get(company.toLowerCase());
-      if (!acquisition) continue;
+      const lowerCompany = company.toLowerCase();
+      const resolvedName = JIRA_COMPANY_ALIASES[lowerCompany] ?? company;
+      const acquisition = acquisitionByName.get(resolvedName.toLowerCase());
+      if (!acquisition) {
+        unmatchedNames.add(company);
+        continue;
+      }
 
       if (!freshPairs.has(acquisition.id)) {
         freshPairs.set(acquisition.id, new Set());
@@ -150,6 +168,8 @@ export async function runJiraSync(): Promise<JiraSyncResult> {
       );
     }
   }
+
+  result.unmatchedCompanyNames = [...unmatchedNames].sort();
 
   // ── 6. Update AcquisitionProgress epic counts for non-manual acqs ────────
   for (const acquisition of acquisitions) {
