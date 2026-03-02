@@ -43,6 +43,10 @@ interface ProgressStep {
     complete: number;
     inProgress: number;
     toDo: number;
+    completeCount?: number;
+    inProgressCount?: number;
+    toDoCount?: number;
+    total?: number;
   };
 }
 
@@ -101,25 +105,48 @@ function ProgressTrack({ title, icon, steps }: ProgressTrackProps) {
             
             {step.type === 'multi-segment' && step.segments && (
               <div className="mt-3">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="h-2 flex-1 bg-muted rounded-full overflow-hidden mr-3 flex">
-                    {step.segments.complete > 0 && (
-                      <div 
-                        className="h-full bg-emerald-500 transition-all duration-500"
-                        style={{ width: `${step.segments.complete}%` }}
-                      />
-                    )}
-                    {step.segments.inProgress > 0 && (
-                      <div 
-                        className="h-full bg-[rgb(2_33_77)] dark:bg-primary transition-all duration-500"
-                        style={{ width: `${step.segments.inProgress}%` }}
-                      />
-                    )}
-                  </div>
-                  <span className="text-sm font-semibold text-muted-foreground min-w-[40px] text-right">
-                    {step.segments.complete}%
-                  </span>
-                </div>
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-between mb-1 cursor-default">
+                        <div className="h-2 flex-1 bg-muted rounded-full overflow-hidden mr-3 flex">
+                          {step.segments.complete > 0 && (
+                            <div 
+                              className="h-full bg-emerald-500 transition-all duration-500"
+                              style={{ width: `${step.segments.complete}%` }}
+                            />
+                          )}
+                          {step.segments.inProgress > 0 && (
+                            <div 
+                              className="h-full bg-[rgb(2_33_77)] dark:bg-primary transition-all duration-500"
+                              style={{ width: `${step.segments.inProgress}%` }}
+                            />
+                          )}
+                        </div>
+                        <span className="text-sm font-semibold text-muted-foreground min-w-[40px] text-right">
+                          {step.segments.complete}%
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs space-y-1.5 p-3">
+                      <p className="font-semibold text-foreground mb-1">
+                        Epics — {step.segments.total ?? 0} total
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                        <span>Complete: <span className="font-semibold">{step.segments.completeCount ?? 0}</span></span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-[rgb(2,33,77)] dark:bg-primary shrink-0" />
+                        <span>In Progress: <span className="font-semibold">{step.segments.inProgressCount ?? 0}</span></span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-muted-foreground/40 shrink-0" />
+                        <span>To Do: <span className="font-semibold">{step.segments.toDoCount ?? 0}</span></span>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -231,6 +258,10 @@ function AcquisitionCard({ acquisition, isExportMode = false, isEditor = false, 
         complete: epicsCompletePercentage,
         inProgress: epicsInProgressPercentage,
         toDo: epicsToDoPercentage,
+        completeCount: progress.functionalityEpicsComplete,
+        inProgressCount: progress.functionalityEpicsInProgress,
+        toDoCount: progress.functionalityEpicsToDo,
+        total: totalEpics,
       },
     },
   ];

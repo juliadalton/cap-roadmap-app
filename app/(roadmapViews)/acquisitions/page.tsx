@@ -240,14 +240,33 @@ export default function AcquisitionListPage() {
     if (isEditor) {
       setHeaderActions(
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => runJiraSync(true)} disabled={isJiraSyncing}>
-            {isJiraSyncing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Test Jira Sync
-          </Button>
-          <Button variant="outline" onClick={() => runJiraSync(false)} disabled={isJiraSyncing}>
-            <RefreshCw className={cn("mr-2 h-4 w-4", isJiraSyncing && "animate-spin")} />
-            {isJiraSyncing ? "Syncing…" : "Sync Jira"}
-          </Button>
+          <div className="flex items-center">
+            <Button
+              variant="outline"
+              className="rounded-r-none border-r-0"
+              onClick={() => runJiraSync(false)}
+              disabled={isJiraSyncing}
+            >
+              <RefreshCw className={cn("mr-2 h-4 w-4", isJiraSyncing && "animate-spin")} />
+              {isJiraSyncing ? "Syncing…" : "Sync Jira"}
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="rounded-l-none px-2"
+                  disabled={isJiraSyncing}
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => runJiraSync(true)}>
+                  Dry Run (preview only)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <Button variant="outline" onClick={runSync} disabled={isSyncing}>
             <RefreshCw className={cn("mr-2 h-4 w-4", isSyncing && "animate-spin")} />
             {isSyncing ? "Syncing…" : "Sync Vitally"}
