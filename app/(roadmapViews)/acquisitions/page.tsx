@@ -196,15 +196,17 @@ export default function AcquisitionListPage() {
         ? ` | Unmatched: ${data.unmatchedCompanyNames.join(', ')}`
         : '';
 
+      const errors = data.errors?.length ? ` | Errors (${data.errors.length}): ${data.errors.slice(0, 3).join('; ')}` : '';
+
       if (dryRun) {
         setSyncMessage({
           type: 'success',
-          text: `[DRY RUN] Would sync ${data.epicsUpserted} epics across ${data.preview?.length ?? 0} rows (${(data.durationMs / 1000).toFixed(1)}s)${unmatched}`,
+          text: `[DRY RUN] Would sync ${data.epicsUpserted} epics across ${data.preview?.length ?? 0} rows (${(data.durationMs / 1000).toFixed(1)}s)${unmatched}${errors}`,
         });
       } else {
         setSyncMessage({
-          type: 'success',
-          text: `Jira sync complete — ${data.epicsUpserted} epics synced, ${data.epicsRemoved} removed, ${data.progressRecordsUpdated} acquisitions updated (${(data.durationMs / 1000).toFixed(1)}s)${unmatched}`,
+          type: data.errors?.length ? 'error' : 'success',
+          text: `Jira sync complete — ${data.epicsUpserted} epics synced, ${data.epicsRemoved} removed, ${data.progressRecordsUpdated} acquisitions updated (${(data.durationMs / 1000).toFixed(1)}s)${unmatched}${errors}`,
         });
         await fetchData();
       }
