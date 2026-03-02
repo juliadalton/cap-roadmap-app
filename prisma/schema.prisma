@@ -99,6 +99,7 @@ model FunctionalityEpic {
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
   
+  @@unique([epicId, acquisitionId])
   @@index([acquisitionId])
   @@index([projectId])
 }

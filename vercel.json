@@ -15,6 +15,10 @@
     {
       "path": "/api/sync/vitally",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/sync/jira",
+      "schedule": "30 5 * * 6"
     }
   ]
 }

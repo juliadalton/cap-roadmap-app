@@ -42,6 +42,8 @@ export default function AcquisitionListPage() {
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const [isJiraSyncing, setIsJiraSyncing] = useState(false);
   
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -181,6 +183,25 @@ export default function AcquisitionListPage() {
     }
   };
 
+  const runJiraSync = useCallback(async () => {
+    setIsJiraSyncing(true);
+    setSyncMessage(null);
+    try {
+      const res = await fetch('/api/sync/jira', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Jira sync failed');
+      setSyncMessage({
+        type: 'success',
+        text: `Jira sync complete — ${data.epicsUpserted} epics synced, ${data.epicsRemoved} removed, ${data.progressRecordsUpdated} acquisitions updated (${(data.durationMs / 1000).toFixed(1)}s)`,
+      });
+      await fetchData();
+    } catch (err: any) {
+      setSyncMessage({ type: 'error', text: err.message || 'Jira sync failed' });
+    } finally {
+      setIsJiraSyncing(false);
+    }
+  }, [fetchData]);
+
   const runSync = useCallback(async () => {
     setIsSyncing(true);
     setSyncMessage(null);
@@ -204,6 +225,10 @@ export default function AcquisitionListPage() {
     if (isEditor) {
       setHeaderActions(
         <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={runJiraSync} disabled={isJiraSyncing}>
+            <RefreshCw className={cn("mr-2 h-4 w-4", isJiraSyncing && "animate-spin")} />
+            {isJiraSyncing ? "Syncing…" : "Sync Jira"}
+          </Button>
           <Button variant="outline" onClick={runSync} disabled={isSyncing}>
             <RefreshCw className={cn("mr-2 h-4 w-4", isSyncing && "animate-spin")} />
             {isSyncing ? "Syncing…" : "Sync Vitally"}
@@ -216,7 +241,7 @@ export default function AcquisitionListPage() {
       );
     }
     return () => setHeaderActions(null);
-  }, [isEditor, isSyncing, runSync, setHeaderActions]);
+  }, [isEditor, isSyncing, isJiraSyncing, runSync, runJiraSync, setHeaderActions]);
 
   if (isLoading) {
     return (

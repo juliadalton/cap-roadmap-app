@@ -152,6 +152,73 @@ export function extractClientIds(issue: JiraIssue): string[] {
   return [];
 }
 
+/**
+ * Fetch all Epics from PROJ that have the Acquired Company field populated
+ * and were created on or after 2024-01-01. Used by the weekly Jira sync.
+ */
+export async function getAcquisitionEpics(): Promise<JiraIssue[]> {
+  const jql = [
+    `project = ${projectKey()}`,
+    `issuetype = Epic`,
+    `"Acquired Company" is not EMPTY`,
+    `created >= "2024-01-01"`,
+    `ORDER BY created DESC`,
+  ].join(" AND ");
+
+  const fields = [
+    "summary",
+    "status",
+    "customfield_10571", // Acquired Company (multi-select)
+  ].join(",");
+
+  const url = `${baseUrl()}/rest/api/3/search/jql`;
+  const headers = getJiraHeaders();
+  const allIssues: JiraIssue[] = [];
+  let nextPageToken: string | undefined;
+
+  while (true) {
+    const params = new URLSearchParams({
+      jql,
+      maxResults: "100",
+      fields,
+      ...(nextPageToken ? { nextPageToken } : {}),
+    });
+
+    const response = await fetch(`${url}?${params}`, { headers });
+    if (!response.ok) {
+      throw new Error(
+        `Jira getAcquisitionEpics failed: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+    const issues: JiraIssue[] = data.issues ?? [];
+    allIssues.push(...issues);
+
+    const isLast: boolean = data.isLast ?? false;
+    nextPageToken = data.nextPageToken;
+    if (issues.length === 0 || isLast || !nextPageToken) break;
+  }
+
+  return allIssues;
+}
+
+/**
+ * Extract the list of Acquired Company names from customfield_10571.
+ * Returns an array of display strings (e.g. ["Cereproc", "Lumenvox"]).
+ */
+export function extractAcquiredCompanies(issue: JiraIssue): string[] {
+  const field = (issue.fields as Record<string, unknown>)["customfield_10571"];
+  if (!Array.isArray(field)) return [];
+  return field.flatMap((item) => {
+    if (typeof item === "object" && item !== null) {
+      const val = (item as Record<string, unknown>)["value"];
+      return val ? [String(val)] : [];
+    }
+    return [];
+  });
+}
+
 /** Custom field IDs for the PRP project */
 export const JIRA_FIELDS = {
   clientIds: "customfield_10737",
