@@ -157,13 +157,12 @@ export function extractClientIds(issue: JiraIssue): string[] {
  * and were created on or after 2024-01-01. Used by the weekly Jira sync.
  */
 export async function getAcquisitionEpics(): Promise<JiraIssue[]> {
-  const jql = [
-    `project = ${projectKey()}`,
-    `issuetype = Epic`,
-    `"Acquired Company" is not EMPTY`,
-    `created >= "2024-01-01"`,
-    `ORDER BY created DESC`,
-  ].join(" AND ");
+  const jql =
+    `project = ${projectKey()}` +
+    ` AND issuetype = Epic` +
+    ` AND cf[10571] is not EMPTY` +
+    ` AND created >= "2024-01-01"` +
+    ` ORDER BY created DESC`;
 
   const fields = [
     "summary",
