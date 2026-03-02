@@ -8,6 +8,8 @@ import { getAcquisitionEpics, extractAcquiredCompanies } from "@/lib/services/ji
  */
 const JIRA_COMPANY_ALIASES: Record<string, string> = {
   ycbm: "YouCanBookMe",
+  denim: "Denim Social",
+  lucy: "Answer Engine",
 };
 
 // Status → AcquisitionProgress bucket mappings
