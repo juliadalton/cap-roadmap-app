@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus, Edit, Trash2, ChevronDown, Building2, Loader2, MoreVertical, FolderKanban, Link2 } from "lucide-react";
+import { Plus, Edit, Trash2, ChevronDown, Building2, Loader2, MoreVertical, FolderKanban, Link2, RefreshCw } from "lucide-react";
 import type { Acquisition, Project } from "@/types/roadmap";
 import AcquisitionForm from "@/components/acquisition-form";
 import Link from "next/link";
@@ -39,6 +39,9 @@ export default function AcquisitionListPage() {
 
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedAcquisitionForDetails, setSelectedAcquisitionForDetails] = useState<Acquisition | null>(null);
+
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -178,17 +181,42 @@ export default function AcquisitionListPage() {
     }
   };
 
+  const runSync = useCallback(async () => {
+    setIsSyncing(true);
+    setSyncMessage(null);
+    try {
+      const res = await fetch('/api/sync/vitally', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Sync failed');
+      setSyncMessage({
+        type: 'success',
+        text: `Sync complete — ${data.clientsUpserted} clients updated, ${data.clientsMarkedChurned} churned (${(data.durationMs / 1000).toFixed(1)}s)`,
+      });
+      await fetchData();
+    } catch (err: any) {
+      setSyncMessage({ type: 'error', text: err.message || 'Sync failed' });
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [fetchData]);
+
   useEffect(() => {
     if (isEditor) {
       setHeaderActions(
-        <Button onClick={() => openAcquisitionModal('create')}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Acquisition
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={runSync} disabled={isSyncing}>
+            <RefreshCw className={cn("mr-2 h-4 w-4", isSyncing && "animate-spin")} />
+            {isSyncing ? "Syncing…" : "Sync Vitally"}
+          </Button>
+          <Button onClick={() => openAcquisitionModal('create')}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Acquisition
+          </Button>
+        </div>
       );
     }
     return () => setHeaderActions(null);
-  }, [isEditor, setHeaderActions]);
+  }, [isEditor, isSyncing, runSync, setHeaderActions]);
 
   if (isLoading) {
     return (
@@ -210,6 +238,15 @@ export default function AcquisitionListPage() {
 
   return (
     <div ref={contentRef} data-export-section="acquisition-grid" className="space-y-6">
+      {syncMessage && (
+        <div className={cn(
+          "rounded-md px-4 py-3 text-sm",
+          syncMessage.type === 'success' ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" : "bg-destructive/10 text-destructive"
+        )}>
+          {syncMessage.text}
+        </div>
+      )}
+
       {acquisitions.length === 0 ? (
         <Card className="py-12">
           <CardContent className="text-center">
