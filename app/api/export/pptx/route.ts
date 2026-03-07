@@ -392,7 +392,7 @@ function buildTrackerSlide(
   // ── STEP 1 — Dev Platform ───────────────────────────────────────────────
   const devStatus = devPlatformDone ? "complete" : "not-started";
   const devBadge  = statusBadgeFor(devStatus, devPlatformDone ? "Connected" : "Not Connected");
-  addStepCard(slide, TECH_X + PAD, STEP1_Y, STEP_W, DEV_CARD_H, devStatus === "in-progress");
+  addStepCard(slide, TECH_X + PAD, STEP1_Y, STEP_W, DEV_CARD_H, false);
 
   slide.addText("1. Dev Platform", {
     x: STEP_CONTENT_X(TECH_X), y: STEP1_Y + CARD_PAD,
