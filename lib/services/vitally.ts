@@ -11,6 +11,7 @@ export interface VitallyAccount {
   name: string;
   externalId: string;
   accountId: string;
+  org_id?: string | number | null;
   traits: {
     arr?: number;
     ARR?: number;
