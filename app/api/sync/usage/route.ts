@@ -24,6 +24,6 @@ export async function POST(req: NextRequest) {
   }
 
   const result = await runUsageSync(bearerToken);
-  const status = result.errors.length > 0 && result.clientsMatched === 0 ? 500 : 200;
-  return NextResponse.json(result, { status });
+  // Always return 200 so the client receives the full error details in the body
+  return NextResponse.json(result, { status: 200 });
 }
