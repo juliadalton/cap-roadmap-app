@@ -81,7 +81,7 @@ export async function runVitallySync(): Promise<SyncResult> {
     if (!account.externalId) continue;
 
     const traits = (account.traits ?? {}) as Record<string, unknown>;
-    const rawOrgId = account.org_id !== undefined ? account.org_id : null;
+    const rawOrgId = traits["sfdc.Capacity_Org_ID__c"];
     const orgId =
       typeof rawOrgId === "string"
         ? rawOrgId
@@ -89,12 +89,12 @@ export async function runVitallySync(): Promise<SyncResult> {
         ? String(rawOrgId)
         : null;
 
-    // Capture a sample of the first 20 accounts that have any value in this field
-    if (rawOrgId !== undefined && rawOrgId !== null && result.orgIdSample.length < 20) {
+    // Diagnostic: capture first 20 accounts to inspect available org ID fields
+    if (result.orgIdSample.length < 20) {
       result.orgIdSample.push({
         clientName: account.name,
-        rawValue: rawOrgId,
-        rawType: typeof rawOrgId,
+        rawValue: { org_id: account.org_id, sfdc_org_id: rawOrgId },
+        rawType: `org_id:${typeof account.org_id} / sfdc:${typeof rawOrgId}`,
         savedAs: orgId,
       });
     }
@@ -153,7 +153,8 @@ export async function runVitallySync(): Promise<SyncResult> {
           },
           update: {
             clientName: client.clientName,
-            orgId: client.orgId,
+            // Only overwrite orgId if Vitally provides one — preserves manually entered values
+            ...(client.orgId !== null && { orgId: client.orgId }),
             churned: false,
           },
           create: {
