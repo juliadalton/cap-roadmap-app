@@ -39,6 +39,7 @@ interface ProgressStep {
   percentage?: number;
   type?: 'standard' | 'boolean' | 'multi-segment';
   statusLabel?: string;
+  tooltipContent?: React.ReactNode;
   segments?: {
     complete: number;
     inProgress: number;
@@ -166,20 +167,31 @@ function ProgressTrack({ title, icon, steps }: ProgressTrackProps) {
             
             {step.type !== 'boolean' && step.type !== 'multi-segment' && step.percentage !== undefined && (
               <div className="mt-3">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="h-2 flex-1 bg-muted rounded-full overflow-hidden mr-3">
-                    <div 
-                      className={cn(
-                        "h-full rounded-full transition-all duration-500",
-                        step.status === 'complete' ? "bg-emerald-500" : "bg-[rgb(2_33_77)] dark:bg-primary"
-                      )}
-                      style={{ width: `${step.percentage}%` }}
-                    />
-                  </div>
-                  <span className="text-sm font-semibold text-muted-foreground min-w-[40px] text-right">
-                    {step.percentage}%
-                  </span>
-                </div>
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-between mb-1 cursor-default">
+                        <div className="h-2 flex-1 bg-muted rounded-full overflow-hidden mr-3">
+                          <div 
+                            className={cn(
+                              "h-full rounded-full transition-all duration-500",
+                              step.status === 'complete' ? "bg-emerald-500" : "bg-[rgb(2_33_77)] dark:bg-primary"
+                            )}
+                            style={{ width: `${step.percentage}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-semibold text-muted-foreground min-w-[40px] text-right">
+                          {step.percentage}%
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    {step.tooltipContent && (
+                      <TooltipContent side="bottom" className="text-xs p-3">
+                        {step.tooltipContent}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             )}
           </div>
@@ -275,6 +287,22 @@ function AcquisitionCard({ acquisition, isExportMode = false, isEditor = false, 
       status: !clientMetricsApplicable ? 'not-started' : clientAccessPercentage === 100 ? 'complete' : clientAccessPercentage > 0 ? 'in-progress' : 'not-started',
       percentage: clientMetricsApplicable ? clientAccessPercentage : undefined,
       statusLabel: !clientMetricsApplicable ? 'Not Applicable' : undefined,
+      tooltipContent: clientMetricsApplicable ? (
+        <div className="space-y-1">
+          <p className="font-semibold text-foreground mb-1">Console Access</p>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+            <span>With access: <span className="font-semibold">{progress.clientAccessCount}</span></span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-muted-foreground/40 shrink-0" />
+            <span>No access: <span className="font-semibold">{progress.clientCountTotal - progress.clientAccessCount}</span></span>
+          </div>
+          <div className="border-t border-border mt-1.5 pt-1.5">
+            <span className="text-muted-foreground">Total clients: <span className="font-semibold text-foreground">{progress.clientCountTotal}</span></span>
+          </div>
+        </div>
+      ) : undefined,
     },
     {
       id: 'clientActive',
@@ -282,6 +310,22 @@ function AcquisitionCard({ acquisition, isExportMode = false, isEditor = false, 
       status: !clientMetricsApplicable ? 'not-started' : clientActivePercentage === 100 ? 'complete' : clientActivePercentage > 0 ? 'in-progress' : 'not-started',
       percentage: clientMetricsApplicable ? clientActivePercentage : undefined,
       statusLabel: !clientMetricsApplicable ? 'Not Applicable' : undefined,
+      tooltipContent: clientMetricsApplicable ? (
+        <div className="space-y-1">
+          <p className="font-semibold text-foreground mb-1">Console Activity</p>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+            <span>Active: <span className="font-semibold">{progress.clientActiveCount}</span></span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-muted-foreground/40 shrink-0" />
+            <span>Not yet active: <span className="font-semibold">{progress.clientCountTotal - progress.clientActiveCount}</span></span>
+          </div>
+          <div className="border-t border-border mt-1.5 pt-1.5">
+            <span className="text-muted-foreground">Total clients: <span className="font-semibold text-foreground">{progress.clientCountTotal}</span></span>
+          </div>
+        </div>
+      ) : undefined,
     },
   ];
 
@@ -454,6 +498,7 @@ export default function AcquisitionTrackerPage() {
         description: `Integration progress for ${acquisition.name}`,
         order: index + 1,
         elementRef: null,
+        data: acquisition,
       });
     });
   }, [mounted, acquisitions, registerSection]);

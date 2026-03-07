@@ -185,6 +185,7 @@ export async function runVitallySync(): Promise<SyncResult> {
   for (const acquisition of acquisitions) {
     if (!acquisition.progress) continue;
     if (acquisition.progress.manualSync) continue;
+    if (acquisition.progress.clientMetricsApplicable === false) continue;
 
     try {
       const [liveCount, accessCount] = await Promise.all([

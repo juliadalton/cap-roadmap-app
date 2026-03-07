@@ -11,6 +11,7 @@ export interface ExportableSection {
   order: number
   elementRef?: HTMLElement | null
   captureFunction?: () => Promise<string | HTMLCanvasElement | null>
+  data?: unknown
 }
 
 export interface ExportablePage {

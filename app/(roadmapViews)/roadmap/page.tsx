@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRoadmap } from "../layout"; // Use context
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"; // For metrics popover if used
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"; // For metrics popover if used
 import { Checkbox } from "@/components/ui/checkbox"; // For metrics popover if used
-import { Edit, Trash2, ChevronDown, History, ChevronRight, Link, Link2, CheckCircle2, Clock, CircleDashed } from "lucide-react";
+import { Edit, Trash2, ChevronDown, History, ChevronRight, Link, Link2, CheckCircle2, Clock, CircleDashed, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"; // <-- Import helpers
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -46,8 +46,22 @@ export default function RoadmapPage() {
     allMilestones,
     categories, // <-- Destructure categories from context
     openItemModal, // <-- Destructure openItemModal from context
-    deleteItem // <-- Destructure deleteItem from context
+    deleteItem, // <-- Destructure deleteItem from context
+    setHeaderActions,
   } = useRoadmap();
+
+  // Register the customer-facing PDF download button in the page header (visible to all users)
+  useEffect(() => {
+    setHeaderActions(
+      <a href="/Capacity_2026_Product_Roadmap.pdf" download="Capacity_2026_Product_Roadmap.pdf">
+        <Button variant="outline">
+          <Download className="mr-2 h-4 w-4" />
+          Download Customer Roadmap
+        </Button>
+      </a>
+    );
+    return () => setHeaderActions(null);
+  }, [setHeaderActions]);
 
   // Local state for expanding item metrics (if keeping this feature)
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});

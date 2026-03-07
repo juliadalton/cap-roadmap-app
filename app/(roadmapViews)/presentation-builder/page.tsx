@@ -149,7 +149,7 @@ export default function PresentationBuilderPage() {
       if (format === 'pdf') {
         await exportToPDF();
       } else {
-        alert('PowerPoint export requires server-side processing. This feature is coming soon.');
+        await exportToPPTX();
       }
     } catch (error) {
       console.error(`Export to ${format} failed:`, error);
@@ -252,7 +252,34 @@ export default function PresentationBuilderPage() {
 
     pdf.setFillColor(2, 33, 77);
     pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-    
+
+    // Draw white Capacity wordmark logo in top-left corner of cover
+    try {
+      const logoW = 280;
+      const logoH = 56;
+      const logoPad = 48;
+
+      // jsPDF cannot embed SVGs directly — render to canvas first, then use as PNG
+      const svgImg = new window.Image();
+      svgImg.src = '/Capacity-Wordmark-white.svg';
+      await new Promise<void>((resolve) => {
+        svgImg.onload = () => resolve();
+        svgImg.onerror = () => resolve(); // silently skip on error
+      });
+
+      if (svgImg.naturalWidth > 0) {
+        const logoCanvas = document.createElement('canvas');
+        logoCanvas.width = logoW * 2;  // 2× for sharpness
+        logoCanvas.height = logoH * 2;
+        const ctx = logoCanvas.getContext('2d')!;
+        ctx.drawImage(svgImg, 0, 0, logoCanvas.width, logoCanvas.height);
+        const pngData = logoCanvas.toDataURL('image/png');
+        pdf.addImage(pngData, 'PNG', logoPad, logoPad, logoW, logoH);
+      }
+    } catch {
+      // If logo fails to load, continue without it
+    }
+
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(72);
     pdf.text(presentationTitle, pageWidth / 2, pageHeight / 2 - 40, { align: 'center' });
@@ -343,6 +370,88 @@ export default function PresentationBuilderPage() {
     }
 
     pdf.save(`${presentationTitle.replace(/\s+/g, '_')}.pdf`);
+  };
+
+  const exportToPPTX = async () => {
+    const html2canvas = (await import('html2canvas')).default;
+
+    const totalSections = Array.from(selectedContent.values()).reduce(
+      (sum, c) => sum + c.sectionIds.length, 0
+    );
+    let currentSection = 0;
+    const slides: { sectionId: string; sectionName: string; pageName: string; imageData: string; data?: unknown }[] = [];
+
+    // ── 1. Capture all screenshots client-side ────────────────────────────────
+    for (const [pageId, content] of selectedContent) {
+      const page = registeredPages.find(p => p.id === pageId);
+      if (!page) continue;
+
+      for (const sectionId of content.sectionIds) {
+        const section = page.sections.find(s => s.id === sectionId);
+        if (!section) continue;
+
+        currentSection++;
+        setExportProgress({
+          current: currentSection,
+          total: totalSections,
+          currentSection: `${page.name} - ${section.sectionName}`,
+        });
+
+        // Tracker sections use native PPTX elements — skip screenshot capture
+        const isTrackerSection = sectionId.startsWith('tracker-');
+        let imageData = '';
+        if (!isTrackerSection) {
+          try {
+            const canvas = await capturePageViaIframe(page.path, sectionId, html2canvas);
+            if (canvas) {
+              // Use JPEG at 0.85 quality to keep payload size manageable
+              imageData = canvas.toDataURL('image/jpeg', 0.85);
+            }
+          } catch (err) {
+            console.error(`Failed to capture section ${sectionId}:`, err);
+          }
+        }
+
+        slides.push({
+          sectionId,
+          sectionName: section.sectionName,
+          pageName: page.name,
+          imageData,
+          ...(isTrackerSection && section.data ? { data: section.data } : {}),
+        });
+      }
+    }
+
+    // ── 2. POST to server, receive .pptx binary ───────────────────────────────
+    setExportProgress({
+      current: totalSections,
+      total: totalSections,
+      currentSection: 'Building PowerPoint file…',
+    });
+
+    const res = await fetch('/api/export/pptx', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: presentationTitle, slides }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(err.error || `Server error ${res.status}`);
+    }
+
+    // ── 3. Trigger browser download ───────────────────────────────────────────
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${presentationTitle.replace(/\s+/g, '_')}.pptx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    setExportProgress(null);
   };
 
   if (!isEditor) {
@@ -558,13 +667,43 @@ export default function PresentationBuilderPage() {
                   <p className="text-sm text-muted-foreground">
                     Export selected content as a PowerPoint presentation. Each section becomes a slide.
                   </p>
-                  <div className="p-4 bg-muted/50 rounded-lg border border-dashed">
-                    <p className="text-sm text-center text-muted-foreground">
-                      <Presentation className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      PowerPoint export coming soon.<br />
-                      <span className="text-xs">Use PDF export for now.</span>
-                    </p>
-                  </div>
+                  <p className="text-xs text-muted-foreground/70">
+                    Export loads each page in the background to capture content. This may take a moment.
+                  </p>
+                  {exportProgress && exportFormat === 'pptx' && (
+                    <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Capturing slides...</span>
+                        <span className="font-medium">{exportProgress.current}/{exportProgress.total}</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${(exportProgress.current / exportProgress.total) * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {exportProgress.currentSection}
+                      </p>
+                    </div>
+                  )}
+                  <Button
+                    className="w-full"
+                    onClick={() => handleExport('pptx')}
+                    disabled={selectedContent.size === 0 || isExporting}
+                  >
+                    {isExporting && exportFormat === 'pptx' ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        {exportProgress ? 'Capturing...' : 'Generating PPTX...'}
+                      </>
+                    ) : (
+                      <>
+                        <FileDown className="h-4 w-4 mr-2" />
+                        Export as PowerPoint
+                      </>
+                    )}
+                  </Button>
                 </TabsContent>
               </Tabs>
 

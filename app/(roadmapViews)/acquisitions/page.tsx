@@ -7,7 +7,9 @@ import { useExportContent } from "@/context/export-content-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Edit, Trash2, ChevronDown, Building2, Loader2, MoreVertical, FolderKanban, Link2, RefreshCw } from "lucide-react";
@@ -44,6 +46,10 @@ export default function AcquisitionListPage() {
   const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const [isJiraSyncing, setIsJiraSyncing] = useState(false);
+
+  const [isUsageSyncDialogOpen, setIsUsageSyncDialogOpen] = useState(false);
+  const [usageBearerToken, setUsageBearerToken] = useState('');
+  const [isUsageSyncing, setIsUsageSyncing] = useState(false);
   
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -236,6 +242,33 @@ export default function AcquisitionListPage() {
     }
   }, [fetchData]);
 
+  const runUsageSync = useCallback(async () => {
+    if (!usageBearerToken.trim()) return;
+    setIsUsageSyncing(true);
+    setSyncMessage(null);
+    try {
+      const res = await fetch('/api/sync/usage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bearerToken: usageBearerToken.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Usage sync failed');
+      const errors = data.errors?.length ? ` | Errors: ${data.errors.slice(0, 3).join('; ')}` : '';
+      setSyncMessage({
+        type: data.errors?.length ? 'error' : 'success',
+        text: `Usage sync complete — ${data.clientsMatched} clients matched, ${data.clientsActivated} activated, ${data.clientsDeactivated} deactivated (${(data.durationMs / 1000).toFixed(1)}s)${errors}`,
+      });
+      setIsUsageSyncDialogOpen(false);
+      setUsageBearerToken('');
+      await fetchData();
+    } catch (err: any) {
+      setSyncMessage({ type: 'error', text: err.message || 'Usage sync failed' });
+    } finally {
+      setIsUsageSyncing(false);
+    }
+  }, [fetchData, usageBearerToken]);
+
   useEffect(() => {
     if (isEditor) {
       setHeaderActions(
@@ -271,6 +304,10 @@ export default function AcquisitionListPage() {
             <RefreshCw className={cn("mr-2 h-4 w-4", isSyncing && "animate-spin")} />
             {isSyncing ? "Syncing…" : "Sync Vitally"}
           </Button>
+          <Button variant="outline" onClick={() => setIsUsageSyncDialogOpen(true)} disabled={isUsageSyncing}>
+            <RefreshCw className={cn("mr-2 h-4 w-4", isUsageSyncing && "animate-spin")} />
+            {isUsageSyncing ? "Syncing…" : "Sync Usage"}
+          </Button>
           <Button onClick={() => openAcquisitionModal('create')}>
             <Plus className="mr-2 h-4 w-4" />
             Add Acquisition
@@ -279,7 +316,7 @@ export default function AcquisitionListPage() {
       );
     }
     return () => setHeaderActions(null);
-  }, [isEditor, isSyncing, isJiraSyncing, runSync, runJiraSync, setHeaderActions]);
+  }, [isEditor, isSyncing, isJiraSyncing, isUsageSyncing, runSync, runJiraSync, setHeaderActions]);
 
   if (isLoading) {
     return (
@@ -404,6 +441,36 @@ export default function AcquisitionListPage() {
           })}
         </div>
       )}
+
+      {/* Usage Sync Token Dialog */}
+      <Dialog open={isUsageSyncDialogOpen} onOpenChange={(open) => { setIsUsageSyncDialogOpen(open); if (!open) setUsageBearerToken(''); }}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>Sync Usage Metrics</DialogTitle>
+            <DialogDescription>
+              Paste the Core API bearer token below. The sync will match clients by Org ID and update active-in-console status and feature usage flags.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2 space-y-2">
+            <Label htmlFor="usage-token">Bearer Token</Label>
+            <Textarea
+              id="usage-token"
+              placeholder="Paste token here…"
+              className="font-mono text-xs resize-none h-24"
+              value={usageBearerToken}
+              onChange={(e) => setUsageBearerToken(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setIsUsageSyncDialogOpen(false); setUsageBearerToken(''); }}>
+              Cancel
+            </Button>
+            <Button onClick={runUsageSync} disabled={isUsageSyncing || !usageBearerToken.trim()}>
+              {isUsageSyncing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Syncing…</> : 'Run Sync'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isAcquisitionModalOpen} onOpenChange={(open) => !open && closeAcquisitionModal()}>
         <DialogContent className="sm:max-w-[525px] max-h-[90vh] flex flex-col">
