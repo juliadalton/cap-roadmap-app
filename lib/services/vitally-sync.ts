@@ -24,6 +24,7 @@ export interface SyncResult {
   clientsMarkedChurned: number;
   progressRecordsUpdated: number;
   errors: string[];
+  orgIdSample: Array<{ clientName: string; rawValue: unknown; rawType: string; savedAs: string | null }>;
 }
 
 /**
@@ -46,6 +47,7 @@ export async function runVitallySync(): Promise<SyncResult> {
     clientsMarkedChurned: 0,
     progressRecordsUpdated: 0,
     errors: [],
+    orgIdSample: [],
   };
 
   // ── 1. Load all acquisitions ─────────────────────────────────────────────
@@ -79,10 +81,23 @@ export async function runVitallySync(): Promise<SyncResult> {
     if (!account.externalId) continue;
 
     const traits = (account.traits ?? {}) as Record<string, unknown>;
+    const rawOrgId = traits["sfdc.Capacity_Org_ID__c"];
     const orgId =
-      typeof traits["sfdc.Capacity_Org_ID__c"] === "string"
-        ? traits["sfdc.Capacity_Org_ID__c"]
+      typeof rawOrgId === "string"
+        ? rawOrgId
+        : typeof rawOrgId === "number"
+        ? String(rawOrgId)
         : null;
+
+    // Capture a sample of the first 20 accounts that have any value in this field
+    if (rawOrgId !== undefined && rawOrgId !== null && result.orgIdSample.length < 20) {
+      result.orgIdSample.push({
+        clientName: account.name,
+        rawValue: rawOrgId,
+        rawType: typeof rawOrgId,
+        savedAs: orgId,
+      });
+    }
 
     for (const [key, value] of Object.entries(traits)) {
       const match = ARR_FIELD_RE.exec(key);
