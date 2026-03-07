@@ -81,10 +81,7 @@ export async function runVitallySync(): Promise<SyncResult> {
     if (!account.externalId) continue;
 
     const traits = (account.traits ?? {}) as Record<string, unknown>;
-    const rawOrgId =
-      account.org_id !== undefined && account.org_id !== null
-        ? account.org_id
-        : traits["sfdc.Capacity_Org_ID__c"];
+    const rawOrgId = account.org_id !== undefined ? account.org_id : null;
     const orgId =
       typeof rawOrgId === "string"
         ? rawOrgId
