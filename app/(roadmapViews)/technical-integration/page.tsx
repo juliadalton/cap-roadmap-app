@@ -75,7 +75,7 @@ export default function TechnicalIntegrationPage() {
   const [expandedAcquisitions, setExpandedAcquisitions] = useState<Record<string, boolean>>({});
   const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
   const [viewingProject, setViewingProject] = useState<Project | null>(null);
-  const [viewMode, setViewMode] = useState<'acquisition' | 'project'>('acquisition');
+  const [viewMode, setViewMode] = useState<'acquisition' | 'project'>('project');
   
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -376,7 +376,7 @@ export default function TechnicalIntegrationPage() {
   }
 
   const COLUMN_WIDTH = isExportMode ? 180 : 160;
-  const ROW_LABEL_WIDTH = isExportMode ? 400 : 280;
+  const ROW_LABEL_WIDTH = isExportMode ? 400 : 340;
 
   return (
     <div ref={contentRef} data-export-section="integration-timeline" className="space-y-6">
@@ -431,7 +431,7 @@ export default function TechnicalIntegrationPage() {
             <div className="min-w-max">
               <div className="flex border-b bg-muted/50 sticky top-0 z-10">
                 <div 
-                  className="shrink-0 p-4 font-semibold border-r bg-muted/50 sticky left-0 z-20"
+                  className="shrink-0 p-4 font-semibold border-r bg-card sticky left-0 z-20"
                   style={{ width: ROW_LABEL_WIDTH }}
                 >
                   {viewMode === 'acquisition' ? 'Acquisition / Project' : 'Project / Acquisition'}
@@ -480,7 +480,7 @@ export default function TechnicalIntegrationPage() {
                           style={{ backgroundColor: acqColor }}
                         />
                         <div className="flex-1 min-w-0">
-                          <div className={`font-semibold ${isExportMode ? '' : 'truncate'}`}>
+                          <div className={`text-sm font-semibold ${isExportMode ? '' : 'truncate'}`}>
                             {acquisition.name}
                           </div>
                           <div className="text-xs text-muted-foreground">
@@ -669,7 +669,7 @@ export default function TechnicalIntegrationPage() {
                         <div className="flex-1 min-w-0">
                           <button
                             onClick={() => setViewingProject(project)}
-                            className={`font-semibold ${isExportMode ? '' : 'truncate'} cursor-pointer hover:text-[rgb(2_33_77)] dark:hover:text-primary hover:underline text-left w-full`}
+                            className={`text-sm font-semibold ${isExportMode ? '' : 'truncate'} cursor-pointer hover:text-[rgb(2_33_77)] dark:hover:text-primary hover:underline text-left w-full`}
                           >
                             {project.title}
                           </button>
