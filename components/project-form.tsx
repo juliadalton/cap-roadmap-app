@@ -153,6 +153,9 @@ export default function ProjectForm({
     new Date(a.date).getTime() - new Date(b.date).getTime()
   )
 
+  // Sort acquisitions alphabetically
+  const sortedAcquisitions = [...acquisitions].sort((a, b) => a.name.localeCompare(b.name))
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4 px-2">
@@ -204,7 +207,7 @@ export default function ProjectForm({
                 <div className="flex flex-wrap gap-1">
                   {selectedAcquisitionIds.length > 0 ? (
                     selectedAcquisitionIds
-                      .map(id => acquisitions.find(a => a.id === id))
+                      .map(id => sortedAcquisitions.find(a => a.id === id))
                       .filter(Boolean)
                       .map(acq => (
                         <Badge key={acq!.id} variant="secondary" className="flex items-center gap-1 pr-1">
@@ -234,7 +237,7 @@ export default function ProjectForm({
                 <CommandList>
                   <CommandEmpty>No acquisitions found.</CommandEmpty>
                   <CommandGroup>
-                    {acquisitions.map((acquisition) => (
+                    {sortedAcquisitions.map((acquisition) => (
                       <CommandItem
                         key={acquisition.id}
                         value={acquisition.name}

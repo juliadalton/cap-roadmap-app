@@ -581,7 +581,7 @@ export default function PresentationBuilderPage() {
                           
                           {isExpanded && page.sections.length > 0 && (
                             <div className="border-t bg-muted/20 p-3 pl-12 space-y-2">
-                              {page.sections.map((section) => (
+                              {[...page.sections].sort((a, b) => a.sectionName.localeCompare(b.sectionName)).map((section) => (
                                 <div 
                                   key={section.id}
                                   className="flex items-center gap-3 p-2 rounded hover:bg-muted/50"
@@ -616,7 +616,7 @@ export default function PresentationBuilderPage() {
               <CardTitle className="text-lg">Export Options</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Tabs defaultValue="pdf" className="w-full">
+              <Tabs defaultValue="pptx" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="pdf">PDF</TabsTrigger>
                   <TabsTrigger value="pptx">PowerPoint</TabsTrigger>
