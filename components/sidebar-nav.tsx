@@ -72,6 +72,7 @@ export default function SidebarNav({ isEditor, onNavigate, isExpanded, onToggle 
         { href: "/acquisitions", label: "Acquisition List" },
         { href: "/acquisition-tracker", label: "Acquisition Tracker" },
         { href: "/technical-integration", label: "Technical Integration" },
+        { href: "/integration-methodology", label: "Integration Methodology" },
       ],
     },
     // Admin section only for editors
