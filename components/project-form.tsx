@@ -207,7 +207,19 @@ export default function ProjectForm({
                       .map(id => acquisitions.find(a => a.id === id))
                       .filter(Boolean)
                       .map(acq => (
-                        <Badge key={acq!.id} variant="secondary">{acq!.name}</Badge>
+                        <Badge key={acq!.id} variant="secondary" className="flex items-center gap-1 pr-1">
+                          {acq!.name}
+                          <button
+                            type="button"
+                            className="ml-0.5 rounded-full hover:bg-muted-foreground/20 p-0.5"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleAcquisitionToggle(acq!.id)
+                            }}
+                          >
+                            <XCircle className="h-3 w-3" />
+                          </button>
+                        </Badge>
                       ))
                   ) : (
                     <span className="text-muted-foreground">Select acquisitions...</span>
