@@ -129,7 +129,7 @@ export function ExportContentProvider({ children }: ExportContentProviderProps) 
 
   const getOrderedPages = useCallback(() => {
     return Array.from(pages.values()).sort((a, b) => {
-      const pageOrder = ['roadmap', 'category', 'timeline', 'roadmap-process', 'acquisitions', 'acquisition-tracker', 'technical-integration']
+      const pageOrder = ['roadmap', 'category', 'timeline', 'roadmap-process', 'acquisitions', 'acquisition-tracker', 'technical-integration', 'integration-methodology']
       const aIndex = pageOrder.indexOf(a.id)
       const bIndex = pageOrder.indexOf(b.id)
       return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex)

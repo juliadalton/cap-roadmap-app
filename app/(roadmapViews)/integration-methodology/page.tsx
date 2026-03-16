@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DISPOSITION_META } from "@/lib/constants/dispositions";
@@ -18,6 +19,7 @@ import {
   Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useExportContent } from "@/context/export-content-context";
 
 // ── Disposition state progression ─────────────────────────────────────────────
 
@@ -110,6 +112,33 @@ function EpicStatusRow({
 // ── Main page ──────────────────────────────────────────────────────────────────
 
 export default function IntegrationMethodologyPage() {
+  const { registerPage, registerSection } = useExportContent();
+
+  const endStatesRef = useRef<HTMLDivElement>(null);
+  const overallProgressRef = useRef<HTMLDivElement>(null);
+  const technicalRef = useRef<HTMLDivElement>(null);
+  const clientMigrationRef = useRef<HTMLDivElement>(null);
+  const dataSourcesRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    registerPage({
+      id: 'integration-methodology',
+      name: 'Integration Methodology',
+      path: '/integration-methodology',
+    });
+
+    registerSection({ id: 'methodology-end-states', pageId: 'integration-methodology', pageName: 'Integration Methodology', sectionName: 'Acquisition End States', description: 'Disposition spectrum from Affiliated to Migrated', order: 1, elementRef: endStatesRef.current });
+    registerSection({ id: 'methodology-overall-progress', pageId: 'integration-methodology', pageName: 'Integration Methodology', sectionName: 'Overall Integration Progress', description: 'Formula combining Technical and Client scores', order: 2, elementRef: overallProgressRef.current });
+    registerSection({ id: 'methodology-technical', pageId: 'integration-methodology', pageName: 'Integration Methodology', sectionName: 'Technical Integration', description: 'Dev Platform + Functionality in Console steps', order: 3, elementRef: technicalRef.current });
+    registerSection({ id: 'methodology-client-migration', pageId: 'integration-methodology', pageName: 'Integration Methodology', sectionName: 'Client Migration', description: 'Clients with access and active in console', order: 4, elementRef: clientMigrationRef.current });
+    registerSection({ id: 'methodology-data-sources', pageId: 'integration-methodology', pageName: 'Integration Methodology', sectionName: 'Data Sources & Sync Schedule', description: 'Vitally, Jira, and Core API sync details', order: 5, elementRef: dataSourcesRef.current });
+  }, [mounted, registerPage, registerSection]);
+
   return (
     <div className="space-y-8 max-w-5xl">
 
@@ -126,7 +155,7 @@ export default function IntegrationMethodologyPage() {
       </div>
 
       {/* ── Section 1: Acquisition End States ── */}
-      <Card>
+      <div ref={endStatesRef} data-export-section="methodology-end-states"><Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <GitMerge className="h-5 w-5 text-muted-foreground" />
@@ -177,10 +206,10 @@ export default function IntegrationMethodologyPage() {
             current progress.
           </p>
         </CardContent>
-      </Card>
+      </Card></div>
 
       {/* ── Section 2: Overall Progress Formula ── */}
-      <Card>
+      <div ref={overallProgressRef} data-export-section="methodology-overall-progress"><Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-muted-foreground" />
@@ -252,10 +281,10 @@ export default function IntegrationMethodologyPage() {
             </p>
           </div>
         </CardContent>
-      </Card>
+      </Card></div>
 
       {/* ── Section 3: Technical Integration ── */}
-      <Card>
+      <div ref={technicalRef} data-export-section="methodology-technical"><Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Plug className="h-5 w-5 text-muted-foreground" />
@@ -344,10 +373,10 @@ export default function IntegrationMethodologyPage() {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card></div>
 
       {/* ── Section 4: Client Migration ── */}
-      <Card>
+      <div ref={clientMigrationRef} data-export-section="methodology-client-migration"><Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5 text-muted-foreground" />
@@ -465,10 +494,10 @@ export default function IntegrationMethodologyPage() {
             </p>
           </div>
         </CardContent>
-      </Card>
+      </Card></div>
 
       {/* ── Section 5: Data Sources ── */}
-      <Card>
+      <div ref={dataSourcesRef} data-export-section="methodology-data-sources"><Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-muted-foreground" />
@@ -511,7 +540,7 @@ export default function IntegrationMethodologyPage() {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card></div>
 
     </div>
   );
