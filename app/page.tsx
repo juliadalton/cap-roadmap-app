@@ -13,7 +13,7 @@ export default function RootPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-        router.replace('/roadmap');
+        router.replace('/hub');
     }
   }, [isLoading, isAuthenticated, router]);
 
