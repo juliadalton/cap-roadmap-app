@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useSearchParams } from 'next/navigation';
 import { useRoadmap } from "../layout";
 import { useExportContent } from "@/context/export-content-context";
@@ -847,7 +848,11 @@ export default function TechnicalIntegrationPage() {
               {viewingProject.description && (
                 <div>
                   <h4 className="text-sm font-medium mb-1">Description</h4>
-                  <p className="text-sm text-muted-foreground">{viewingProject.description}</p>
+                  <div className="text-sm text-muted-foreground prose prose-sm dark:prose-invert max-w-none
+                    [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:pl-4 [&>ol]:mb-2
+                    [&>strong]:font-semibold [&>h1]:font-bold [&>h2]:font-semibold [&>h3]:font-semibold">
+                    <ReactMarkdown>{viewingProject.description}</ReactMarkdown>
+                  </div>
                 </div>
               )}
               

@@ -183,10 +183,10 @@ export default function ProjectForm({
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea 
-                  placeholder="Enter project description" 
+                  placeholder="Enter project description. Markdown supported: **bold**, - bullet lists, paragraph breaks, etc." 
                   {...field} 
                   value={field.value ?? ''} 
-                  rows={3}
+                  rows={5}
                 />
               </FormControl>
               <FormMessage />
