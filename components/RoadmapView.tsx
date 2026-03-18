@@ -6,38 +6,12 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Edit, Trash2, ChevronDown, History, ChevronRight, Link } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"
 import type { RoadmapItem, Milestone } from "@/types/roadmap"
 import { useState } from "react"
 import React from 'react'
 
-// Define categories locally or receive as prop if dynamic
 const categories = ["Product", "AI", "Integrations", "Branding", "Migrations"];
-
-// Define helper functions locally or receive as props
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "completed": return "bg-green-500"
-    case "in-progress": return "bg-amber-500"
-    case "planned": return "bg-slate-500"
-    default: return "bg-slate-300"
-  }
-}
-
-const getCategoryColor = (category: string) => {
-  switch (category) {
-    case "Product": return "bg-blue-500";
-    case "AI": return "bg-[rgb(5_174_25)]";
-    case "Integrations": return "bg-[rgb(255_159_0)]";
-    case "Branding": return "bg-purple-500";
-    case "Migrations": return "bg-[rgb(154_169_191)]";
-    default: return "bg-gray-400";
-  }
-}
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-}
 
 
 interface RoadmapViewProps {

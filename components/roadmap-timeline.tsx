@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"
 import type { RoadmapItem, Milestone } from "@/types/roadmap"
 import { EditorViewTable } from "@/components/editor-view-table"
 import RoadmapView from "@/components/RoadmapView"
@@ -82,47 +83,6 @@ export default function RoadmapTimeline({
     });
   const historicalMilestoneCount = sortedMilestones.length - displayedMilestones.length;
   // --- End of component scope calculations --- 
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-500"
-      case "in-progress":
-        return "bg-amber-500"
-      case "planned":
-        return "bg-slate-500"
-      default:
-        return "bg-slate-300"
-    }
-  }
-
-  const getCategoryColor = (category: string) => {
-    // Updated category colors (adjust colors as needed)
-    switch (category) {
-      case "Product":
-        return "bg-blue-500"; // Keep Product as blue
-      case "AI":
-        return "bg-[rgb(5_174_25)]"; // Update AI color
-      case "Integrations":
-        return "bg-[rgb(255_159_0)]"; // Update Integrations color
-      case "Branding":
-        return "bg-purple-500"; // New category color
-      case "Migrations":
-        return "bg-[rgb(154_169_191)]"; // New category color
-      default:
-        // Fallback for any categories not explicitly defined (e.g., from older data)
-        return "bg-gray-400"; 
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
-  }
 
   const toggleSortDirection = () => {
     setSortDirection(sortDirection === "asc" ? "desc" : "asc")
