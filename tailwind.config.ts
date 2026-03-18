@@ -12,6 +12,11 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
+  			brand: {
+  				navy: '#02214d',
+  				light: '#f0f4f9',
+  				metric: '#d3dce6',
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

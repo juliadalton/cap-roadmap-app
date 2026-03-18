@@ -21,6 +21,7 @@ import ItemForm from "@/components/item-form";
 import { MilestoneManagementModal } from "@/components/milestone-management-modal";
 import { type SaveMilestoneData } from "@/components/milestone-form";
 import SidebarNav from "@/components/sidebar-nav";
+import { CATEGORIES } from "@/lib/constants/roadmap";
 
 // --- Context Definition ---
 
@@ -99,8 +100,7 @@ interface RoadmapLayoutProps {
   children: ReactNode;
 }
 
-// Move categories definition here for use in filter and context
-const categories = ["Product", "AI", "Integrations", "Branding", "Migrations"];
+const categories = [...CATEGORIES];
 
 export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
   const { user, userRole, isAuthenticated, isLoading: isAuthLoading } = useAuth(); // Get auth status and loading state

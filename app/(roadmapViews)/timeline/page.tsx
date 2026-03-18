@@ -9,8 +9,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Edit, Trash2, ChevronDown, Plus, Lock, History, Link, Link2, ChevronRight, CheckCircle2, Clock, CircleDashed } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { RoadmapItem } from "@/types/roadmap"; // <-- Import RoadmapItem
-import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"; // <-- Import helpers
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import type { RoadmapItem } from "@/types/roadmap";
+import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters";
 
 function StatusIcon({ status }: { status: string }) {
   const config: Record<string, { icon: React.ReactNode; label: string }> = {
@@ -45,6 +46,7 @@ export default function TimelinePage() {
   } = useRoadmap();
 
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const toggleItemExpansion = (itemId: string) => {
     setExpandedItems(prev => ({ ...prev, [itemId]: !prev[itemId] }));
@@ -59,16 +61,18 @@ export default function TimelinePage() {
     openItemModal('edit', item);
   };
 
-  const handleDeleteClick = async (itemId: string) => {
-    // Optional: Add a confirmation dialog here before calling deleteItem
-    if (window.confirm("Are you sure you want to delete this item?")) {
-      try {
-        await deleteItem(itemId);
-        // Optionally show a success notification
-      } catch (error) {
-        console.error("Failed to delete item:", error);
-        // Optionally show an error notification
-      }
+  const handleDeleteClick = (itemId: string) => {
+    setPendingDeleteId(itemId);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    try {
+      await deleteItem(pendingDeleteId);
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+    } finally {
+      setPendingDeleteId(null);
     }
   };
   
@@ -105,7 +109,7 @@ export default function TimelinePage() {
               return (
                 <div key={milestone.id} className="relative pl-10">
                   {/* Milestone dot */}
-                  <div className="absolute left-[12px] top-1.5 h-4 w-4 rounded-full bg-[rgb(2_33_77)] border-2 border-background" />
+                  <div className="absolute left-[12px] top-1.5 h-4 w-4 rounded-full bg-brand-navy border-2 border-background" />
                   
                   {/* Milestone Header */} 
                   <div className="mb-4">
@@ -245,7 +249,7 @@ export default function TimelinePage() {
                                             <div className="text-xs font-medium text-muted-foreground mb-1">Pirate Metrics:</div>
                                             <div className="flex flex-wrap gap-1">
                                               {item.pirateMetrics.map(metric => (
-                                                <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0">{metric}</Badge>
+                                                <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
                                               ))}
                                             </div>
                                           </div>
@@ -255,7 +259,7 @@ export default function TimelinePage() {
                                             <div className="text-xs font-medium text-muted-foreground mb-1">North Star Metrics:</div>
                                             <div className="flex flex-wrap gap-1">
                                               {item.northStarMetrics.map(metric => (
-                                                <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0">{metric}</Badge>
+                                                <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
                                               ))}
                                             </div>
                                           </div>
@@ -310,6 +314,19 @@ export default function TimelinePage() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete item?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 } 

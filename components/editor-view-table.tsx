@@ -13,12 +13,12 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { cn } from "@/lib/utils"
 import type { RoadmapItem, Milestone } from "@/types/roadmap"
 import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"
+import { CATEGORIES, STATUSES, PIRATE_METRICS_OPTIONS, NORTH_STAR_METRICS_OPTIONS } from "@/lib/constants/roadmap"
 
-// Define options centrally (could also be passed as props)
-const statuses = ["planned", "in-progress", "completed"]
-const categories = ["Product", "AI", "Integrations", "Branding", "Migrations"]
-const pirateMetricsOptions = ["Acquisition", "Activation", "Revenue", "Retention", "Referral"]
-const northStarMetricsOptions = ["Increase Automated Deflections", "Reduce Average Handle Time", "Increase Automated Processes", "Increase in Conversions"]
+const statuses = [...STATUSES];
+const categories = [...CATEGORIES];
+const pirateMetricsOptions = [...PIRATE_METRICS_OPTIONS];
+const northStarMetricsOptions = [...NORTH_STAR_METRICS_OPTIONS];
 
 interface EditorViewTableProps {
   items: RoadmapItem[]
@@ -93,7 +93,7 @@ export function EditorViewTable({
 
   return (
     <div className="border rounded-lg overflow-hidden">
-      <div className="grid grid-cols-[1fr,100px,100px,1fr,1fr,2fr,minmax(80px,auto)] gap-2 p-3 font-medium bg-[rgb(240_244_249)] dark:bg-muted/50 text-xs sticky top-0 z-10">
+      <div className="grid grid-cols-[1fr,100px,100px,1fr,1fr,2fr,minmax(80px,auto)] gap-2 p-3 font-medium bg-brand-light dark:bg-muted/50 text-xs sticky top-0 z-10">
         <div>Milestone</div>
         <div>Category</div>
         <div>Status</div>

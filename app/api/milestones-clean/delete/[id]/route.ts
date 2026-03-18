@@ -46,7 +46,7 @@ export async function DELETE(
       where: { id },
     });
 
-    return NextResponse.json({ success: true });
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error('Error deleting milestone:', error);
     return NextResponse.json(

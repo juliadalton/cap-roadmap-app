@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
 // GET /api/functionality-epics/[id] - Get single epic
@@ -32,9 +34,6 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { getServerSession } = await import("next-auth/next");
-    const { authOptions } = await import('@/lib/auth');
-    
     const session = await getServerSession(authOptions);
     if (!session || !session.user || session.user.role !== 'editor') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -72,9 +71,6 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { getServerSession } = await import("next-auth/next");
-    const { authOptions } = await import('@/lib/auth');
-    
     const session = await getServerSession(authOptions);
     if (!session || !session.user || session.user.role !== 'editor') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -85,7 +81,7 @@ export async function DELETE(
       where: { id },
     });
 
-    return NextResponse.json({ message: 'Functionality epic deleted successfully' });
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error("Failed to delete functionality epic:", error);
     return NextResponse.json({ error: 'Failed to delete functionality epic' }, { status: 500 });

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -75,6 +76,8 @@ export default function TechnicalIntegrationPage() {
   
   const [expandedAcquisitions, setExpandedAcquisitions] = useState<Record<string, boolean>>({});
   const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
+  const [pendingDeleteAcquisitionId, setPendingDeleteAcquisitionId] = useState<string | null>(null);
+  const [pendingDeleteProjectId, setPendingDeleteProjectId] = useState<string | null>(null);
   const [viewingProject, setViewingProject] = useState<Project | null>(null);
   const [viewMode, setViewMode] = useState<'acquisition' | 'project'>('project');
   
@@ -221,17 +224,20 @@ export default function TechnicalIntegrationPage() {
     }
   };
 
-  const deleteAcquisition = async (acquisitionId: string) => {
-    if (!window.confirm('Are you sure you want to delete this acquisition? This will not delete associated projects.')) {
-      return;
-    }
+  const deleteAcquisition = (acquisitionId: string) => {
+    setPendingDeleteAcquisitionId(acquisitionId);
+  };
 
+  const confirmDeleteAcquisition = async () => {
+    if (!pendingDeleteAcquisitionId) return;
     try {
-      const response = await fetch(`/api/acquisitions/${acquisitionId}`, { method: 'DELETE' });
+      const response = await fetch(`/api/acquisitions/${pendingDeleteAcquisitionId}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete acquisition');
       await fetchData();
     } catch (err: any) {
-      alert(err.message);
+      console.error(err.message);
+    } finally {
+      setPendingDeleteAcquisitionId(null);
     }
   };
 
@@ -275,17 +281,20 @@ export default function TechnicalIntegrationPage() {
     }
   };
 
-  const deleteProject = async (projectId: string) => {
-    if (!window.confirm('Are you sure you want to delete this project?')) {
-      return;
-    }
+  const deleteProject = (projectId: string) => {
+    setPendingDeleteProjectId(projectId);
+  };
 
+  const confirmDeleteProject = async () => {
+    if (!pendingDeleteProjectId) return;
     try {
-      const response = await fetch(`/api/projects/${projectId}`, { method: 'DELETE' });
+      const response = await fetch(`/api/projects/${pendingDeleteProjectId}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete project');
       await fetchData();
     } catch (err: any) {
-      alert(err.message);
+      console.error(err.message);
+    } finally {
+      setPendingDeleteProjectId(null);
     }
   };
 
@@ -930,6 +939,32 @@ export default function TechnicalIntegrationPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!pendingDeleteAcquisitionId} onOpenChange={(open) => { if (!open) setPendingDeleteAcquisitionId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete acquisition?</AlertDialogTitle>
+            <AlertDialogDescription>This will permanently delete the acquisition. Associated projects will not be deleted.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteAcquisition} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!pendingDeleteProjectId} onOpenChange={(open) => { if (!open) setPendingDeleteProjectId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete project?</AlertDialogTitle>
+            <AlertDialogDescription>This will permanently delete the project and cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteProject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

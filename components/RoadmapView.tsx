@@ -7,11 +7,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Edit, Trash2, ChevronDown, History, ChevronRight, Link } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"
+import { CATEGORIES } from "@/lib/constants/roadmap"
 import type { RoadmapItem, Milestone } from "@/types/roadmap"
 import { useState } from "react"
 import React from 'react'
 
-const categories = ["Product", "AI", "Integrations", "Branding", "Migrations"];
+const categories = [...CATEGORIES];
 
 
 interface RoadmapViewProps {
@@ -198,7 +199,7 @@ export default function RoadmapView({
                                            <div className="mt-1">
                                              <div className="flex flex-wrap gap-1">
                                                {item.pirateMetrics.map(metric => (
-                                                 <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0 h-4">P: {metric}</Badge>
+                                                 <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0 h-4">P: {metric}</Badge>
                                                ))}
                                              </div>
                                            </div>
@@ -208,7 +209,7 @@ export default function RoadmapView({
                                            <div className="mt-1">
                                              <div className="flex flex-wrap gap-1">
                                                {item.northStarMetrics.map(metric => (
-                                                 <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0 h-4">N: {metric}</Badge>
+                                                 <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0 h-4">N: {metric}</Badge>
                                                ))}
                                              </div>
                                            </div>

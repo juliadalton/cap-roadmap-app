@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogOverlay, DialogPortal, DialogClose } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useRoadmap } from '@/app/(roadmapViews)/layout'; // Adjust path as needed
@@ -24,7 +25,8 @@ export function MilestoneManagementModal() {
   } = useRoadmap();
 
   const [currentlyEditingMilestone, setCurrentlyEditingMilestone] = useState<Milestone | null>(null);
-  const [activeTab, setActiveTab] = useState("viewEdit"); 
+  const [activeTab, setActiveTab] = useState("viewEdit");
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const handleSwitchToEditTab = (milestone: Milestone) => {
     setCurrentlyEditingMilestone(milestone);
@@ -55,19 +57,21 @@ export function MilestoneManagementModal() {
     }
   }, [editingMilestone, milestoneModalMode, isMilestoneModalOpen]); // Depend on isMilestoneModalOpen to reset tab on reopen
 
-  const handleDeleteClick = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this milestone? This may affect associated items.")) {
-      try {
-        if (deleteMilestone) await deleteMilestone(id);
-        // If the deleted milestone was being edited, switch back to the view tab
-        if (currentlyEditingMilestone?.id === id) {
-          handleSwitchToViewTab();
-        }
-      } catch (error) {
-        console.error("Error deleting milestone:", error);
-        // Error display will be handled by context via milestoneModalError in the form, 
-        // or a general notification system if implemented.
+  const handleDeleteClick = (id: string) => {
+    setPendingDeleteId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    try {
+      if (deleteMilestone) await deleteMilestone(pendingDeleteId);
+      if (currentlyEditingMilestone?.id === pendingDeleteId) {
+        handleSwitchToViewTab();
       }
+    } catch (error) {
+      console.error("Error deleting milestone:", error);
+    } finally {
+      setPendingDeleteId(null);
     }
   };
   
@@ -146,5 +150,18 @@ export function MilestoneManagementModal() {
         </Tabs>
       </DialogContent>
     </Dialog>
+
+    <AlertDialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete milestone?</AlertDialogTitle>
+          <AlertDialogDescription>This will permanently delete the milestone. Associated roadmap items will not be deleted but will become unlinked.</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 } 

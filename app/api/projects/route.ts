@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
 // GET /api/projects - List all projects
@@ -23,9 +25,6 @@ export async function GET(request: Request) {
 // POST /api/projects - Create a new project
 export async function POST(request: Request) {
   try {
-    const { getServerSession } = await import("next-auth/next");
-    const { authOptions } = await import('@/lib/auth');
-    
     const session = await getServerSession(authOptions);
     if (!session || !session.user || session.user.role !== 'editor') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

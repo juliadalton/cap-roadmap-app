@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -50,6 +51,7 @@ export default function AcquisitionListPage() {
   const [isUsageSyncDialogOpen, setIsUsageSyncDialogOpen] = useState(false);
   const [usageBearerToken, setUsageBearerToken] = useState('');
   const [isUsageSyncing, setIsUsageSyncing] = useState(false);
+  const [pendingDeleteAcquisitionId, setPendingDeleteAcquisitionId] = useState<string | null>(null);
   
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -175,17 +177,20 @@ export default function AcquisitionListPage() {
     }
   };
 
-  const deleteAcquisition = async (acquisitionId: string) => {
-    if (!window.confirm('Are you sure you want to delete this acquisition? This will not delete associated projects.')) {
-      return;
-    }
+  const deleteAcquisition = (acquisitionId: string) => {
+    setPendingDeleteAcquisitionId(acquisitionId);
+  };
 
+  const confirmDeleteAcquisition = async () => {
+    if (!pendingDeleteAcquisitionId) return;
     try {
-      const response = await fetch(`/api/acquisitions/${acquisitionId}`, { method: 'DELETE' });
+      const response = await fetch(`/api/acquisitions/${pendingDeleteAcquisitionId}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete acquisition');
       await fetchData();
     } catch (err: any) {
-      alert(err.message);
+      console.error(err.message);
+    } finally {
+      setPendingDeleteAcquisitionId(null);
     }
   };
 
@@ -660,6 +665,19 @@ export default function AcquisitionListPage() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!pendingDeleteAcquisitionId} onOpenChange={(open) => { if (!open) setPendingDeleteAcquisitionId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete acquisition?</AlertDialogTitle>
+            <AlertDialogDescription>This will permanently delete the acquisition. Associated projects will not be deleted.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteAcquisition} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

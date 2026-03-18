@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"
+import { CATEGORIES } from "@/lib/constants/roadmap"
 import type { RoadmapItem, Milestone } from "@/types/roadmap"
 import { EditorViewTable } from "@/components/editor-view-table"
 import RoadmapView from "@/components/RoadmapView"
@@ -64,7 +65,7 @@ export default function RoadmapTimeline({
     }
   }, [currentView]);
 
-  const categories = ["Product", "AI", "Integrations", "Branding", "Migrations"];
+  const categories = [...CATEGORIES];
 
   // --- Calculate sorted/displayed milestones and count ONCE in component scope --- 
   const today = new Date();
@@ -119,7 +120,7 @@ export default function RoadmapTimeline({
                 return (
                   <div key={milestone.id} className="relative pl-10">
                     {/* Milestone dot - Updated background color */}
-                    <div className="absolute left-[12px] top-1.5 h-4 w-4 rounded-full bg-[rgb(2_33_77)] border-2 border-background" />
+                    <div className="absolute left-[12px] top-1.5 h-4 w-4 rounded-full bg-brand-navy border-2 border-background" />
                     {/* Milestone Header (Title, Add Button) */}
                     <div className="mb-4">
                       <h3 className="text-xl font-bold flex items-center">
@@ -196,7 +197,7 @@ export default function RoadmapTimeline({
                                           <div className="text-xs font-medium text-muted-foreground mb-1">Pirate Metrics:</div>
                                           <div className="flex flex-wrap gap-1">
                                             {item.pirateMetrics.map(metric => (
-                                              <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0">{metric}</Badge>
+                                              <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
                                             ))}
                                           </div>
                                         </div>
@@ -208,7 +209,7 @@ export default function RoadmapTimeline({
                                           <div className="text-xs font-medium text-muted-foreground mb-1">North Star Metrics:</div>
                                           <div className="flex flex-wrap gap-1">
                                             {item.northStarMetrics.map(metric => (
-                                              <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0">{metric}</Badge>
+                                              <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
                                             ))}
                                           </div>
                                         </div>
@@ -314,7 +315,7 @@ export default function RoadmapTimeline({
                      return (
                        <Card key={`${category}-${milestone.id}`} className="overflow-hidden">
                           {/* Restore Milestone header */} 
-                           <div className="p-3 font-medium flex items-center justify-between bg-[rgb(240_244_249)] dark:bg-muted/50">
+                           <div className="p-3 font-medium flex items-center justify-between bg-brand-light dark:bg-muted/50">
                               {milestone.title}
                               <span className="text-sm font-normal text-muted-foreground">
                                 {formatDate(milestone.date)}
@@ -358,7 +359,7 @@ export default function RoadmapTimeline({
                                           <div className="text-xs font-medium text-muted-foreground mb-1">Pirate Metrics:</div>
                                           <div className="flex flex-wrap gap-1">
                                             {item.pirateMetrics.map(metric => (
-                                              <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0">{metric}</Badge>
+                                              <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
                                             ))}
                                           </div>
                                         </div>
@@ -369,7 +370,7 @@ export default function RoadmapTimeline({
                                           <div className="text-xs font-medium text-muted-foreground mb-1">North Star Metrics:</div>
                                           <div className="flex flex-wrap gap-1">
                                             {item.northStarMetrics.map(metric => (
-                                              <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0">{metric}</Badge>
+                                              <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
                                             ))}
                                           </div>
                                         </div>
@@ -470,26 +471,26 @@ export default function RoadmapTimeline({
           <TabsList className={cn("grid w-full", isEditor ? "grid-cols-4" : "grid-cols-3")}>
             <TabsTrigger
               value="timeline"
-              className="bg-[rgb(240_244_249)] dark:bg-muted data-[state=active]:bg-background data-[state=active]:text-foreground"
+              className="bg-brand-light dark:bg-muted data-[state=active]:bg-background data-[state=active]:text-foreground"
             >
               Timeline View
             </TabsTrigger>
             <TabsTrigger
               value="category"
-              className="bg-[rgb(240_244_249)] dark:bg-muted data-[state=active]:bg-background data-[state=active]:text-foreground"
+              className="bg-brand-light dark:bg-muted data-[state=active]:bg-background data-[state=active]:text-foreground"
             >
               Category View
             </TabsTrigger>
             <TabsTrigger
               value="roadmap"
-              className="bg-[rgb(240_244_249)] dark:bg-muted data-[state=active]:bg-background data-[state=active]:text-foreground"
+              className="bg-brand-light dark:bg-muted data-[state=active]:bg-background data-[state=active]:text-foreground"
             >
              Roadmap View
             </TabsTrigger>
             {isEditor && (
               <TabsTrigger
                 value="editor"
-                className="bg-[rgb(240_244_249)] dark:bg-muted data-[state=active]:bg-background data-[state=active]:text-foreground"
+                className="bg-brand-light dark:bg-muted data-[state=active]:bg-background data-[state=active]:text-foreground"
               >
                 Editor View
               </TabsTrigger>

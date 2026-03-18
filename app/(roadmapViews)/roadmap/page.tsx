@@ -220,7 +220,7 @@ export default function RoadmapPage() {
                                                 <div className="text-xs font-medium text-muted-foreground mb-1">Pirate Metrics:</div>
                                                 <div className="flex flex-wrap gap-1">
                                                   {item.pirateMetrics.map(metric => (
-                                                    <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0 h-4">{metric}</Badge>
+                                                    <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0 h-4">{metric}</Badge>
                                                   ))}
                                                 </div>
                                               </div>
@@ -230,7 +230,7 @@ export default function RoadmapPage() {
                                                 <div className="text-xs font-medium text-muted-foreground mb-1">North Star Metrics:</div>
                                                 <div className="flex flex-wrap gap-1">
                                                   {item.northStarMetrics.map(metric => (
-                                                    <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0 h-4">{metric}</Badge>
+                                                    <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0 h-4">{metric}</Badge>
                                                   ))}
                                                 </div>
                                               </div>

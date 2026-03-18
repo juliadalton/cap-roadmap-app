@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 
@@ -19,10 +21,6 @@ export async function GET(request: Request) {
 // POST /api/roadmap/milestones
 export async function POST(request: Request) {
   try {
-    // Import auth dependencies only when needed
-    const { getServerSession } = await import("next-auth/next");
-    const { authOptions } = await import('@/lib/auth');
-    
     const session = await getServerSession(authOptions);
     if (!session || !session.user || session.user.role !== 'editor') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

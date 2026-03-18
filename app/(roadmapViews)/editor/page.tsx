@@ -1,38 +1,40 @@
 "use client";
 
-import React from 'react';
-import { useRoadmap } from "../layout"; // Use the context hook
+import React, { useState } from 'react';
+import { useRoadmap } from "../layout";
 import { EditorViewTable } from "@/components/editor-view-table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Lock } from "lucide-react";
 import type { RoadmapItem } from "@/types/roadmap";
 
 export default function EditorPage() {
-  // Consume context from the layout
   const {
-    allItems, // Pass ALL items to the editor table, not filtered displayedItems
+    allItems,
     allMilestones,
-    sortDirection, 
-    isEditor, 
-    openItemModal, // <-- Destructure from context
-    deleteItem,    // <-- Destructure from context
+    sortDirection,
+    isEditor,
+    openItemModal,
+    deleteItem,
   } = useRoadmap();
 
-  // Handler to open the modal for editing an item
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
   const handleEditItemModal = (item: RoadmapItem) => {
     openItemModal('edit', item);
   };
 
-  // Handler to delete an item using context function
-  const handleDeleteItemClick = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this item?")) {
-      try {
-        await deleteItem(id);
-        // Optionally show success notification
-      } catch (error) {
-        console.error("EditorPage: Failed to delete item:", error);
-        // Optionally show error notification to user
-        alert(`Error deleting item: ${error instanceof Error ? error.message : String(error)}`);
-      }
+  const handleDeleteItemClick = (id: string) => {
+    setPendingDeleteId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    try {
+      await deleteItem(pendingDeleteId);
+    } catch (error) {
+      console.error("EditorPage: Failed to delete item:", error);
+    } finally {
+      setPendingDeleteId(null);
     }
   };
 
@@ -51,17 +53,31 @@ export default function EditorPage() {
     );
   }
 
-  // Render the table for editors
   return (
-    <div className="space-y-4">
-      <EditorViewTable
-        items={allItems} 
-        milestones={allMilestones}
-        onEditItem={handleEditItemModal}  
-        onDeleteItem={handleDeleteItemClick} 
-        isEditor={isEditor}
-        sortDirection={sortDirection}
-      />
-    </div>
+    <>
+      <div className="space-y-4">
+        <EditorViewTable
+          items={allItems}
+          milestones={allMilestones}
+          onEditItem={handleEditItemModal}
+          onDeleteItem={handleDeleteItemClick}
+          isEditor={isEditor}
+          sortDirection={sortDirection}
+        />
+      </div>
+
+      <AlertDialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete item?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 } 

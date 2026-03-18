@@ -14,6 +14,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Badge } from "@/components/ui/badge"
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { CATEGORIES, STATUSES, PIRATE_METRICS_OPTIONS, NORTH_STAR_METRICS_OPTIONS } from "@/lib/constants/roadmap"
 import type { RoadmapItem, Milestone, RelevantLink } from "@/types/roadmap"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, SubmitHandler, Control } from "react-hook-form"
@@ -37,11 +38,10 @@ const formSchema = z.object({
 // Explicit type for form values based on schema
 type FormValues = z.infer<typeof formSchema>;
 
-// Define options centrally
-const statuses = ["planned", "in-progress", "completed"]
-const categories = ["Product", "AI", "Integrations", "Branding", "Migrations"]
-const pirateMetricsOptions = ["Acquisition", "Activation", "Revenue", "Retention", "Referral"]
-const northStarMetricsOptions = ["Increase Automated Deflections", "Reduce Average Handle Time", "Increase Automated Processes", "Increase in Conversions"]
+const statuses = [...STATUSES];
+const categories = [...CATEGORIES];
+const pirateMetricsOptions = [...PIRATE_METRICS_OPTIONS];
+const northStarMetricsOptions = [...NORTH_STAR_METRICS_OPTIONS];
 
 // Define the type for the data passed to onSave
 type SaveItemData = Omit<z.infer<typeof formSchema>, 'date'> & {

@@ -113,7 +113,7 @@ export default function CategoryPage() {
                   return (
                     <Card key={`${category}-${milestone.id}`} className="overflow-hidden">
                       {/* Milestone header */} 
-                      <div className="p-3 font-medium flex items-center justify-between bg-[rgb(240_244_249)] dark:bg-muted/50">
+                      <div className="p-3 font-medium flex items-center justify-between bg-brand-light dark:bg-muted/50">
                          {milestone.title}
                          <span className="text-sm font-normal text-muted-foreground">
                            {formatDate(milestone.date)}
@@ -218,7 +218,7 @@ export default function CategoryPage() {
                                         <div className="text-xs font-medium text-muted-foreground mb-1">Pirate Metrics:</div>
                                         <div className="flex flex-wrap gap-1">
                                           {item.pirateMetrics.map(metric => (
-                                            <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0">{metric}</Badge>
+                                            <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
                                           ))}
                                         </div>
                                       </div>
@@ -228,7 +228,7 @@ export default function CategoryPage() {
                                         <div className="text-xs font-medium text-muted-foreground mb-1">North Star Metrics:</div>
                                         <div className="flex flex-wrap gap-1">
                                           {item.northStarMetrics.map(metric => (
-                                            <Badge key={metric} className="bg-[rgb(211_220_230)] text-foreground hover:bg-[rgb(211_220_230)]/80 text-xs px-1.5 py-0">{metric}</Badge>
+                                            <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
                                           ))}
                                         </div>
                                       </div>
