@@ -379,7 +379,7 @@ export default function PresentationBuilderPage() {
       (sum, c) => sum + c.sectionIds.length, 0
     );
     let currentSection = 0;
-    const slides: { sectionId: string; sectionName: string; pageName: string; imageData: string; data?: unknown }[] = [];
+    const slides: { sectionId: string; sectionName: string; pageName: string; imageData: string; imageWidth?: number; imageHeight?: number; data?: unknown }[] = [];
 
     // ── 1. Capture all screenshots client-side ────────────────────────────────
     for (const [pageId, content] of selectedContent) {
@@ -400,12 +400,15 @@ export default function PresentationBuilderPage() {
         // Tracker sections use native PPTX elements — skip screenshot capture
         const isTrackerSection = sectionId.startsWith('tracker-');
         let imageData = '';
+        let imageWidth: number | undefined;
+        let imageHeight: number | undefined;
         if (!isTrackerSection) {
           try {
             const canvas = await capturePageViaIframe(page.path, sectionId, html2canvas);
             if (canvas) {
-              // Use JPEG at 0.85 quality to keep payload size manageable
               imageData = canvas.toDataURL('image/jpeg', 0.85);
+              imageWidth = canvas.width;
+              imageHeight = canvas.height;
             }
           } catch (err) {
             console.error(`Failed to capture section ${sectionId}:`, err);
@@ -417,6 +420,7 @@ export default function PresentationBuilderPage() {
           sectionName: section.sectionName,
           pageName: page.name,
           imageData,
+          ...(imageWidth ? { imageWidth, imageHeight } : {}),
           ...(isTrackerSection && section.data ? { data: section.data } : {}),
         });
       }
