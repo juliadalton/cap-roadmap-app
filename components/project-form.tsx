@@ -212,16 +212,23 @@ export default function ProjectForm({
                       .map(acq => (
                         <Badge key={acq!.id} variant="secondary" className="flex items-center gap-1 pr-1">
                           {acq!.name}
-                          <button
-                            type="button"
-                            className="ml-0.5 rounded-full hover:bg-muted-foreground/20 p-0.5"
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            className="ml-0.5 rounded-full hover:bg-muted-foreground/20 p-0.5 cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleAcquisitionToggle(acq!.id)
                             }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.stopPropagation()
+                                handleAcquisitionToggle(acq!.id)
+                              }
+                            }}
                           >
                             <XCircle className="h-3 w-3" />
-                          </button>
+                          </span>
                         </Badge>
                       ))
                   ) : (

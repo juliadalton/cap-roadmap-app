@@ -11,9 +11,10 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Checkbox } from "@/components/ui/checkbox"; // For metrics popover if used
 import { Edit, Trash2, ChevronDown, History, ChevronRight, Link, Link2, CheckCircle2, Clock, CircleDashed, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"; // <-- Import helpers
+import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import type { RoadmapItem } from "@/types/roadmap"; // <-- Import RoadmapItem
+import type { RoadmapItem } from "@/types/roadmap";
 
 function StatusIcon({ status }: { status: string }) {
   const config: Record<string, { icon: React.ReactNode; label: string }> = {
@@ -33,7 +34,8 @@ function StatusIcon({ status }: { status: string }) {
 }
 
 export default function RoadmapPage() {
-  // Consume context
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
   const {
     displayedItems,
     displayedMilestones,
@@ -254,7 +256,7 @@ export default function RoadmapPage() {
                                             </DropdownMenuItem>
                                             <DropdownMenuItem
                                               className="text-destructive focus:text-destructive text-xs"
-                                              onClick={() => deleteItem(item.id)}
+                                              onClick={() => setPendingDeleteId(item.id)}
                                             >
                                               <Trash2 className="mr-2 h-3 w-3" /> Delete
                                             </DropdownMenuItem>
@@ -296,6 +298,29 @@ export default function RoadmapPage() {
           )}
        </div>
 
-    </div> // End of main container
+      <AlertDialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete item?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={async () => {
+                if (pendingDeleteId) {
+                  try { await deleteItem(pendingDeleteId); } catch (e) { console.error(e); }
+                  setPendingDeleteId(null);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+    </div>
   )
 } 

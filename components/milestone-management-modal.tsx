@@ -75,9 +75,8 @@ export function MilestoneManagementModal() {
     }
   };
   
-  if (!isMilestoneModalOpen) return null;
-
   return (
+    <>
     <Dialog open={isMilestoneModalOpen} onOpenChange={(isOpen) => {
       if (!isOpen) {
         closeMilestoneModal(); // Context close
@@ -163,5 +162,6 @@ export function MilestoneManagementModal() {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+    </>
   );
 } 
