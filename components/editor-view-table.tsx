@@ -15,10 +15,10 @@ import type { RoadmapItem, Milestone } from "@/types/roadmap"
 import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"
 import { CATEGORIES, STATUSES, PIRATE_METRICS_OPTIONS, NORTH_STAR_METRICS_OPTIONS } from "@/lib/constants/roadmap"
 
-const statuses = [...STATUSES];
-const categories = [...CATEGORIES];
-const pirateMetricsOptions = [...PIRATE_METRICS_OPTIONS];
-const northStarMetricsOptions = [...NORTH_STAR_METRICS_OPTIONS];
+const statuses: string[] = [...STATUSES];
+const categories: string[] = [...CATEGORIES];
+const pirateMetricsOptions: string[] = [...PIRATE_METRICS_OPTIONS];
+const northStarMetricsOptions: string[] = [...NORTH_STAR_METRICS_OPTIONS];
 
 interface EditorViewTableProps {
   items: RoadmapItem[]

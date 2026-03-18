@@ -100,7 +100,7 @@ interface RoadmapLayoutProps {
   children: ReactNode;
 }
 
-const categories = [...CATEGORIES];
+const categories: string[] = [...CATEGORIES];
 
 export default function RoadmapLayout({ children }: RoadmapLayoutProps) {
   const { user, userRole, isAuthenticated, isLoading: isAuthLoading } = useAuth(); // Get auth status and loading state

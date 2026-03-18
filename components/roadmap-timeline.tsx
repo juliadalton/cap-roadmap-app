@@ -65,7 +65,7 @@ export default function RoadmapTimeline({
     }
   }, [currentView]);
 
-  const categories = [...CATEGORIES];
+  const categories: string[] = [...CATEGORIES];
 
   // --- Calculate sorted/displayed milestones and count ONCE in component scope --- 
   const today = new Date();

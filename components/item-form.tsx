@@ -38,10 +38,10 @@ const formSchema = z.object({
 // Explicit type for form values based on schema
 type FormValues = z.infer<typeof formSchema>;
 
-const statuses = [...STATUSES];
-const categories = [...CATEGORIES];
-const pirateMetricsOptions = [...PIRATE_METRICS_OPTIONS];
-const northStarMetricsOptions = [...NORTH_STAR_METRICS_OPTIONS];
+const statuses: string[] = [...STATUSES];
+const categories: string[] = [...CATEGORIES];
+const pirateMetricsOptions: string[] = [...PIRATE_METRICS_OPTIONS];
+const northStarMetricsOptions: string[] = [...NORTH_STAR_METRICS_OPTIONS];
 
 // Define the type for the data passed to onSave
 type SaveItemData = Omit<z.infer<typeof formSchema>, 'date'> & {

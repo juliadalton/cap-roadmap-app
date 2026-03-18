@@ -12,7 +12,7 @@ import type { RoadmapItem, Milestone } from "@/types/roadmap"
 import { useState } from "react"
 import React from 'react'
 
-const categories = [...CATEGORIES];
+const categories: string[] = [...CATEGORIES];
 
 
 interface RoadmapViewProps {
