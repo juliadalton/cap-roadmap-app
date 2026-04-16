@@ -11,6 +11,7 @@ import ItemForm from "@/components/item-form";
 import { MilestoneManagementModal } from "@/components/milestone-management-modal";
 import SidebarNav from "@/components/sidebar-nav";
 import { RoadmapProvider, useRoadmap } from "@/context/roadmap-context";
+import { AcquisitionProvider } from "@/context/acquisition-context";
 
 // --- Page title map ---
 
@@ -203,7 +204,9 @@ function LayoutChrome({ children }: { children: ReactNode }) {
 export default function RoadmapLayout({ children }: { children: ReactNode }) {
   return (
     <RoadmapProvider>
-      <LayoutChrome>{children}</LayoutChrome>
+      <AcquisitionProvider>
+        <LayoutChrome>{children}</LayoutChrome>
+      </AcquisitionProvider>
     </RoadmapProvider>
   );
 }

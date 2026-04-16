@@ -6,7 +6,6 @@ import { Providers } from "@/components/providers"
 import UserMenu from "@/components/user-menu"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Logo } from "@/components/logo"
-import { ClientProviders } from "@/components/client-providers"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -27,7 +26,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body className={inter.className}>
-        <ClientProviders>
+        <Providers>
           <div className="min-h-screen flex flex-col">
             <header className="border-b bg-[rgb(0_43_103)] dark:bg-background fixed top-0 left-0 right-0 z-50 h-[57px]">
               <div className="px-4 py-3 flex justify-between items-center w-full h-full">
@@ -42,7 +41,7 @@ export default function RootLayout({
             <div className="h-[57px] shrink-0" />
             <main className="flex-1 min-w-0">{children}</main>
           </div>
-        </ClientProviders>
+        </Providers>
       </body>
     </html>
   )

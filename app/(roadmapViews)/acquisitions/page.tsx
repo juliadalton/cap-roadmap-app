@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRoadmap } from "@/context/roadmap-context";
+import { useAcquisitions } from "@/context/acquisition-context";
 import { useExportContent } from "@/context/export-content-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,6 +20,7 @@ import AcquisitionForm from "@/components/acquisition-form";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { DISPOSITION_META } from "@/lib/constants/dispositions";
+import { toast } from "sonner";
 import { DispositionBadge } from "@/components/disposition-badge";
 
 export default function AcquisitionListPage() {
@@ -27,10 +29,13 @@ export default function AcquisitionListPage() {
   const searchParams = useSearchParams();
   const isExportMode = searchParams.get('export') === 'true';
   
-  const [acquisitions, setAcquisitions] = useState<Acquisition[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    acquisitions,
+    projects,
+    isLoadingAcquisitions: isLoading,
+    acquisitionsError: error,
+    fetchAcquisitions: fetchData,
+  } = useAcquisitions();
   const [mounted, setMounted] = useState(false);
   
   const [isAcquisitionModalOpen, setIsAcquisitionModalOpen] = useState(false);
@@ -79,34 +84,6 @@ export default function AcquisitionListPage() {
       elementRef: contentRef.current,
     });
   }, [mounted, registerPage, registerSection]);
-
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const [acquisitionsRes, projectsRes] = await Promise.all([
-        fetch('/api/acquisitions'),
-        fetch('/api/projects'),
-      ]);
-      
-      if (!acquisitionsRes.ok) throw new Error('Failed to fetch acquisitions');
-      if (!projectsRes.ok) throw new Error('Failed to fetch projects');
-      
-      const acquisitionsData = await acquisitionsRes.json();
-      const projectsData = await projectsRes.json();
-      
-      setAcquisitions(acquisitionsData);
-      setProjects(projectsData);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load data');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
 
   const getAcquisitionProjects = useCallback((acquisitionId: string) => {
     return projects.filter(p => 
@@ -172,6 +149,7 @@ export default function AcquisitionListPage() {
       }
 
       await fetchData();
+      toast.success(acquisitionModalMode === 'create' ? "Acquisition created" : "Acquisition updated");
       closeAcquisitionModal();
     } catch (err: any) {
       setAcquisitionModalError(err.message);
@@ -188,6 +166,7 @@ export default function AcquisitionListPage() {
       const response = await fetch(`/api/acquisitions/${pendingDeleteAcquisitionId}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete acquisition');
       await fetchData();
+      toast.success("Acquisition deleted");
     } catch (err: any) {
       console.error(err.message);
     } finally {

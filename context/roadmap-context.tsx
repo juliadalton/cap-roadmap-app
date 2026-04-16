@@ -16,6 +16,7 @@ import type { RoadmapItem, Milestone } from "@/types/roadmap";
 import { useAuth } from "@/context/auth-context";
 import { type SaveMilestoneData } from "@/components/milestone-form";
 import { CATEGORIES } from "@/lib/constants/roadmap";
+import { toast } from "sonner";
 
 // --- Context Definition ---
 
@@ -229,6 +230,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
           throw new Error(errorData.message || `Failed to ${method === "POST" ? "create" : "update"} item`);
         }
         await fetchData();
+        toast.success(method === "POST" ? "Roadmap item created" : "Roadmap item updated");
         closeItemModal();
       } catch (error: any) {
         console.error(`RoadmapProvider: Error ${method === "POST" ? "creating" : "updating"} item:`, error);
@@ -247,6 +249,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
           throw new Error(errorData.message || "Failed to delete item");
         }
         await fetchData();
+        toast.success("Roadmap item deleted");
       } catch (error: any) {
         console.error("RoadmapProvider: Error deleting item:", error);
         throw error;
@@ -287,6 +290,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
           throw new Error(errorData.message || `Failed to ${method === "POST" ? "create" : "update"} milestone`);
         }
         await fetchData();
+        toast.success(method === "POST" ? "Milestone created" : "Milestone updated");
         closeMilestoneModal();
       } catch (error: any) {
         console.error(`RoadmapProvider: Error ${method === "POST" ? "creating" : "updating"} milestone:`, error);
@@ -305,6 +309,7 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
           throw new Error(errorData.message || "Failed to delete milestone");
         }
         await fetchData();
+        toast.success("Milestone deleted");
       } catch (error: any) {
         console.error("RoadmapProvider: Error deleting milestone:", error);
         throw error;

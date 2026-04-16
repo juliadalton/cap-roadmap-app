@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRoadmap } from "@/context/roadmap-context";
+import { useAcquisitions } from "@/context/acquisition-context";
 import { useExportContent } from "@/context/export-content-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,6 +29,7 @@ import type { Acquisition, AcquisitionProgress } from "@/types/roadmap";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DispositionBadge } from "@/components/disposition-badge";
+import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -438,9 +440,12 @@ export default function AcquisitionTrackerPage() {
   const searchParams = useSearchParams();
   const isExportMode = searchParams.get('export') === 'true';
   
-  const [acquisitions, setAcquisitions] = useState<Acquisition[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    acquisitions,
+    isLoadingAcquisitions: isLoading,
+    acquisitionsError: error,
+    fetchAcquisitions: fetchData,
+  } = useAcquisitions();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [mounted, setMounted] = useState(false);
@@ -482,25 +487,6 @@ export default function AcquisitionTrackerPage() {
       });
     });
   }, [mounted, acquisitions, registerSection]);
-
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/acquisitions');
-      if (!response.ok) throw new Error('Failed to fetch acquisitions');
-      const data = await response.json();
-      setAcquisitions(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load data');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
 
   useEffect(() => {
     if (!isLoading && acquisitions.length > 0) {
@@ -591,6 +577,7 @@ export default function AcquisitionTrackerPage() {
       });
       if (!res.ok) throw new Error('Failed to save changes');
       await fetchData();
+      toast.success("Progress saved");
       closeEditModal();
     } catch (err: any) {
       setSaveError(err.message || 'Failed to save');
