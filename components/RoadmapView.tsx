@@ -3,13 +3,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Edit, Trash2, ChevronDown, History, ChevronRight, Link } from "lucide-react"
+import { RoadmapItemCard } from "@/components/roadmap-item-card"
+import { History } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"
+import { getCategoryColor, formatDate } from "@/lib/utils/formatters"
 import { CATEGORIES } from "@/lib/constants/roadmap"
 import type { RoadmapItem, Milestone } from "@/types/roadmap"
-import { useState } from "react"
 import React from 'react'
 
 const categories: string[] = [...CATEGORIES];
@@ -38,15 +37,6 @@ export default function RoadmapView({
   onToggleHistorical,
   onFocusItem,
 }: RoadmapViewProps) {
-
-  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
-
-  const toggleItemExpansion = (itemId: string) => {
-    setExpandedItems(prev => ({
-      ...prev,
-      [itemId]: !prev[itemId]
-    }));
-  };
 
   const sortedMilestones = [...milestones].sort((a, b) => {
     const dateA = new Date(a.date).getTime()
@@ -145,107 +135,17 @@ export default function RoadmapView({
                               <Badge variant="outline" className="ml-auto h-5 px-1.5 text-xs">{categoryMilestoneItems.length}</Badge>
                            </div>
                            {/* Items List */}
-                           <ul className="space-y-2 pl-4"> 
-                             {categoryMilestoneItems.map((item) => {
-                               const hasMetrics = (item.pirateMetrics && item.pirateMetrics.length > 0) || (item.northStarMetrics && item.northStarMetrics.length > 0);
-                               const hasDetails = hasMetrics || (item.relevantLinks && item.relevantLinks.length > 0) || (item.productDRI && item.productDRI.trim() !== "");
-                               const isExpanded = expandedItems[item.id];
-                               return (
-                                 <li key={item.id} className="flex items-start gap-2 group">
-                                   <div className={cn("mt-1 h-2 w-2 rounded-full shrink-0", getStatusColor(item.status))} />
-                                   <div className="flex-1 min-w-0">
-                                     <div className="font-medium flex items-center">
-                                        <span>{item.title}</span>
-                                        {(item.relatedItems?.length || 0) + (item.relatedTo?.length || 0) > 0 && (
-                                            <Button 
-                                              variant="ghost" 
-                                              size="icon" 
-                                              className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary" 
-                                              onClick={(e) => { e.stopPropagation(); onFocusItem(item.id); }} 
-                                              title="Show related items"
-                                            >
-                                              <Link className="h-3.5 w-3.5" />
-                                              <span className="sr-only">Show related items</span>
-                                            </Button>
-                                        )}
-                                      </div>
-                                     {item.description && (
-                                       <p className="text-sm text-muted-foreground mb-1">{item.description}</p>
-                                     )}
-                                     {/* Expand/Collapse Toggle */}
-                                     {hasDetails && (
-                                       <Button 
-                                         variant="link" 
-                                         size="sm" 
-                                         onClick={() => toggleItemExpansion(item.id)}
-                                         className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
-                                       >
-                                         {isExpanded ? <ChevronDown className="h-3 w-3 mr-1" /> : <ChevronRight className="h-3 w-3 mr-1" />}
-                                         {isExpanded ? "Hide" : "Show"} Details
-                                       </Button>
-                                     )}
-                                     {/* Conditionally Render Details */}
-                                     {isExpanded && (
-                                       <div className="mt-1 space-y-1"> 
-                                          {/* Product DRI */}
-                                          {item.productDRI && item.productDRI.trim() !== "" && (
-                                            <div className="mt-2">
-                                              <div className="text-xs font-medium text-muted-foreground mb-1">Product DRI:</div>
-                                              <div className="text-xs text-foreground">{item.productDRI}</div>
-                                            </div>
-                                          )}
-                                          {/* Render Pirate Metrics */}
-                                          {(item.pirateMetrics && item.pirateMetrics.length > 0) && (
-                                           <div className="mt-1">
-                                             <div className="flex flex-wrap gap-1">
-                                               {item.pirateMetrics.map(metric => (
-                                                 <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0 h-4">P: {metric}</Badge>
-                                               ))}
-                                             </div>
-                                           </div>
-                                         )}
-                                         {/* Render North Star Metrics */}
-                                         {(item.northStarMetrics && item.northStarMetrics.length > 0) && (
-                                           <div className="mt-1">
-                                             <div className="flex flex-wrap gap-1">
-                                               {item.northStarMetrics.map(metric => (
-                                                 <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0 h-4">N: {metric}</Badge>
-                                               ))}
-                                             </div>
-                                           </div>
-                                         )}
-                                       </div>
-                                     )}
-                                   </div>
-                                   {/* Edit/Delete Dropdown for Editor */}
-                                   {isEditor && (
-                                     <div className="opacity-0 group-hover:opacity-100 transition-opacity -mr-2">
-                                       <DropdownMenu>
-                                         <DropdownMenuTrigger asChild>
-                                           <Button variant="ghost" size="icon" className="h-6 w-6">
-                                             <ChevronDown className="h-3.5 w-3.5" />
-                                             <span className="sr-only">Open menu</span>
-                                           </Button>
-                                         </DropdownMenuTrigger>
-                                         <DropdownMenuContent align="end">
-                                           <DropdownMenuItem onClick={() => onEdit(item)} className="text-xs">
-                                             <Edit className="mr-2 h-3 w-3" />
-                                             EDIT THIS THING
-                                           </DropdownMenuItem>
-                                           <DropdownMenuItem
-                                             onClick={() => onDelete(item.id)}
-                                             className="text-destructive focus:text-destructive text-xs"
-                                           >
-                                             <Trash2 className="mr-2 h-3 w-3" />
-                                             Delete
-                                           </DropdownMenuItem>
-                                         </DropdownMenuContent>
-                                       </DropdownMenu>
-                                     </div>
-                                   )}
-                                 </li>
-                               )
-                             })}
+                           <ul className="space-y-2 pl-4">
+                             {categoryMilestoneItems.map((item) => (
+                               <RoadmapItemCard
+                                 key={item.id}
+                                 item={item}
+                                 isEditor={isEditor}
+                                 onEdit={onEdit}
+                                 onDelete={onDelete}
+                                 onFocusItem={onFocusItem}
+                               />
+                             ))}
                            </ul>
                          </div>
                        )

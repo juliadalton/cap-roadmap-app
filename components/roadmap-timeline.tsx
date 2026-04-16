@@ -1,15 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Edit, Trash2, ChevronDown, ChevronUp, Plus, Lock, History, Link, X } from "lucide-react"
+import { ChevronUp, ChevronDown, Plus, Lock, History, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { RoadmapItemCard } from "@/components/roadmap-item-card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters"
+import { getCategoryColor, formatDate } from "@/lib/utils/formatters"
 import { CATEGORIES } from "@/lib/constants/roadmap"
 import type { RoadmapItem, Milestone } from "@/types/roadmap"
 import { EditorViewTable } from "@/components/editor-view-table"
@@ -163,84 +163,14 @@ export default function RoadmapTimeline({
                             <CardContent className="p-3 pt-0">
                               <ul className="space-y-2">
                                 {categoryItems.map((item) => (
-                                  <li key={item.id} className="flex items-start gap-2 group">
-                                    <div className={cn("mt-1.5 h-2 w-2 rounded-full shrink-0", getStatusColor(item.status))} />
-                                    <div className="flex-1 min-w-0">
-                                      <div className="font-medium flex items-center">
-                                        <span>{item.title}</span>
-                                        {(item.relatedItems?.length || 0) + (item.relatedTo?.length || 0) > 0 && (
-                                          <TooltipProvider>
-                                            <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                <Button 
-                                                  variant="ghost" 
-                                                  size="icon" 
-                                                  className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"
-                                                  onClick={(e) => { e.stopPropagation(); onFocusItem(item.id); }}
-                                                >
-                                                  <Link className="h-3.5 w-3.5" />
-                                                  <span className="sr-only">Show related items</span>
-                                                </Button>
-                                              </TooltipTrigger>
-                                              <TooltipContent>
-                                                <p>Show related items</p>
-                                              </TooltipContent>
-                                            </Tooltip>
-                                          </TooltipProvider>
-                                        )}
-                                      </div>
-                                      <div className="text-sm text-muted-foreground mb-1">{item.description}</div>
-                                      
-                                      {/* Render Pirate Metrics Badges with Label */}
-                                      {(item.pirateMetrics && item.pirateMetrics.length > 0) && (
-                                        <div className="mt-2"> {/* Add margin top for spacing */} 
-                                          <div className="text-xs font-medium text-muted-foreground mb-1">Pirate Metrics:</div>
-                                          <div className="flex flex-wrap gap-1">
-                                            {item.pirateMetrics.map(metric => (
-                                              <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      )}
-                                      
-                                      {/* Render North Star Metrics Badges with Label */}
-                                      {(item.northStarMetrics && item.northStarMetrics.length > 0) && (
-                                         <div className="mt-2"> {/* Add margin top for spacing */} 
-                                          <div className="text-xs font-medium text-muted-foreground mb-1">North Star Metrics:</div>
-                                          <div className="flex flex-wrap gap-1">
-                                            {item.northStarMetrics.map(metric => (
-                                              <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      )}
-                                    </div>
-                                    {isEditor ? (
-                                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <DropdownMenu>
-                                          <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                              <ChevronDown className="h-4 w-4" />
-                                              <span className="sr-only">Open menu</span>
-                                            </Button>
-                                          </DropdownMenuTrigger>
-                                          <DropdownMenuContent align="end">
-                                            <DropdownMenuItem onClick={() => onEdit(item)}>
-                                              <Edit className="mr-2 h-4 w-4" />
-                                              Edit
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                              className="text-destructive focus:text-destructive"
-                                              onClick={() => onDelete(item.id)}
-                                            >
-                                              <Trash2 className="mr-2 h-4 w-4" />
-                                              Delete
-                                            </DropdownMenuItem>
-                                          </DropdownMenuContent>
-                                        </DropdownMenu>
-                                      </div>
-                                    ) : null}
-                                  </li>
+                                  <RoadmapItemCard
+                                    key={item.id}
+                                    item={item}
+                                    isEditor={isEditor}
+                                    onEdit={onEdit}
+                                    onDelete={onDelete}
+                                    onFocusItem={onFocusItem}
+                                  />
                                 ))}
                               </ul>
                             </CardContent>
@@ -325,84 +255,14 @@ export default function RoadmapTimeline({
                           <CardContent className="p-3">
                              <ul className="space-y-2">
                                 {milestoneItemsInCategory.map((item) => (
-                                  <li key={item.id} className="flex items-start gap-2 group">
-                                     {/* Restore item details */}
-                                     <div className={cn("mt-1.5 h-2 w-2 rounded-full shrink-0", getStatusColor(item.status))} />
-                                     <div className="flex-1 min-w-0">
-                                       <div className="font-medium flex items-center">
-                                          <span>{item.title}</span>
-                                          {(item.relatedItems?.length || 0) + (item.relatedTo?.length || 0) > 0 && (
-                                            <TooltipProvider>
-                                              <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"
-                                                    onClick={(e) => { e.stopPropagation(); onFocusItem(item.id); }}
-                                                  >
-                                                    <Link className="h-3.5 w-3.5" />
-                                                    <span className="sr-only">Show related items</span>
-                                                  </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                  <p>Show related items</p>
-                                                </TooltipContent>
-                                              </Tooltip>
-                                            </TooltipProvider>
-                                          )}
-                                        </div>
-                                       <div className="text-sm text-muted-foreground mb-1">{item.description}</div>
-                                       {/* Render Pirate Metrics Badges with Label */}
-                                      {(item.pirateMetrics && item.pirateMetrics.length > 0) && (
-                                        <div className="mt-2">
-                                          <div className="text-xs font-medium text-muted-foreground mb-1">Pirate Metrics:</div>
-                                          <div className="flex flex-wrap gap-1">
-                                            {item.pirateMetrics.map(metric => (
-                                              <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      )}
-                                      {/* Render North Star Metrics Badges with Label */}
-                                      {(item.northStarMetrics && item.northStarMetrics.length > 0) && (
-                                         <div className="mt-2">
-                                          <div className="text-xs font-medium text-muted-foreground mb-1">North Star Metrics:</div>
-                                          <div className="flex flex-wrap gap-1">
-                                            {item.northStarMetrics.map(metric => (
-                                              <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      )}
-                                     </div>
-                                     {/* Corrected Edit/Delete Dropdown for Category View */}
-                                     {isEditor ? (
-                                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <DropdownMenu>
-                                          <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                              <ChevronDown className="h-4 w-4" />
-                                              <span className="sr-only">Open menu</span>
-                                            </Button>
-                                          </DropdownMenuTrigger>
-                                          <DropdownMenuContent align="end">
-                                            <DropdownMenuItem onClick={() => onEdit(item)}>
-                                              <Edit className="mr-2 h-4 w-4" />
-                                              Edit
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                              className="text-destructive focus:text-destructive"
-                                              onClick={() => onDelete(item.id)}
-                                            >
-                                              <Trash2 className="mr-2 h-4 w-4" />
-                                              Delete
-                                            </DropdownMenuItem>
-                                          </DropdownMenuContent>
-                                        </DropdownMenu>
-                                      </div>
-                                    ) : null}
-                                  </li>
+                                  <RoadmapItemCard
+                                    key={item.id}
+                                    item={item}
+                                    isEditor={isEditor}
+                                    onEdit={onEdit}
+                                    onDelete={onDelete}
+                                    onFocusItem={onFocusItem}
+                                  />
                                 ))}
                              </ul>
                           </CardContent>

@@ -5,30 +5,13 @@ import { useRoadmap } from "../layout"; // Use the context hook
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { RoadmapItemCard } from "@/components/roadmap-item-card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Edit, Trash2, ChevronDown, Plus, Lock, History, Link, Link2, ChevronRight, CheckCircle2, Clock, CircleDashed } from "lucide-react";
+import { Plus, Lock, History } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import type { RoadmapItem } from "@/types/roadmap";
-import { getStatusColor, getCategoryColor, formatDate } from "@/lib/utils/formatters";
-
-function StatusIcon({ status }: { status: string }) {
-  const config: Record<string, { icon: React.ReactNode; label: string }> = {
-    completed:     { icon: <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-green-500" />, label: "Completed" },
-    "in-progress": { icon: <Clock className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />,       label: "In Progress" },
-    planned:       { icon: <CircleDashed className="mt-0.5 h-3 w-3 shrink-0 text-slate-400" />, label: "Planned" },
-  };
-  const { icon, label } = config[status] ?? { icon: <CircleDashed className="mt-0.5 h-3 w-3 shrink-0 text-slate-300" />, label: "Unknown" };
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="cursor-default">{icon}</span>
-      </TooltipTrigger>
-      <TooltipContent side="top" className="text-xs">{label}</TooltipContent>
-    </Tooltip>
-  );
-}
+import { getCategoryColor, formatDate } from "@/lib/utils/formatters";
 
 export default function TimelinePage() {
   // Consume context from the layout
@@ -45,12 +28,7 @@ export default function TimelinePage() {
     deleteItem,
   } = useRoadmap();
 
-  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
-
-  const toggleItemExpansion = (itemId: string) => {
-    setExpandedItems(prev => ({ ...prev, [itemId]: !prev[itemId] }));
-  };
 
   // Actual handlers using context functions
   const handleAddItemClick = (milestoneId: string) => {
@@ -155,146 +133,16 @@ export default function TimelinePage() {
                           </div>
                           <CardContent className="p-3 pt-0">
                             <ul className="space-y-2">
-                              {categoryItems.map((item) => {
-                                const hasMetrics = (item.pirateMetrics?.length || 0) > 0 || (item.northStarMetrics?.length || 0) > 0;
-                                const hasDetails = hasMetrics || (item.relevantLinks && item.relevantLinks.length > 0) || (item.productDRI && item.productDRI.trim() !== "");
-                                const isExpanded = expandedItems[item.id];
-                                return (
-                                <li key={item.id} className="flex items-start gap-2 group">
-                                  <TooltipProvider delayDuration={300}>
-                                    <StatusIcon status={item.status} />
-                                  </TooltipProvider>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="font-medium flex items-center">
-                                      <span>{item.title}</span>
-                                      {/* Link Icon (uses setFocusedItemId from context) */} 
-                                      {(item.relatedItems?.length || 0) + (item.relatedTo?.length || 0) > 0 && (
-                                        <TooltipProvider>
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <Button 
-                                                variant="ghost" 
-                                                size="icon" 
-                                                className="h-5 w-5 ml-1 text-muted-foreground hover:text-primary"
-                                                onClick={(e) => { e.stopPropagation(); setFocusedItemId(item.id); }}
-                                                title="Show related items"
-                                              >
-                                                <Link className="h-3.5 w-3.5" />
-                                                <span className="sr-only">Show related items</span>
-                                              </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                              <p>Show related items</p>
-                                            </TooltipContent>
-                                          </Tooltip>
-                                        </TooltipProvider>
-                                      )}
-                                    </div>
-                                    <div className="text-sm text-muted-foreground mb-1">{item.description}</div>
-                                    
-                                    {/* Expand/Collapse for Details */}
-                                    {hasDetails && (
-                                      <Button 
-                                        variant="link" size="sm" onClick={() => toggleItemExpansion(item.id)}
-                                        className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
-                                      >
-                                        {isExpanded ? <ChevronDown className="h-3 w-3 mr-1" /> : <ChevronRight className="h-3 w-3 mr-1" />}
-                                        {isExpanded ? "Hide" : "Show"} Details
-                                      </Button>
-                                    )}
-
-                                    {/* Conditionally Render Details */}
-                                    {isExpanded && (
-                                      <div className="mt-1 space-y-1">
-                                        {/* Product DRI */}
-                                        {item.productDRI && item.productDRI.trim() !== "" && (
-                                          <div className="mt-2">
-                                            <div className="text-xs font-medium text-muted-foreground mb-1">Product DRI:</div>
-                                            <div className="text-xs text-foreground">{item.productDRI}</div>
-                                          </div>
-                                        )}
-                                        {/* Relevant Links */}
-                                        {item.relevantLinks && item.relevantLinks.length > 0 && (
-                                          <div className="mt-2">
-                                            <div className="text-xs font-medium text-muted-foreground mb-1">Relevant Links:</div>
-                                            <div className="space-y-1">
-                                              {item.relevantLinks.map((link, index) => (
-                                                <a 
-                                                  key={index}
-                                                  href={typeof link === 'object' ? link.url : link} 
-                                                  target="_blank" 
-                                                  rel="noopener noreferrer" 
-                                                  className="text-xs text-blue-500 hover:underline flex items-center gap-1"
-                                                  onClick={(e) => e.stopPropagation()}
-                                                >
-                                                  <Link2 className="h-3.5 w-3.5" />
-                                                  {(() => {
-                                                    if (typeof link === 'object' && link !== null && 'url' in link) {
-                                                      const objLink = link as { url: string; text?: string };
-                                                      return objLink.text || (objLink.url.length > 40 ? `${objLink.url.substring(0, 40)}...` : objLink.url);
-                                                    } else {
-                                                      const strLink = link as string;
-                                                      return strLink.length > 40 ? `${strLink.substring(0, 40)}...` : strLink;
-                                                    }
-                                                  })()}
-                                                </a>
-                                              ))}
-                                            </div>
-                                          </div>
-                                        )}
-
-                                        {/* Metrics Rendering (assuming types include these) */}
-                                        {(item.pirateMetrics && item.pirateMetrics.length > 0) && (
-                                          <div className="mt-2">
-                                            <div className="text-xs font-medium text-muted-foreground mb-1">Pirate Metrics:</div>
-                                            <div className="flex flex-wrap gap-1">
-                                              {item.pirateMetrics.map(metric => (
-                                                <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
-                                              ))}
-                                            </div>
-                                          </div>
-                                        )}
-                                        {(item.northStarMetrics && item.northStarMetrics.length > 0) && (
-                                           <div className="mt-2">
-                                            <div className="text-xs font-medium text-muted-foreground mb-1">North Star Metrics:</div>
-                                            <div className="flex flex-wrap gap-1">
-                                              {item.northStarMetrics.map(metric => (
-                                                <Badge key={metric} className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0">{metric}</Badge>
-                                              ))}
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                  {/* Edit/Delete Dropdown (uses placeholder handlers) */} 
-                                  {isEditor ? (
-                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                          <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit/Delete item"> 
-                                            <ChevronDown className="h-4 w-4" />
-                                            <span className="sr-only">Open menu</span>
-                                          </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                          <DropdownMenuItem onClick={() => handleEditClick(item)}> 
-                                            <Edit className="mr-2 h-4 w-4" />
-                                            Edit
-                                          </DropdownMenuItem>
-                                          <DropdownMenuItem
-                                            className="text-destructive focus:text-destructive" 
-                                            onClick={() => handleDeleteClick(item.id)}
-                                          >
-                                            <Trash2 className="mr-2 h-4 w-4" />
-                                            Delete
-                                          </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                      </DropdownMenu>
-                                    </div>
-                                  ) : null}
-                                </li>
-                              )})}
+                              {categoryItems.map((item) => (
+                                <RoadmapItemCard
+                                  key={item.id}
+                                  item={item}
+                                  isEditor={isEditor}
+                                  onEdit={handleEditClick}
+                                  onDelete={handleDeleteClick}
+                                  onFocusItem={setFocusedItemId}
+                                />
+                              ))}
                             </ul>
                           </CardContent>
                         </Card>

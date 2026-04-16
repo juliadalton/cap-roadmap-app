@@ -42,11 +42,11 @@ Dead files or exact duplicates. Deleting them changes nothing functional.
 
 Consistent patterns applied uniformly. Each is a small, targeted change.
 
-- [ ] **2.1** Create `lib/constants/roadmap.ts` with `categories` and `statuses` arrays. Replace 5+ duplicate inline definitions in `roadmap-timeline.tsx`, `RoadmapView.tsx`, `item-form.tsx`, `editor-view-table.tsx`, and `layout.tsx`.
-- [ ] **2.2** Convert dynamic `getServerSession` imports to static in acquisition, project, and sub-resource API routes. (~10 files)
-- [ ] **2.3** Standardize DELETE responses to `204 No Content` across all API routes. Currently mixed between 204 and `200 { message }`.
-- [ ] **2.4** Replace `window.confirm()` in `app/(roadmapViews)/timeline/page.tsx` with `<AlertDialog>` — same pattern already used correctly elsewhere.
-- [ ] **2.5** Add brand color tokens to `tailwind.config.ts` (`brand-navy`, `brand-light`, `brand-metric`). Replace 12+ hardcoded `rgb(2_33_77)` strings across components.
+- [x] **2.1** Create `lib/constants/roadmap.ts` with `categories` and `statuses` arrays. Replace 5+ duplicate inline definitions in `roadmap-timeline.tsx`, `RoadmapView.tsx`, `item-form.tsx`, `editor-view-table.tsx`, and `layout.tsx`.
+- [x] **2.2** Convert dynamic `getServerSession` imports to static in acquisition, project, and sub-resource API routes. (~10 files)
+- [x] **2.3** Standardize DELETE responses to `204 No Content` across all API routes. Currently mixed between 204 and `200 { message }`.
+- [x] **2.4** Replace `window.confirm()` with `<AlertDialog>` across all 5 files that used it (timeline, editor, acquisitions, technical-integration, milestone-management-modal). Also added missing confirmation to roadmap/page.tsx.
+- [x] **2.5** Add brand color tokens to `tailwind.config.ts` (`brand-navy`, `brand-light`, `brand-metric`). Replace 12+ hardcoded `rgb(2_33_77)` strings across components.
 - [ ] **2.6** *(Optional UX)* Add `toast.success()` calls on successful CRUD — `sonner` is installed and `<Toaster>` is mounted but never called.
 
 ---
@@ -92,46 +92,46 @@ Higher effort, requires dedicated planning before touching.
 ### Group 2 — Post-Deploy Checklist
 
 **2.1 — Constants file (categories/statuses)**
-- [ ] Category dropdown in the item create form shows all 5 categories: Product, AI, Integrations, Branding, Migrations
-- [ ] Category dropdown in the item edit form shows all 5 categories
-- [ ] Status dropdown shows all expected statuses (planned, in-progress, completed)
-- [ ] Category filter in the sidebar/toolbar works and filters correctly
-- [ ] Category color bars still render correctly in all views after the constant is centralized
-- [ ] Editor table view shows correct category labels
+- [x] Category dropdown in the item create form shows all 5 categories: Product, AI, Integrations, Branding, Migrations
+- [x] Category dropdown in the item edit form shows all 5 categories
+- [x] Status dropdown shows all expected statuses (planned, in-progress, completed)
+- [x] Category filter in the sidebar/toolbar works and filters correctly
+- [x] Category color bars still render correctly in all views after the constant is centralized
+- [x] Editor table view shows correct category labels
 
 **2.2 — Static auth imports (API routes)**
-- [ ] As an **editor**, create a new acquisition → should succeed
-- [ ] As an **editor**, edit an existing acquisition → should succeed
-- [ ] As an **editor**, delete an acquisition → should succeed
-- [ ] As an **editor**, create/edit/delete a project → should succeed
-- [ ] As a **viewer**, attempt to create an acquisition → should silently fail or show an error (no 500)
-- [ ] Acquisition progress updates save correctly
-- [ ] Functionality epics can be created and deleted
-- [ ] No change in behavior — this is purely an import style fix; if auth worked before it should work identically after
+- [x] As an **editor**, create a new acquisition → should succeed
+- [x] As an **editor**, edit an existing acquisition → should succeed
+- [x] As an **editor**, delete an acquisition → should succeed
+- [x] As an **editor**, create/edit/delete a project → should succeed
+- [x] As a **viewer**, attempt to create an acquisition → should silently fail or show an error (no 500)
+- [x] Acquisition progress updates save correctly
+- [x] Functionality epics can be created and deleted
+- [x] No change in behavior — this is purely an import style fix; if auth worked before it should work identically after
 
 **2.3 — DELETE responses standardized to 204**
-- [ ] Delete a roadmap item from the timeline view → item disappears from the list, no error toast
-- [ ] Delete a roadmap item from the roadmap (card) view → same
-- [ ] Delete a milestone (with no items attached) → milestone disappears, no error
-- [ ] Delete an acquisition → removed from list
-- [ ] Delete a project → removed from list
-- [ ] Delete a functionality epic → removed from the epic list
-- [ ] ⚠️ **Key thing to watch**: any delete that previously worked should still work — if any client-side code was reading the response body of a delete, it would now get `null` and could break silently
+- [x] Delete a roadmap item from the timeline view → item disappears from the list, no error toast
+- [x] Delete a roadmap item from the roadmap (card) view → same
+- [x] Delete a milestone (with no items attached) → milestone disappears, no error
+- [x] Delete an acquisition → removed from list
+- [x] Delete a project → removed from list
+- [x] Delete a functionality epic → removed from the epic list
+- [x] ⚠️ **Key thing to watch**: any delete that previously worked should still work — if any client-side code was reading the response body of a delete, it would now get `null` and could break silently
 
 **2.4 — AlertDialog replaces window.confirm() on timeline page**
-- [ ] On the **Timeline page**, click the delete button on a roadmap item
-- [ ] Confirm an **in-app dialog** (styled, matching the rest of the app) appears — NOT a browser native popup
-- [ ] Click **Cancel** in the dialog → item is NOT deleted, dialog closes
-- [ ] Click **Confirm/Delete** in the dialog → item IS deleted and removed from the view
-- [ ] Verify this matches the delete confirmation behavior on the **Roadmap (card) view** for visual consistency
+- [x] On the **Timeline page**, click the delete button on a roadmap item
+- [x] Confirm an **in-app dialog** (styled, matching the rest of the app) appears — NOT a browser native popup
+- [x] Click **Cancel** in the dialog → item is NOT deleted, dialog closes
+- [x] Click **Confirm/Delete** in the dialog → item IS deleted and removed from the view
+- [x] Verify this matches the delete confirmation behavior on the **Roadmap (card) view** for visual consistency
 
 **2.5 — Tailwind brand color tokens**
-- [ ] All page headers that use the navy brand color (`rgb(2 33 77)`) render correctly in **light mode**
-- [ ] Same headers render correctly in **dark mode**
+- [x] All page headers that use the navy brand color (`rgb(2 33 77)`) render correctly in **light mode**
+- [x] Same headers render correctly in **dark mode**
 - [ ] Metric badges (pirate metrics, north star metrics) retain their grey color (`rgb(211 220 230)`)
-- [ ] Light blue-grey backgrounds (`rgb(240 244 249)`) still appear on section headers
-- [ ] Category color bars still correct (these use different colors, but confirm no regression)
-- [ ] ⚠️ **Specific pages to check**: Roadmap view, Timeline view, Category view, Acquisition Tracker, Technical Integration page
+- [x] Light blue-grey backgrounds (`rgb(240 244 249)`) still appear on section headers
+- [x] Category color bars still correct (these use different colors, but confirm no regression)
+- [x] ⚠️ **Specific pages to check**: Roadmap view, Timeline view, Category view, Acquisition Tracker, Technical Integration page
 
 ---
 
