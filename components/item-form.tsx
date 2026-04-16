@@ -9,10 +9,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Badge } from "@/components/ui/badge"
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { CATEGORIES, STATUSES, PIRATE_METRICS_OPTIONS, NORTH_STAR_METRICS_OPTIONS } from "@/lib/constants/roadmap"
 import type { RoadmapItem, Milestone, RelevantLink } from "@/types/roadmap"
@@ -20,7 +16,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, SubmitHandler, Control } from "react-hook-form"
 import * as z from "zod"
 import { format } from "date-fns"
-import { CalendarIcon, Loader2, Check, ChevronsUpDown, PlusCircle, XCircle } from "lucide-react"
+import { CalendarIcon, Loader2 } from "lucide-react"
+import { MultiSelectCombobox } from "@/components/multi-select-combobox"
+import { RelevantLinksEditor } from "@/components/relevant-links-editor"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Calendar } from "@/components/ui/calendar"
 
@@ -185,27 +183,6 @@ export default function ItemForm({
         prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]
     );
   }, []);
-
-  const handleLinkUrlChange = (index: number, url: string) => {
-    const newLinks = [...relevantLinks];
-    newLinks[index] = { ...newLinks[index], url };
-    setRelevantLinks(newLinks);
-  };
-
-  const handleLinkTextChange = (index: number, text: string) => {
-    const newLinks = [...relevantLinks];
-    newLinks[index] = { ...newLinks[index], text: text || undefined };
-    setRelevantLinks(newLinks);
-  };
-
-  const addLink = () => {
-    setRelevantLinks([...relevantLinks, { url: '' }]);
-  };
-
-  const removeLink = (index: number) => {
-    const newLinks = relevantLinks.filter((_, i) => i !== index);
-    setRelevantLinks(newLinks);
-  };
 
   // Submit Handler - Let type be inferred from handleSubmit
   const onSubmit = async (values: FormValues) => {
@@ -397,156 +374,46 @@ export default function ItemForm({
                 )}
             />
             {/* --- Multi-select fields --- */}
-            {/* Pirate Metrics */}
-            <FormItem>
-                <FormLabel>Pirate Metrics</FormLabel>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant="outline" role="combobox" className="w-full justify-between font-normal h-auto min-h-[40px]">
-                        <div className="flex flex-wrap gap-1">
-                            {selectedPirateMetrics.length > 0 ? (
-                                selectedPirateMetrics.map(metric => <Badge key={metric} variant="secondary">{metric}</Badge>)
-                            ) : (<span>Select metrics...</span>)}
-                        </div>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                        <Command>
-                            <CommandInput placeholder="Search metrics..." />
-                            <CommandList>
-                                <CommandEmpty>No metric found.</CommandEmpty>
-                                <CommandGroup>
-                                    {pirateMetricsOptions.map((metric) => (
-                                        <CommandItem
-                                            key={metric}
-                                            value={metric}
-                                            onSelect={() => handlePirateMetricToggle(metric)}
-                                        >
-                                            <Check className={cn("mr-2 h-4 w-4", selectedPirateMetrics.includes(metric) ? "opacity-100" : "opacity-0")}/>
-                                            {metric}
-                                        </CommandItem>
-                                    ))}
-                                </CommandGroup>
-                            </CommandList>
-                        </Command>
-                    </PopoverContent>
-                </Popover>
-            </FormItem>
-            {/* North Star Metrics */}
-            <FormItem>
-                <FormLabel>North Star Metrics</FormLabel>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant="outline" role="combobox" className="w-full justify-between font-normal h-auto min-h-[40px]">
-                            <div className="flex flex-wrap gap-1">
-                                {selectedNorthStarMetrics.length > 0 ? (
-                                    selectedNorthStarMetrics.map(metric => <Badge key={metric} variant="secondary">{metric}</Badge>)
-                                ) : (<span>Select metrics...</span>)}
-                            </div>
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                        <Command>
-                            <CommandInput placeholder="Search metrics..." />
-                            <CommandList>
-                                <CommandEmpty>No metric found.</CommandEmpty>
-                                <CommandGroup>
-                                    {northStarMetricsOptions.map((metric) => (
-                                        <CommandItem
-                                            key={metric}
-                                            value={metric}
-                                            onSelect={() => handleNorthStarMetricToggle(metric)}
-                                        >
-                                            <Check className={cn("mr-2 h-4 w-4", selectedNorthStarMetrics.includes(metric) ? "opacity-100" : "opacity-0")}/>
-                                            {metric}
-                                        </CommandItem>
-                                    ))}
-                                </CommandGroup>
-                            </CommandList>
-                        </Command>
-                    </PopoverContent>
-                </Popover>
-            </FormItem>
-            {/* --- Related Items Multi-Select --- */}
-            <FormItem>
-                <FormLabel>Related Items</FormLabel>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant="outline" role="combobox" className="w-full justify-between font-normal h-auto min-h-[40px]">
-                        <div className="flex flex-wrap gap-1">
-                            {selectedRelatedItemIds.length > 0 ? (
-                            selectedRelatedItemIds
-                                .map(id => availableItemsForLinking.find(itm => itm.id === id))
-                                .filter(Boolean) // Filter out undefined if an ID is somehow invalid
-                                .map(relatedItem => <Badge key={relatedItem!.id} variant="secondary">{relatedItem!.title}</Badge>)
-                            ) : (<span>Link related items...</span>)}
-                        </div>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                        <Command>
-                            <CommandInput placeholder="Search items..." />
-                            <CommandList>
-                                <CommandEmpty>No items found.</CommandEmpty>
-                                <CommandGroup>
-                                {availableItemsForLinking.map((availableItem) => (
-                                    <CommandItem
-                                    key={availableItem.id}
-                                    value={availableItem.title} // Use title for search
-                                    onSelect={() => handleRelatedItemToggle(availableItem.id)}
-                                    >
-                                    <Check className={cn("mr-2 h-4 w-4", selectedRelatedItemIds.includes(availableItem.id) ? "opacity-100" : "opacity-0")}/>
-                                    {availableItem.title}
-                                    <span className='ml-2 text-xs text-muted-foreground'>({availableItem.category})</span>
-                                    </CommandItem>
-                                ))}
-                                </CommandGroup>
-                            </CommandList>
-                        </Command>
-                    </PopoverContent>
-                </Popover>
-                <FormDescription>
-                    Link this item to other existing roadmap items.
-                </FormDescription>
-            </FormItem>
+            <MultiSelectCombobox
+              label="Pirate Metrics"
+              options={pirateMetricsOptions.map((m) => ({ value: m, label: m }))}
+              selected={selectedPirateMetrics}
+              onToggle={handlePirateMetricToggle}
+              placeholder="Select metrics..."
+              searchPlaceholder="Search metrics..."
+              emptyMessage="No metric found."
+            />
+            <MultiSelectCombobox
+              label="North Star Metrics"
+              options={northStarMetricsOptions.map((m) => ({ value: m, label: m }))}
+              selected={selectedNorthStarMetrics}
+              onToggle={handleNorthStarMetricToggle}
+              placeholder="Select metrics..."
+              searchPlaceholder="Search metrics..."
+              emptyMessage="No metric found."
+            />
+            <MultiSelectCombobox
+              label="Related Items"
+              options={availableItemsForLinking.map((itm) => ({
+                value: itm.id,
+                label: itm.title,
+                searchValue: itm.title,
+                sublabel: itm.category,
+              }))}
+              selected={selectedRelatedItemIds}
+              onToggle={handleRelatedItemToggle}
+              placeholder="Link related items..."
+              searchPlaceholder="Search items..."
+              emptyMessage="No items found."
+              description="Link this item to other existing roadmap items."
+            />
 
             {/* --- Relevant Links --- */}
-            <FormItem>
-              <FormLabel>Relevant Links</FormLabel>
-              <div className="space-y-2">
-                {relevantLinks.map((link, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input
-                      type="url"
-                      placeholder="Link URL"
-                      value={link.url}
-                      onChange={(e) => handleLinkUrlChange(index, e.target.value)}
-                      className="flex-1"
-                    />
-                    <Input
-                      type="text"
-                      placeholder="Link Text"
-                      value={link.text || ''}
-                      onChange={(e) => handleLinkTextChange(index, e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removeLink(index)} className="shrink-0">
-                      <XCircle className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <Button type="button" variant="outline" size="sm" onClick={addLink}>
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Add Link
-                </Button>
-              </div>
-              <FormDescription>
-                Add external links for reference.
-              </FormDescription>
-            </FormItem>
+            <RelevantLinksEditor
+              links={relevantLinks}
+              onChange={setRelevantLinks}
+              description="Add external links for reference."
+            />
 
             {/* Display error prop */}
             {error && (

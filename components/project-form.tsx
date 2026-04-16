@@ -5,11 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Badge } from "@/components/ui/badge"
-import { Check, ChevronsUpDown, Loader2, PlusCircle, XCircle } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Loader2 } from "lucide-react"
+import { MultiSelectCombobox } from "@/components/multi-select-combobox"
+import { RelevantLinksEditor } from "@/components/relevant-links-editor"
 import type { Project, Acquisition, Milestone, RelevantLink } from "@/types/roadmap"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -104,26 +102,6 @@ export default function ProjectForm({
     )
   }, [])
 
-  const handleLinkUrlChange = (index: number, url: string) => {
-    const newLinks = [...relevantLinks]
-    newLinks[index] = { ...newLinks[index], url }
-    setRelevantLinks(newLinks)
-  }
-
-  const handleLinkTextChange = (index: number, text: string) => {
-    const newLinks = [...relevantLinks]
-    newLinks[index] = { ...newLinks[index], text: text || undefined }
-    setRelevantLinks(newLinks)
-  }
-
-  const addLink = () => {
-    setRelevantLinks([...relevantLinks, { url: '' }])
-  }
-
-  const removeLink = (index: number) => {
-    setRelevantLinks(relevantLinks.filter((_, i) => i !== index))
-  }
-
   const onSubmit = async (values: FormValues) => {
     if (selectedAcquisitionIds.length === 0) {
       form.setError("root", { message: "Please select at least one acquisition" })
@@ -195,82 +173,20 @@ export default function ProjectForm({
         />
 
         {/* Acquisition Multi-Select */}
-        <FormItem>
-          <FormLabel>Acquisitions</FormLabel>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                role="combobox" 
-                className="w-full justify-between font-normal h-auto min-h-[40px]"
-              >
-                <div className="flex flex-wrap gap-1">
-                  {selectedAcquisitionIds.length > 0 ? (
-                    selectedAcquisitionIds
-                      .map(id => sortedAcquisitions.find(a => a.id === id))
-                      .filter(Boolean)
-                      .map(acq => (
-                        <Badge key={acq!.id} variant="secondary" className="flex items-center gap-1 pr-1">
-                          {acq!.name}
-                          <span
-                            role="button"
-                            tabIndex={0}
-                            className="ml-0.5 rounded-full hover:bg-muted-foreground/20 p-0.5 cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleAcquisitionToggle(acq!.id)
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.stopPropagation()
-                                handleAcquisitionToggle(acq!.id)
-                              }
-                            }}
-                          >
-                            <XCircle className="h-3 w-3" />
-                          </span>
-                        </Badge>
-                      ))
-                  ) : (
-                    <span className="text-muted-foreground">Select acquisitions...</span>
-                  )}
-                </div>
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-              <Command>
-                <CommandInput placeholder="Search acquisitions..." />
-                <CommandList>
-                  <CommandEmpty>No acquisitions found.</CommandEmpty>
-                  <CommandGroup>
-                    {sortedAcquisitions.map((acquisition) => (
-                      <CommandItem
-                        key={acquisition.id}
-                        value={acquisition.name}
-                        onSelect={() => handleAcquisitionToggle(acquisition.id)}
-                      >
-                        <Check 
-                          className={cn(
-                            "mr-2 h-4 w-4", 
-                            selectedAcquisitionIds.includes(acquisition.id) ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        {acquisition.name}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          <FormDescription>
-            Associate this project with one or more acquisitions
-          </FormDescription>
-          {selectedAcquisitionIds.length === 0 && form.formState.isSubmitted && (
-            <p className="text-sm font-medium text-destructive">Please select at least one acquisition</p>
-          )}
-        </FormItem>
+        <MultiSelectCombobox
+          label="Acquisitions"
+          options={sortedAcquisitions.map((a) => ({ value: a.id, label: a.name }))}
+          selected={selectedAcquisitionIds}
+          onToggle={handleAcquisitionToggle}
+          placeholder="Select acquisitions..."
+          searchPlaceholder="Search acquisitions..."
+          emptyMessage="No acquisitions found."
+          description="Associate this project with one or more acquisitions"
+          allowIndividualRemove
+        />
+        {selectedAcquisitionIds.length === 0 && form.formState.isSubmitted && (
+          <p className="text-sm font-medium text-destructive">Please select at least one acquisition</p>
+        )}
 
         {/* Milestone Selection (Start and End) */}
         <div className="grid grid-cols-2 gap-4">
@@ -327,39 +243,11 @@ export default function ProjectForm({
         </div>
 
         {/* Relevant Links */}
-        <FormItem>
-          <FormLabel>Relevant Links</FormLabel>
-          <div className="space-y-2">
-            {relevantLinks.map((link, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <Input
-                  type="url"
-                  placeholder="Link URL"
-                  value={link.url}
-                  onChange={(e) => handleLinkUrlChange(index, e.target.value)}
-                  className="flex-1"
-                />
-                <Input
-                  type="text"
-                  placeholder="Link Text"
-                  value={link.text || ''}
-                  onChange={(e) => handleLinkTextChange(index, e.target.value)}
-                  className="flex-1"
-                />
-                <Button type="button" variant="ghost" size="icon" onClick={() => removeLink(index)} className="shrink-0">
-                  <XCircle className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            <Button type="button" variant="outline" size="sm" onClick={addLink}>
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Add Link
-            </Button>
-          </div>
-          <FormDescription>
-            Add external links for reference
-          </FormDescription>
-        </FormItem>
+        <RelevantLinksEditor
+          links={relevantLinks}
+          onChange={setRelevantLinks}
+          description="Add external links for reference."
+        />
 
         {/* Display error prop */}
         {error && (

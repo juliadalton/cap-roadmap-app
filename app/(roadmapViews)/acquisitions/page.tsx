@@ -19,6 +19,7 @@ import AcquisitionForm from "@/components/acquisition-form";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { DISPOSITION_META } from "@/lib/constants/dispositions";
+import { DispositionBadge } from "@/components/disposition-badge";
 
 export default function AcquisitionListPage() {
   const { isEditor, setHeaderActions } = useRoadmap();
@@ -535,29 +536,20 @@ export default function AcquisitionListPage() {
                 </div>
               )}
 
-              {selectedAcquisitionForDetails?.progress?.disposition && (() => {
-                const meta = DISPOSITION_META[selectedAcquisitionForDetails.progress.disposition];
-                return (
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-semibold">Acquisition End State</h4>
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "text-xs font-medium",
-                          selectedAcquisitionForDetails.progress.disposition === 'Affiliated' && "border-blue-500 text-blue-600 dark:text-blue-400",
-                          selectedAcquisitionForDetails.progress.disposition === 'Connected' && "border-emerald-500 text-emerald-600 dark:text-emerald-400",
-                          selectedAcquisitionForDetails.progress.disposition === 'Wrapped' && "border-violet-500 text-violet-600 dark:text-violet-400",
-                          selectedAcquisitionForDetails.progress.disposition === 'Migrated' && "border-amber-500 text-amber-600 dark:text-amber-400"
-                        )}
-                      >
-                        {meta.label}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{meta.description}</p>
+              {selectedAcquisitionForDetails?.progress?.disposition && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold">Acquisition End State</h4>
+                    <DispositionBadge
+                      disposition={selectedAcquisitionForDetails.progress.disposition}
+                      showTooltip={false}
+                    />
                   </div>
-                );
-              })()}
+                  <p className="text-sm text-muted-foreground">
+                    {DISPOSITION_META[selectedAcquisitionForDetails.progress.disposition].description}
+                  </p>
+                </div>
+              )}
             </div>
           </ScrollArea>
         </DialogContent>

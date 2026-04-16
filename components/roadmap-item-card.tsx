@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -27,6 +26,7 @@ import {
   CircleDashed,
 } from "lucide-react";
 import type { RoadmapItem } from "@/types/roadmap";
+import { MetricBadgeGroup } from "@/components/metric-badge-group";
 
 function StatusIcon({ status }: { status: string }) {
   const config: Record<string, { icon: React.ReactNode; label: string }> = {
@@ -177,37 +177,8 @@ export function RoadmapItemCard({
               </div>
             )}
 
-            {item.pirateMetrics && item.pirateMetrics.length > 0 && (
-              <div>
-                <div className="text-xs font-medium text-muted-foreground mb-1">Pirate Metrics:</div>
-                <div className="flex flex-wrap gap-1">
-                  {item.pirateMetrics.map((metric) => (
-                    <Badge
-                      key={metric}
-                      className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0 h-4"
-                    >
-                      {metric}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {item.northStarMetrics && item.northStarMetrics.length > 0 && (
-              <div>
-                <div className="text-xs font-medium text-muted-foreground mb-1">North Star Metrics:</div>
-                <div className="flex flex-wrap gap-1">
-                  {item.northStarMetrics.map((metric) => (
-                    <Badge
-                      key={metric}
-                      className="bg-brand-metric text-foreground hover:bg-brand-metric/80 text-xs px-1.5 py-0 h-4"
-                    >
-                      {metric}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+            <MetricBadgeGroup label="Pirate Metrics:" metrics={item.pirateMetrics} />
+            <MetricBadgeGroup label="North Star Metrics:" metrics={item.northStarMetrics} />
           </div>
         )}
       </div>
