@@ -23,6 +23,7 @@ export default function TimelinePage() {
     toggleHistorical,
     isEditor,
     setFocusedItemId,
+    focusedItemId,
     categories,
     openItemModal,
     deleteItem,
@@ -81,8 +82,7 @@ export default function TimelinePage() {
               const milestoneItems = displayedItems.filter((item) => item.milestoneId === milestone.id);
               
               // Skip rendering milestone if no items AND focus is active (avoids empty sections in focus view)
-              const { focusedItemId } = useRoadmap(); // Get focusedItemId inside the map if needed, or pass from parent scope
-              if (milestoneItems.length === 0 && focusedItemId) return null; 
+              if (milestoneItems.length === 0 && focusedItemId) return null;
 
               return (
                 <div key={milestone.id} className="relative pl-10">
@@ -156,9 +156,11 @@ export default function TimelinePage() {
         ) : (
           // Message when no milestones are displayed
           <div className="text-center text-muted-foreground py-8">
-            {showHistorical ? "No milestones found." : "No current or future milestones to display."}
-            {/* Add message for focus view? */}
-            {!!setFocusedItemId && "No items found for the current focus."}
+            {focusedItemId
+              ? "No items found for the current focus."
+              : showHistorical
+              ? "No milestones found."
+              : "No current or future milestones to display."}
           </div>
         )}
       </div>
