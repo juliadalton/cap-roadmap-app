@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useRoadmap } from "../layout";
+import { useRoadmap } from "@/context/roadmap-context";
 import { useExportContent } from "@/context/export-content-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -673,3 +673,4 @@ export default function AcquisitionListPage() {
     </div>
   );
 }
+

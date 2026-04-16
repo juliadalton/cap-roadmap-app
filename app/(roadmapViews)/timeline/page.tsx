@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useRoadmap } from "../layout"; // Use the context hook
+import { useRoadmap } from "@/context/roadmap-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

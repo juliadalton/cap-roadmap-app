@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogOverlay, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { useRoadmap } from '@/app/(roadmapViews)/layout'; // Adjust path as needed
+import { useRoadmap } from '@/context/roadmap-context';
 import MilestoneForm, { type SaveMilestoneData } from './milestone-form'; // Assuming MilestoneForm is in the same directory or path is adjusted
 import type { Milestone } from '@/types/roadmap';
 import { Edit, Trash2, Plus } from 'lucide-react';

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useRoadmap } from "../layout";
+import { useRoadmap } from "@/context/roadmap-context";
 import { useExportContent, type ExportablePage, type ExportableSection } from "@/context/export-content-context";
 import { Lock, FileDown, Presentation, FileText, GripVertical, Check, ChevronDown, ChevronRight, Eye, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -723,3 +723,4 @@ export default function PresentationBuilderPage() {
     </div>
   );
 }
+
