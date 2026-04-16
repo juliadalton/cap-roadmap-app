@@ -73,8 +73,8 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
 
     if (itemCount > 0) {
       return NextResponse.json(
-        { error: 'Cannot delete milestone with associated roadmap items.' },
-        { status: 400 } // Bad request
+        { error: 'This milestone cannot be deleted because it has associated roadmap items. Remove or reassign those items first, then try again.' },
+        { status: 400 }
       );
     }
 
