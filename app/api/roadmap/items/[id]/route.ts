@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
-import { getServerSession } from "next-auth/next";
-import { authOptions } from '@/lib/auth';
+import { requireEditorSession } from '@/lib/auth';
 import type { RoadmapItem, RelevantLink } from '@/types/roadmap';
 
 // GET /api/roadmap/items/[id]
@@ -32,17 +31,14 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
 
 // PATCH /api/roadmap/items/[id]
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user?.role !== "editor") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const { userId, error: authError } = await requireEditorSession();
+  if (authError) return authError;
 
   const params = await context.params;
   const id = params.id;
   try {
     const body = await request.json();
     const { title, description, date, category, status, milestoneId, pirateMetrics, northStarMetrics, relatedItemIds, relevantLinks, productDRI } = body;
-    const userId = session.user.id; // Get user ID from session
 
     if (!id) {
       return NextResponse.json({ error: 'Roadmap item ID is missing' }, { status: 400 });
@@ -94,7 +90,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       };
     }
 
-    allowedUpdates.updatedBy = { connect: { id: session.user.id } };
+    allowedUpdates.updatedBy = { connect: { id: userId } };
 
     console.log(`Attempting to update RoadmapItem ${id} with data:`, allowedUpdates);
 
@@ -139,10 +135,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
 // DELETE /api/roadmap/items/[id]
 export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user || session.user.role !== 'editor') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const { error: authError } = await requireEditorSession();
+  if (authError) return authError;
   // We have the user ID, but it's not directly needed for delete
   const params = await context.params;
   const id = params.id;

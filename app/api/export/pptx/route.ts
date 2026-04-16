@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireEditorSession } from "@/lib/auth";
 import pptxgenjs from "pptxgenjs";
 import { readFileSync } from "fs";
 import { join } from "path";
@@ -832,10 +831,8 @@ function buildMethodologyDataSources(pptx: pptxgenjs, s: pptxgenjs.Slide) {
 // ── Route handler ──────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (session?.user?.role !== "editor") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const { error } = await requireEditorSession();
+  if (error) return error;
 
   let body: ExportRequest;
   try {

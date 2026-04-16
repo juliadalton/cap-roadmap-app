@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { requireEditorSession } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 
@@ -21,11 +20,8 @@ export async function GET(request: Request) {
 // POST /api/roadmap/milestones
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user || session.user.role !== 'editor') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-    // userId not directly stored on Milestone, but check ensures only editors create
+    const { error } = await requireEditorSession();
+    if (error) return error;
 
     const body = await request.json();
     if (!body.title || !body.date) {

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { requireEditorSession } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
 // GET /api/projects/[id] - Get single project
@@ -36,10 +35,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user || session.user.role !== 'editor') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const { error } = await requireEditorSession();
+    if (error) return error;
 
     const { id } = await params;
     const body = await request.json();
@@ -88,10 +85,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user || session.user.role !== 'editor') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const { error } = await requireEditorSession();
+    if (error) return error;
 
     const { id } = await params;
     await prisma.project.delete({

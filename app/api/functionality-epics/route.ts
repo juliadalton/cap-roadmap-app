@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { requireEditorSession } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
 // GET /api/functionality-epics - List all functionality epics
@@ -28,10 +27,8 @@ export async function GET(request: Request) {
 // POST /api/functionality-epics - Create a new functionality epic
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user || session.user.role !== 'editor') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const { error } = await requireEditorSession();
+    if (error) return error;
 
     const body = await request.json();
     if (!body.acquisitionId || !body.epicId || !body.epicName) {

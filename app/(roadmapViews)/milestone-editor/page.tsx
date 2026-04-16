@@ -34,7 +34,7 @@ export default function MilestoneEditorPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/milestones-clean/list');
+      const response = await fetch('/api/roadmap/milestones');
       if (!response.ok) {
         throw new Error(`Failed to fetch milestones: ${response.statusText}`);
       }
@@ -59,7 +59,7 @@ export default function MilestoneEditorPage() {
   const handleCreateMilestone = async (milestoneData: { title: string; date: string }) => {
     setModalError(null);
     try {
-      const response = await fetch('/api/milestones-clean/create', {
+      const response = await fetch('/api/roadmap/milestones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(milestoneData),
@@ -85,8 +85,8 @@ export default function MilestoneEditorPage() {
     
     setModalError(null);
     try {
-      const response = await fetch(`/api/milestones-clean/edit/${editingMilestone.id}`, {
-        method: 'PUT',
+      const response = await fetch(`/api/roadmap/milestones/${editingMilestone.id}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(milestoneData),
       });
@@ -111,7 +111,7 @@ export default function MilestoneEditorPage() {
     if (!milestoneToDelete) return;
 
     try {
-      const response = await fetch(`/api/milestones-clean/delete/${milestoneToDelete.id}`, {
+      const response = await fetch(`/api/roadmap/milestones/${milestoneToDelete.id}`, {
         method: 'DELETE',
       });
 

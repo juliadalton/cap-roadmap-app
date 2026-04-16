@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runJiraSync } from "@/lib/services/jira-sync";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { requireEditorSession } from "@/lib/auth";
 
 export const maxDuration = 300;
 
@@ -42,10 +41,8 @@ export async function GET(req: NextRequest) {
  * Editor-triggered manual sync. Authenticated via session.
  */
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user?.role !== "editor") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const { error } = await requireEditorSession();
+  if (error) return error;
 
   const dryRun = req.nextUrl.searchParams.get("dryRun") === "true";
   const started = Date.now();

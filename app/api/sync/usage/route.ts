@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireEditorSession } from "@/lib/auth";
 import { runUsageSync } from "@/lib/services/usage-sync";
 
 export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (session?.user?.role !== "editor") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const { error } = await requireEditorSession();
+  if (error) return error;
 
   let bearerToken: string;
   try {

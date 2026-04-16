@@ -1,7 +1,9 @@
 import { type NextAuthOptions } from "next-auth"
+import { getServerSession } from "next-auth/next";
 import type { Adapter } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 // Read editor emails from environment variable
@@ -58,4 +60,16 @@ export const authOptions: NextAuthOptions = {
       });
     },
   },
+}
+
+export async function requireEditorSession(): Promise<
+  | { userId: string; error: null }
+  | { userId: null; error: NextResponse }
+> {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+  if (!session?.user || !userId || session.user.role !== "editor") {
+    return { userId: null, error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
+  }
+  return { userId, error: null };
 }

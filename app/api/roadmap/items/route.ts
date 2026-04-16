@@ -2,18 +2,12 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import type { RoadmapItem, RelevantLink } from '@/types/roadmap'; // Assuming your type definition path
 import { Prisma } from '@prisma/client'; // Import Prisma types for error checking
-import { getServerSession } from "next-auth/next";
-import { authOptions } from '@/lib/auth'; // Import from new location
+import { requireEditorSession } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.id;
-
-    // Added detailed check for editor role
-    if (!session?.user || !userId || session.user.role !== 'editor') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const { userId, error } = await requireEditorSession();
+    if (error) return error;
 
     const body = await request.json();
     // Explicitly type body for clarity

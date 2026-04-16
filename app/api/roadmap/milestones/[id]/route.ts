@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
-import { getServerSession } from "next-auth/next";
-import { authOptions } from '@/lib/auth';
+import { requireEditorSession } from '@/lib/auth';
 
 // GET /api/roadmap/milestones/[id] (Optional: If needed)
 export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
@@ -22,10 +21,8 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
 
 // PATCH /api/roadmap/milestones/[id]
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user || session.user.role !== 'editor') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const { error: authError } = await requireEditorSession();
+  if (authError) return authError;
   const params = await context.params;
   const id = params.id;
   try {
@@ -64,10 +61,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
 // DELETE /api/roadmap/milestones/[id]
 export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user || session.user.role !== 'editor') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const { error: authError } = await requireEditorSession();
+  if (authError) return authError;
   const params = await context.params;
   const id = params.id;
   try {

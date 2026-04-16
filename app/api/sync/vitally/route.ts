@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runVitallySync } from "@/lib/services/vitally-sync";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { requireEditorSession } from "@/lib/auth";
 
 // Allow up to 5 minutes — sync touches every Vitally account and every acquisition
 export const maxDuration = 300;
@@ -58,10 +57,8 @@ export async function GET(req: NextRequest) {
  * never needs to reach the browser.
  */
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user?.role !== "editor") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const { error } = await requireEditorSession();
+  if (error) return error;
 
   const started = Date.now();
 

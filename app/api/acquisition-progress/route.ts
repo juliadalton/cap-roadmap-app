@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { requireEditorSession } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
 // GET /api/acquisition-progress - List all acquisition progress records
@@ -28,10 +27,8 @@ export async function GET(request: Request) {
 // POST /api/acquisition-progress - Create a new acquisition progress record
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user || session.user.role !== 'editor') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const { error } = await requireEditorSession();
+    if (error) return error;
 
     const body = await request.json();
     if (!body.acquisitionId) {
