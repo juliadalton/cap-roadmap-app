@@ -151,18 +151,11 @@ export function RoadmapItemCard({
                 <div className="text-xs font-medium text-muted-foreground mb-1">Relevant Links:</div>
                 <div className="space-y-1">
                   {item.relevantLinks.map((link, index) => {
-                    // Defensive: handle legacy plain-string values until data migration (4.5)
-                    const isObj = typeof link === "object" && link !== null;
-                    const href = isObj ? link.url : String(link);
-                    const displayText = isObj
-                      ? link.text || (link.url.length > 40 ? `${link.url.substring(0, 40)}...` : link.url)
-                      : String(link).length > 40
-                      ? `${String(link).substring(0, 40)}...`
-                      : String(link);
+                    const displayText = link.text || (link.url.length > 40 ? `${link.url.substring(0, 40)}...` : link.url);
                     return (
                       <a
                         key={index}
-                        href={href}
+                        href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs text-blue-500 hover:underline flex items-center gap-1"

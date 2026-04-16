@@ -862,13 +862,13 @@ export default function TechnicalIntegrationPage() {
                     {viewingProject.relevantLinks.map((link, i) => (
                       <a
                         key={i}
-                        href={typeof link === 'object' ? link.url : link}
+                        href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-blue-500 hover:underline flex items-center gap-2"
                       >
                         <Link2 className="h-4 w-4" />
-                        {typeof link === 'object' && link.text ? link.text : 'Link'}
+                        {link.text || 'Link'}
                       </a>
                     ))}
                   </div>

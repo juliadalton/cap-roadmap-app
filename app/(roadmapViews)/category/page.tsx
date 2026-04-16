@@ -191,22 +191,14 @@ export default function CategoryPage() {
                                           {item.relevantLinks.map((link, index) => (
                                             <a 
                                               key={index}
-                                              href={typeof link === 'object' ? link.url : link} 
+                                              href={link.url}
                                               target="_blank" 
                                               rel="noopener noreferrer" 
                                               className="text-xs text-blue-500 hover:underline flex items-center gap-1"
                                               onClick={(e) => e.stopPropagation()}
                                             >
                                               <Link2 className="h-3.5 w-3.5" />
-                                              {(() => {
-                                                if (typeof link === 'object' && link !== null && 'url' in link) {
-                                                  const objLink = link as { url: string; text?: string };
-                                                  return objLink.text || (objLink.url.length > 40 ? `${objLink.url.substring(0, 40)}...` : objLink.url);
-                                                } else {
-                                                  const strLink = link as string;
-                                                  return strLink.length > 40 ? `${strLink.substring(0, 40)}...` : strLink;
-                                                }
-                                              })()}
+                                              {link.text || (link.url.length > 40 ? `${link.url.substring(0, 40)}...` : link.url)}
                                             </a>
                                           ))}
                                         </div>

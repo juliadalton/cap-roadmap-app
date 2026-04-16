@@ -83,15 +83,7 @@ export default function ProjectForm({
       setSelectedAcquisitionIds([])
     }
 
-    // Handle relevant links migration
-    const initialLinks = initialData?.relevantLinks || []
-    const formattedLinks: RelevantLink[] = initialLinks.map(link => {
-      if (typeof link === 'object' && link !== null && 'url' in link) {
-        return link as RelevantLink
-      }
-      return { url: link as string }
-    })
-    setRelevantLinks(formattedLinks)
+    setRelevantLinks((initialData?.relevantLinks as RelevantLink[]) || [])
   }, [initialData, form, preselectedAcquisitionId])
 
   const handleAcquisitionToggle = useCallback((acquisitionId: string) => {

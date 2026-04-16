@@ -114,17 +114,7 @@ export default function ItemForm({
       setSelectedPirateMetrics(initialData?.pirateMetrics || []);
       setSelectedNorthStarMetrics(initialData?.northStarMetrics || []);
       
-      // Handle migration from old string[] format to new RelevantLink[] format
-      const initialLinks = initialData?.relevantLinks || [];
-      const formattedLinks: RelevantLink[] = initialLinks.map(link => {
-        // If it's already a RelevantLink object, use it as is
-        if (typeof link === 'object' && link !== null && 'url' in link) {
-          return link as RelevantLink;
-        }
-        // If it's a string (old format), convert to RelevantLink
-        return { url: link as string };
-      });
-      setRelevantLinks(formattedLinks);
+      setRelevantLinks((initialData?.relevantLinks as RelevantLink[]) || []);
       
       // --- Initialize related items state --- 
       // Prefer item.relatedItemIds if available (e.g., from previous form state)
