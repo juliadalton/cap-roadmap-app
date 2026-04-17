@@ -1,5 +1,8 @@
 # Roadmap App — Project Conventions
 
+## Code Review
+See `CONTRIBUTING.md` for code review guidelines, PR scope/size standards, and the branching strategy.
+
 ## Architecture
 
 ```
