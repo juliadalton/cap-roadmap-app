@@ -130,3 +130,4 @@ git push origin feature/your-feature
 If a conflict involves a file you didn't expect to conflict (e.g., a lock file or generated file), don't guess — ask the person who made the other change what the correct resolution is.
 
 For `package-lock.json` conflicts specifically: delete the file, run `npm install`, and commit the regenerated lock file.
+

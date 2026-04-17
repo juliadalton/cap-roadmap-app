@@ -29,6 +29,7 @@ export default function RoadmapPage() {
     openItemModal, // <-- Destructure openItemModal from context
     deleteItem, // <-- Destructure deleteItem from context
     setHeaderActions,
+    focusedItemId,
   } = useRoadmap();
 
   // Register the customer-facing PDF download button in the page header (visible to all users)
@@ -144,7 +145,7 @@ export default function RoadmapPage() {
           {displayedMilestones.length > 0 && !anyVisibleItemsExist && (
              <div className="text-center text-muted-foreground py-8 w-full">
                No items found for the displayed milestones.
-               {useRoadmap().focusedItemId && " (Focus active)"} 
+               {focusedItemId && " (Focus active)"} 
              </div>
           )}
            {allMilestones.length === 0 && (

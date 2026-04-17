@@ -356,7 +356,6 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
     const focusedItem = allItems.find((item) => item.id === focusedItemId);
     if (!focusedItem) {
       console.warn(`RoadmapProvider: Focused item ID ${focusedItemId} not found.`);
-      setFocusedItemId(null);
       return { displayedItems: allItems, displayedMilestones: sortedMilestones, historicalMilestoneCount: count };
     }
 
@@ -378,6 +377,12 @@ export function RoadmapProvider({ children }: { children: ReactNode }) {
 
     return { displayedItems: focusedItems, displayedMilestones: focusedMilestones, historicalMilestoneCount: 0 };
   }, [focusedItemId, allItems, allMilestones, showHistorical, sortDirection, selectedMilestoneFilter]);
+
+  useEffect(() => {
+    if (focusedItemId && !allItems.find((item) => item.id === focusedItemId)) {
+      setFocusedItemId(null);
+    }
+  }, [focusedItemId, allItems]);
 
   // Loading / auth guard states — rendered by the provider so the layout chrome never mounts without data
   if (isAuthLoading || (isAuthenticated && isLoadingRoadmapData)) {
