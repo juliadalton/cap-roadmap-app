@@ -33,6 +33,28 @@ Keep branches short-lived. Aim to merge within 1–2 days to minimize conflicts.
 
 ## Pull Requests
 
+### PR scope and size
+
+Each PR should represent one deliberate, deployable unit of work. When a PR merges, `main` should be in a releasable state.
+
+**Keep PRs focused:**
+- One feature, one bug fix, or one refactor — not a mix
+- If you find yourself writing "and also fixed..." in the description, that's a sign to split it
+- A PR that touches 10+ files across unrelated areas is too large
+
+**Signs a PR should be split:**
+- It contains multiple independent features or fixes
+- Parts of it could ship without the rest
+- A reviewer would need to context-switch to understand different sections
+
+**What's appropriate in one PR:**
+- A single new feature and its supporting types/utilities
+- A single bug fix, including the test or reproduction case
+- A refactor scoped to one area (e.g., extracting a component, renaming across one module)
+- A dependency update with any required code changes
+
+There's no strict line count limit, but if a PR feels big, it probably is. Smaller PRs get reviewed faster, merge cleaner, and are easier to roll back if something goes wrong.
+
 ### Before opening a PR
 
 - Your branch is up to date with `main` (rebase or merge main in if it has moved)
