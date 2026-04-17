@@ -59,11 +59,9 @@ export default function AcquisitionForm({
   error,
 }: AcquisitionFormProps) {
   const [isLoading, setIsLoading] = useState(false)
-
-  const getDefaultColor = () => {
-    if (initialData?.color) return initialData.color;
-    return PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)];
-  };
+  const [defaultColor] = useState(() =>
+    initialData?.color ?? PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)]
+  );
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -71,7 +69,7 @@ export default function AcquisitionForm({
       name: initialData?.name || "",
       description: initialData?.description || "",
       integrationOverview: initialData?.integrationOverview || "",
-      color: getDefaultColor(),
+      color: defaultColor,
       disposition: (initialData?.progress?.disposition as DispositionValue | null | undefined) ?? null,
       manualSync: false,
     },
