@@ -9,7 +9,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Menu,
-  X,
   LayoutDashboard,
   Building2,
   FileEdit,
@@ -135,7 +134,7 @@ export default function SidebarNav({ isEditor, onNavigate, isExpanded, onToggle 
             className="shrink-0"
             aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
           >
-            {isExpanded ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <Menu className="h-5 w-5" />
           </Button>
         </div>
 
