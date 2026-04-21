@@ -120,19 +120,23 @@ export default function SidebarNav({ isEditor, onNavigate, isExpanded, onToggle 
         )}
       >
         {/* Header with toggle button */}
-        <div className={cn(
-          "flex items-center h-14 border-b shrink-0 bg-[#f0f4f9] dark:bg-background",
-          isExpanded ? "justify-between px-4" : "justify-center"
-        )}>
+        <div
+          className={cn(
+            "flex items-center h-14 border-b shrink-0 bg-[#f0f4f9] dark:bg-background cursor-pointer",
+            isExpanded ? "justify-between px-4" : "justify-center"
+          )}
+          onClick={toggleSidebar}
+          aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+          role="button"
+        >
           {isExpanded && (
             <span className="font-semibold text-lg truncate">Roadmap App</span>
           )}
           <Button
             variant="ghost"
             size="icon"
-            onClick={toggleSidebar}
-            className="shrink-0"
-            aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+            className="shrink-0 pointer-events-none"
+            tabIndex={-1}
           >
             <Menu className="h-5 w-5" />
           </Button>
