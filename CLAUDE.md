@@ -162,7 +162,13 @@ Use Tailwind tokens — never raw `rgb()` strings.
 
 ### Component Extraction
 
-If the same JSX block appears in more than one place, extract it into `components/`. Existing shared components to use before creating new ones:
+**Before writing any new UI**, scan `components/` to check whether an existing component already covers the need or can be extended. Never duplicate UI that an existing component handles.
+
+Extract JSX into a new component in `components/` when:
+- The same block appears (or will appear) in more than one place, **or**
+- The block is complex enough that isolating it improves readability
+
+Existing shared components — use these before creating new ones:
 
 - `<RoadmapItemCard>` — status dot, title, links, metrics, editor dropdown
 - `<MetricBadgeGroup>` — pirate/north-star badge list

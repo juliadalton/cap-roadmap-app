@@ -65,6 +65,8 @@ Write a short description that covers:
 - Are error responses using the standard format?
 
 **Components**
+- Did the author check `components/` for an existing component before writing new UI? (see the inventory in `CLAUDE.md`)
+- Is any new UI that appears in more than one place, or is complex enough to isolate, extracted into `components/`?
 - Are confirmation dialogs using `<AlertDialog>` (not `window.confirm`)?
 - Are success notifications using `toast.success()` from sonner?
 - Are brand colors using Tailwind tokens (not raw `rgb()` strings)?
@@ -72,7 +74,6 @@ Write a short description that covers:
 
 **General**
 - Is the change focused? (no unrelated edits bundled in)
-- Are any new shared components or utilities worth extracting to `components/`?
 
 ### Approval
 
