@@ -122,7 +122,7 @@ export default function SidebarNav({ isEditor, onNavigate, isExpanded, onToggle 
         {/* Header with toggle button */}
         <div
           className={cn(
-            "flex items-center h-14 border-b shrink-0 bg-[#f0f4f9] dark:bg-background cursor-pointer",
+            "group flex items-center h-14 border-b shrink-0 bg-[#f0f4f9] dark:bg-background cursor-pointer",
             isExpanded ? "justify-between px-4" : "justify-center"
           )}
           onClick={toggleSidebar}
@@ -135,7 +135,10 @@ export default function SidebarNav({ isEditor, onNavigate, isExpanded, onToggle 
           <Button
             variant="ghost"
             size="icon"
-            className="shrink-0 pointer-events-none"
+            className={cn(
+              "shrink-0 pointer-events-none transition-opacity",
+              isExpanded ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+            )}
             tabIndex={-1}
           >
             <Menu className="h-5 w-5" />
