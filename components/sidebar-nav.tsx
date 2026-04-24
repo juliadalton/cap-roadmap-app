@@ -126,8 +126,11 @@ export default function SidebarNav({ isEditor, onNavigate, isExpanded, onToggle 
             isExpanded ? "justify-between px-4" : "justify-center"
           )}
           onClick={toggleSidebar}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleSidebar(); } }}
           aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+          aria-expanded={isExpanded}
           role="button"
+          tabIndex={0}
         >
           {isExpanded && (
             <span className="font-semibold text-lg truncate">Roadmap App</span>
