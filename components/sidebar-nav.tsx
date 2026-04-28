@@ -9,7 +9,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Menu,
-  X,
   LayoutDashboard,
   Building2,
   FileEdit,
@@ -121,21 +120,31 @@ export default function SidebarNav({ isEditor, onNavigate, isExpanded, onToggle 
         )}
       >
         {/* Header with toggle button */}
-        <div className={cn(
-          "flex items-center h-14 border-b shrink-0 bg-[#f0f4f9] dark:bg-background",
-          isExpanded ? "justify-between px-4" : "justify-center"
-        )}>
+        <div
+          className={cn(
+            "group flex items-center h-14 border-b shrink-0 bg-[#f0f4f9] dark:bg-background cursor-pointer",
+            isExpanded ? "justify-between px-4" : "justify-center"
+          )}
+          onClick={toggleSidebar}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleSidebar(); } }}
+          aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+          aria-expanded={isExpanded}
+          role="button"
+          tabIndex={0}
+        >
           {isExpanded && (
             <span className="font-semibold text-lg truncate">Roadmap App</span>
           )}
           <Button
             variant="ghost"
             size="icon"
-            onClick={toggleSidebar}
-            className="shrink-0"
-            aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+            className={cn(
+              "shrink-0 pointer-events-none transition-opacity",
+              isExpanded ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+            )}
+            tabIndex={-1}
           >
-            {isExpanded ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <Menu className="h-5 w-5" />
           </Button>
         </div>
 
